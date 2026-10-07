@@ -1,11 +1,11 @@
 import {VERSION,MAX_FILE_BYTES,SCHEMA,RISK_MAP} from "./schema.js";
 
-export const STORAGE_KEY="ce100:v5";
-export const MAX_SNAPSHOTS=5;
+export const STORAGE_KEY="ce100:v6";
+export const MAX_SNAPSHOTS=8;
 export const state={
-  view:"form",nav:"form",role:"worker",dark:false,
+  view:"form",nav:"form",role:"tenant",dark:false,
   recordId:crypto.randomUUID?.()||String(Date.now()),
-  data:{workerRole:"worker",country:"SA",city:"Jeddah",jurisdiction:"Jeddah, Saudi Arabia",compensation:"paid",currency:"SAR",contractLanguage:"es",liveIn:false,travelRequired:false,nda:false},
+  data:{actor:"tenant",rentalPurpose:"habitual",contractForm:"new",contractLanguage:"es",tensionedZone:false,largeHolder:false,landlordLargeHolder:"unsure",landlordIsCompany:false,touristUse:false,additionalGuaranteeMonths:0,rentIndex:"irav",depositMonths:1},
   docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
 };
 
@@ -13,163 +13,48 @@ export const filled=v=>v!==undefined&&v!==null&&v!==""&&!(Array.isArray(v)&&v.le
 export const visibleFields=()=>SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
 
 export function riskAssessment(){
-  const flags=[];
+  const flags=[],d=state.data;
   for(const [id,label,weight] of RISK_MAP){
-    const v=state.data[id];
-    if(v==="yes") flags.push({id,label,weight,severity:weight>=3?"critical":"elevated"});
-    else if(v==="no"&&["workerDocumentAccess","workerCanLeaveSite","workerHasPhoneAccess","workerCanContactFamily"].includes(id))
-      flags.push({id,label,weight,severity:weight>=3?"critical":"elevated"});
-    else if(v==="limited"||v==="unsure") flags.push({id,label,weight:1,severity:"review"});
+    const v=d[id];
+    if(id==="tensionedZone"&&v===true)flags.push({id,label,weight,severity:"review"});
+    else if(id==="largeHolder"&&v===true)flags.push({id,label,weight,severity:"review"});
+    else if(id==="documentsComplete"&&!v)flags.push({id,label,weight,severity:"elevated"});
+    else if(id==="rentComplianceEvidence"&&d.tensionedZone===true&&!filled(v))flags.push({id,label,weight,severity:"elevated"});
   }
   const score=flags.reduce((n,f)=>n+f.weight,0);
-  return {flags,score,level:flags.some(f=>f.severity==="critical")||score>=5?"HIGH":score>=2?"REVIEW":"NORMAL"};
+  return{flags,score,level:score>=4?"HIGH":score>=2?"REVIEW":"NORMAL"};
 }
 
 export function validate(){
   const errors=[],warnings=[],d=state.data;
   for(const f of visibleFields()){
-    if(!f.required) continue;
+    if(!f.required)continue;
     const v=d[f.id];
-    if(f.type==="checkbox" ? v!==true : f.type==="file" ? !(v&&v.id) : !filled(v))
-      errors.push({field:f.id,message:"Falta: "+f.label+"."});
+    if(f.type==="checkbox"?v!==true:f.type==="file"?!(v&&v.id):!filled(v))errors.push({field:f.id,message:"Falta: "+f.label+"."});
   }
-  if(d.endDate&&d.startDate&&d.endDate<d.startDate) errors.push({field:"endDate",message:"La fecha de finalización es anterior al inicio."});
-  if(d.startTime&&d.endTime&&d.endTime<=d.startTime) warnings.push({field:"endTime",message:"Comprueba una jornada que pueda cruzar medianoche."});
-  if(Array.isArray(d.workingDays)&&d.weeklyRestDay&&d.workingDays.includes(d.weeklyRestDay))
-    errors.push({field:"weeklyRestDay",message:"El día de descanso no puede coincidir con un día de trabajo."});
-  if(Number(d.wageDeductions||0)>0&&!filled(d.deductionExplanation))
-    errors.push({field:"deductionExplanation",message:"Explica las deducciones registradas."});
-  if(Number(d.recruitmentFee||0)>0) warnings.push({field:"recruitmentFee",message:"Revisa independientemente cualquier coste de contratación asumido por el trabajador."});
-  if(state.role==="worker"){
-    if(d.workerUnderstandsContract!==true) errors.push({field:"workerUnderstandsContract",message:"Debe existir comprensión o asistencia lingüística independiente."});
-    if(d.workerIndependentCopy!==true) errors.push({field:"workerIndependentCopy",message:"Debe existir una copia independiente accesible."});
-    if(d.readCompensation!==true) warnings.push({field:"readCompensation",message:"Revisa la remuneración antes de preparar la firma."});
-    if(d.readSchedule!==true) warnings.push({field:"readSchedule",message:"Revisa la jornada y el descanso antes de preparar la firma."});
-    if(d.interpreterRequired===true&&!filled(d.workerPreferredLanguage))
-      errors.push({field:"workerPreferredLanguage",message:"Selecciona el idioma de asistencia."});
-  }
-  if(!state.docs.length) warnings.push({field:"documents",message:"No hay documentos cargados."});
-  return {errors,warnings,isValid:errors.length===0};
+  if(d.startDate&&d.endDate&&d.endDate<d.startDate)errors.push({field:"endDate",message:"La fecha final es anterior a la fecha inicial."});
+  if(Number(d.occupants||0)<1)errors.push({field:"occupants",message:"Debe existir al menos una persona ocupante."});
+  if(Number(d.depositMonths)!==1)warnings.push({field:"depositMonths",message:"La fianza legal ordinaria de vivienda es una mensualidad; revisa el supuesto aplicable."});
+  if(Number(d.additionalGuaranteeMonths)<0)errors.push({field:"additionalGuaranteeMonths",message:"La garantía adicional no puede ser negativa."});
+  if(Number(d.additionalGuaranteeMonths)>2)errors.push({field:"additionalGuaranteeMonths",message:"La garantía adicional supera dos mensualidades en el supuesto general sujeto al límite legal."});
+  if(Number(d.agencyFees||0)>0)errors.push({field:"agencyFees",message:"La gestión inmobiliaria y la formalización del contrato no deben repercutirse al arrendatario."});
+  if(d.tensionedZone===true&&!filled(d.rentComplianceEvidence))errors.push({field:"rentComplianceEvidence",message:"Documenta la base y evidencia utilizada para la limitación de renta."});
+  if(d.tensionedZone===true&&d.largeHolder===true&&!filled(d.referenceRent))warnings.push({field:"referenceRent",message:"Comprueba el índice o sistema de referencia aplicable."});
+  if(d.touristUse===true&&d.rentalPurpose==="habitual")errors.push({field:"touristUse",message:"El uso turístico entra en conflicto con la finalidad de vivienda habitual declarada."});
+  if(d.rentalPurpose==="habitual"&&d.habitualResidence!==true)errors.push({field:"habitualResidence",message:"Confirma el destino a residencia habitual."});
+  if(state.role==="tenant"){if(d.tenantComprehension!==true)errors.push({field:"tenantComprehension",message:"Confirma comprensión o asistencia."});if(d.tenantIndependentCopy!==true)errors.push({field:"tenantIndependentCopy",message:"Confirma que dispones de copia independiente."});}
+  return{errors,warnings,isValid:errors.length===0};
 }
 
-export function publicData(){
-  const out={};
-  for(const f of SCHEMA){
-    const v=state.data[f.id];
-    if(!filled(v)||f.private||f.restricted) continue;
-    if(f.type==="file") out[f.id]={id:v.id,name:v.name,type:v.type,size:v.size,hash:v.hash,status:v.status,version:v.version};
-    else if(f.type==="files") out[f.id]=(v||[]).map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));
-    else out[f.id]=v;
-  }
-  return out;
-}
-
-export function integrityData(){
-  const out={};
-  for(const f of SCHEMA){
-    const v=state.data[f.id];
-    if(!filled(v)||f.private) continue;
-    if(f.type==="file") out[f.id]={id:v.id,name:v.name,type:v.type,size:v.size,hash:v.hash,status:v.status,version:v.version};
-    else if(f.type==="files") out[f.id]=(v||[]).map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));
-    else out[f.id]=v;
-  }
-  return out;
-}
-
+export function publicData(){const out={};for(const f of SCHEMA){const v=state.data[f.id];if(!filled(v)||f.private||f.restricted)continue;if(f.type==="file")out[f.id]={id:v.id,name:v.name,type:v.type,size:v.size,hash:v.hash,status:v.status,version:v.version};else if(f.type==="files")out[f.id]=(v||[]).map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));else out[f.id]=v;}return out;}
+export function integrityData(){const out={};for(const f of SCHEMA){const v=state.data[f.id];if(!filled(v)||f.private)continue;if(f.type==="file")out[f.id]={id:v.id,name:v.name,type:v.type,size:v.size,hash:v.hash,status:v.status,version:v.version};else if(f.type==="files")out[f.id]=(v||[]).map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));else out[f.id]=v;}return out;}
 export const documentManifest=()=>state.docs.map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));
-
-export async function sha256Text(value){
-  if(!crypto.subtle) throw new Error("Web Crypto unavailable");
-  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
-  return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
-export async function sha256File(file){
-  const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
-  return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
-
-export function audit(action,meta={}){
-  state.audit=[...state.audit,{
-    eventId:crypto.randomUUID?.()||String(Date.now()),
-    timestamp:new Date().toISOString(),actor:state.role,action,meta
-  }].slice(-100);
-}
-
-export function saveLocal(onDone){
-  clearTimeout(state.saveTimer);
-  state.saveTimer=setTimeout(()=>{
-    try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({
-        version:VERSION,recordId:state.recordId,role:state.role,
-        data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),
-        snapshots:state.snapshots,savedAt:new Date().toISOString()
-      }));
-      onDone?.("Guardado local · "+new Date().toLocaleTimeString());
-    }catch{onDone?.("No se pudo guardar el borrador local.");}
-  },350);
-}
-
-export function restore(){
-  try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-    if(!saved) return;
-    state.recordId=saved.recordId||state.recordId;
-    state.role=saved.role||state.role;
-    state.data={...state.data,...(saved.data||{})};
-    state.audit=Array.isArray(saved.audit)?saved.audit:[];
-    state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];
-  }catch{}
-}
-
-export async function addDocuments(fileList,fieldId){
-  for(const file of [...fileList||[]]){
-    if(file.size>MAX_FILE_BYTES){alert(file.name+": supera 10 MB.");continue;}
-    const doc={
-      id:"DOC-"+(crypto.randomUUID?.()||Date.now()),
-      name:file.name,type:file.type||"application/octet-stream",size:file.size,
-      hash:await sha256File(file),status:"NEEDS_REVIEW",version:1,
-      file,url:URL.createObjectURL(file)
-    };
-    state.docs.push(doc);
-    if(["workerPassport","workerNationalID","residenceDocument"].includes(fieldId)) state.data[fieldId]=doc;
-    else state.data.additionalDocuments=[...(state.data.additionalDocuments||[]),doc];
-    audit("documentAdded",{documentId:doc.id,hash:doc.hash});
-  }
-}
-
-export function releaseObjectUrls(){
-  for(const d of state.docs){try{URL.revokeObjectURL(d.url)}catch{}}
-}
-
-export function buildVerificationURL(){
-  if(!state.prepared) return "";
-  const base=location.href.replace(/index\.html.*$/,"");
-  return base+"verify.html?id="+encodeURIComponent(state.prepared.recordId)+
-    "&version="+encodeURIComponent(state.prepared.version)+
-    "&hash="+encodeURIComponent(state.prepared.hash)+
-    "&request="+encodeURIComponent(state.prepared.requestId)+"&mode=static";
-}
-
-export async function createSignatureRequest(){
-  const validation=validate();
-  if(!validation.isValid) return false;
-  if(state.role==="worker"&&(riskAssessment().level!=="NORMAL"||state.data.independentReviewRequested===true)){
-    state.view="protected";state.nav="review";audit("protectiveGate",{level:riskAssessment().level});return false;
-  }
-  if(!state.data.consentIdentity||!state.data.consentDocuments||!state.data.consentContract){
-    alert("Faltan confirmaciones requeridas.");return false;
-  }
-  if(!state.hash){
-    const canonical=JSON.stringify({recordId:state.recordId,version:VERSION,data:integrityData(),documents:documentManifest()});
-    state.hash=await sha256Text(canonical);
-  }
-  state.prepared={
-    recordId:state.recordId,version:VERSION,hash:state.hash,
-    preparedAt:new Date().toISOString(),
-    requestId:crypto.randomUUID?.()||String(Date.now())
-  };
-  state.qrUrl=buildVerificationURL();
-  audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});
-  state.view="sign";state.nav="review";
-  return true;
-}
+export async function sha256Text(value){if(!crypto.subtle)throw new Error("Web Crypto unavailable");const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");}
+export async function sha256File(file){const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");}
+export function audit(action,meta={}){state.audit=[...state.audit,{eventId:crypto.randomUUID?.()||String(Date.now()),timestamp:new Date().toISOString(),actor:state.role,action,meta}].slice(-100);}
+export function saveLocal(onDone){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:VERSION,recordId:state.recordId,role:state.role,data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),snapshots:state.snapshots,savedAt:new Date().toISOString()}));onDone?.("Guardado local · "+new Date().toLocaleTimeString());}catch{onDone?.("No se pudo guardar el borrador local.");}},350);}
+export function restore(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!saved)return;state.recordId=saved.recordId||state.recordId;state.role=saved.role||state.role;state.data={...state.data,...(saved.data||{})};state.data.actor=state.role;state.audit=Array.isArray(saved.audit)?saved.audit:[];state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];}catch{}}
+export async function addDocuments(fileList,fieldId){for(const file of[...fileList||[]]){if(file.size>MAX_FILE_BYTES){alert(file.name+": supera 10 MB.");continue;}const doc={id:"DOC-"+(crypto.randomUUID?.()||Date.now()),name:file.name,type:file.type||"application/octet-stream",size:file.size,hash:await sha256File(file),status:"NEEDS_REVIEW",version:1,file,url:URL.createObjectURL(file)};state.docs.push(doc);state.data.additionalDocuments=[...(state.data.additionalDocuments||[]),doc];audit("documentAdded",{documentId:doc.id,hash:doc.hash});}}
+export function releaseObjectUrls(){for(const d of state.docs){try{URL.revokeObjectURL(d.url)}catch{}}}
+export function buildVerificationURL(){if(!state.prepared)return"";const base=location.href.replace(/index\.html.*$/,"");return base+"verify.html?id="+encodeURIComponent(state.prepared.recordId)+"&version="+encodeURIComponent(state.prepared.version)+"&hash="+encodeURIComponent(state.prepared.hash)+"&request="+encodeURIComponent(state.prepared.requestId)+"&mode=static";}
+export async function createSignatureRequest(){const v=validate();if(!v.isValid)return false;if(state.role==="tenant"&&riskAssessment().level==="HIGH"){state.view="protected";state.nav="review";audit("protectiveGate",{level:"HIGH"});return false;}if(!state.data.signatureMethod||!state.data.identityVerification)return false;if(!state.hash){state.hash=await sha256Text(JSON.stringify({recordId:state.recordId,version:VERSION,data:integrityData(),documents:documentManifest()}));}state.prepared={recordId:state.recordId,version:VERSION,hash:state.hash,preparedAt:new Date().toISOString(),requestId:crypto.randomUUID?.()||String(Date.now())};state.qrUrl=buildVerificationURL();audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});state.view="sign";state.nav="review";return true;}
