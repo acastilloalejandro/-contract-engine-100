@@ -1,25 +1,13 @@
-# Producción: Contract Engine 100 v4.0
+# Production Readiness
 
-## Implementado en la versión estática
+## Implementado
 
-- Motor de formulario declarativo y dependencias.
-- Validación local y reglas cruzadas.
-- Hash SHA-256 de documentos y representación de expediente.
-- QR real generado en el cliente mediante EasyQRCodeJS 4.6.2.
-- Página estática de verificación del contenido transportado por el QR.
-- Detección de capacidades WebAuthn sin fingir una autenticación.
-- Guardado local con exclusión de campos marcados como personal/restricted y de archivos.
-- CI de humo mediante GitHub Actions.
+Arquitectura separada por módulos, validación declarativa, riesgo privado, hashing SHA-256, documentos locales, snapshots, Contract Diff, lectura en voz alta, WebAuthn capability detection, preparación de firma, QR bajo demanda, verificación estática, manifest PWA, CI y diseño iPhone-first.
 
-## Pendiente para producción real
+## Pendiente
 
-1. Backend de expedientes y control de acceso por rol.
-2. Challenge/response de WebAuthn y almacenamiento de credenciales.
-3. Proveedor de firma electrónica y evidencia de firma.
-4. Endpoint de verificación con almacenamiento de la representación firmada.
-5. Almacenamiento cifrado y política de retención/borrado.
-6. OCR/document intelligence real con revisión humana y trazabilidad.
-7. CSP y dependencias empaquetadas con hash/versionado desde el build.
-8. Tests de integración, seguridad, accesibilidad y recuperación ante fallos.
+Backend y sesiones; autorización por rol; almacenamiento cifrado; challenge/response WebAuthn; proveedor de firma; verificación criptográfica server-side; OCR/document intelligence; CSP y dependencias empaquetadas; gestión de claves; retención y borrado; observabilidad; backups; recuperación ante desastres; pruebas de seguridad; localización; revisión jurídica y de privacidad.
 
-La versión estática no debe presentarse como sistema de identidad, firma electrónica o almacenamiento seguro de producción.
+## Regla de representación
+
+No presentar el frontend estático como identidad verificada, firma electrónica cualificada o registro gubernamental.
