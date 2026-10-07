@@ -5,7 +5,7 @@ export const PROVINCES=["Álava","Albacete","Alicante","Almería","Asturias","Á
 export const COUNTRIES=[["ES","España","EUR"],["FR","Francia","EUR"],["PT","Portugal","EUR"],["IT","Italia","EUR"],["DE","Alemania","EUR"],["OTHER","Otro país","EUR"]];
 export const languages=opts([["es","Español"],["ca","Catalán"],["eu","Euskera"],["gl","Gallego"],["en","Inglés"],["fr","Francés"],["ar","Árabe"]]);
 export const yesNo=opts([["yes","Sí"],["no","No"],["unsure","No estoy seguro/a"]]);
-const F=(id,section,label,type,o={})=>({id,section,label,type,actor:o.actor||["tenant","landlord","reviewer"],required:!!o.required,private:!!o.private,restricted:!!o.restricted,when:o.when||(()=>true),options:o.options||[]});
+const F=(id,section,label,type,o={})=>({id,section,label,type,actor:o.actor||["tenant","landlord","reviewer"],required:!!o.required,private:!!o.private,restricted:!!o.restricted,computed:!!o.computed,when:o.when||(()=>true),options:o.options||[]});
 export const SCHEMA=[
 F("actor","Contexto","Quién completa el expediente","radio",{required:true,options:opts([["tenant","Arrendatario/a"],["landlord","Arrendador/a"],["reviewer","Revisor/a"]])}),
 F("rentalPurpose","Contexto","Finalidad del arrendamiento","radio",{required:true,options:opts([["habitual","Vivienda habitual"],["seasonal","Temporada"],["other","Otra finalidad legalmente admisible"]])}),
@@ -48,8 +48,8 @@ F("previousRentEvidence","Renta","Evidencia de la renta anterior","files"),
 F("referenceRent","Renta","Límite/precio de referencia aplicable (€)","number"),
 F("referenceRentEvidence","Renta","Evidencia del índice/límite de referencia","files"),
 F("rentIndex","Renta","Índice/metodología de actualización pactada","select",{required:true,options:opts([["irav","IRAV / índice legal vigente cuando proceda"],["none","Sin actualización"],["other","Otra metodología documentada"]])}),
-F("tensionedZone","Renta","Zona de mercado residencial tensionado detectada","switch",{required:true}),
-F("largeHolder","Renta","Gran tenedor a efectos de limitación de renta","switch",{required:true}),
+F("tensionedZone","Renta","Zona de mercado residencial tensionado detectada","switch",{computed:true}),
+F("largeHolder","Renta","Gran tenedor a efectos de limitación de renta","switch",{computed:true}),
 F("tensionDeclarationEvidence","Renta","Evidencia de declaración y vigencia de la zona","files"),
 F("rentCapBasis","Renta","Base utilizada para comprobar el límite de renta","select",{when:d=>d.tensionedZone===true,options:opts([["previous_contract","Contrato anterior"],["reference_index","Sistema de índices de referencia"],["combined","Ambos / el más restrictivo aplicable"],["na","No aplicable"]])}),
 F("rentComplianceEvidence","Renta","Explicación/evidencia del cumplimiento del límite","textarea",{when:d=>d.tensionedZone===true}),
@@ -69,7 +69,7 @@ F("landlordMajorRepairs","Conservación","Canal para reparaciones a cargo del ar
 F("accessForRepairs","Conservación","Procedimiento de acceso para obras/reparaciones","textarea"),
 F("subletting","Uso","Cesión/subarriendo","select",{required:true,options:opts([["no","No permitido salvo consentimiento legalmente exigible"],["partial","Solo parcial y con consentimiento escrito cuando proceda"],["other","Otro supuesto autorizado"]])}),
 F("works","Uso","Obras o modificaciones del arrendatario","textarea"),
-F("habitualResidence","Uso","La vivienda se destina a residencia habitual","checkbox",{required:true}),
+F("habitualResidence","Uso","La vivienda se destina a residencia habitual","checkbox",{when:d=>d.rentalPurpose==="habitual",required:true}),
 F("touristUse","Uso","Se prevé uso turístico","switch",{required:true}),
 F("petsAllowed","Uso","Régimen pactado sobre animales","textarea"),F("smoking","Uso","Régimen pactado sobre tabaco","textarea"),F("insurance","Uso","Seguro vinculado a la vivienda","textarea"),
 F("privacyNotice","Privacidad","Información sobre tratamiento de datos personales entregada","checkbox",{required:true}),
