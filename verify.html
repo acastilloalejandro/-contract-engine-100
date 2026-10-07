@@ -1,74 +1,24 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f7f8">
-<meta name="description" content="Verificación de formato y contenido transportado por Contract Engine 100.">
-<link rel="stylesheet" href="./styles/world-ui.css">
-<title>Contract Engine 100 · Verificación</title>
-<style>
-body{margin:0;padding:24px}
-.verify-wrap{max-width:500px;margin:0 auto;padding-top:max(24px,env(safe-area-inset-top))}
-.verify-card{background:var(--wm-white);border:1px solid var(--wm-border);border-radius:28px;padding:20px;box-shadow:var(--wm-shadow)}
-.dark .verify-card{background:#151517;border-color:rgba(255,255,255,.07);box-shadow:none}
-.verify-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.verify-brand{display:flex;align-items:center;gap:12px}
-.verify-mark{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#111;color:#fff;font-weight:800;font-size:11px}
-.dark .verify-mark{background:#fff;color:#111}
-.verify-kicker{font-size:10px;color:var(--wm-muted);font-weight:700}
-.verify-title{font-size:14px;font-weight:800}
-.verify-local{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#f0f0f2;color:#555;font-size:10px;font-weight:750}
-.dark .verify-local{background:#242428;color:#ddd}
-.verify-status{margin:22px 0 8px;font-size:32px;line-height:1;font-weight:850;letter-spacing:-.045em}
-.verify-ok{color:var(--wm-green)}
-.verify-bad{color:var(--wm-red)}
-.verify-row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--wm-border);font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
-.verify-label{color:var(--wm-muted)}
-.verify-value{text-align:right;word-break:break-all}
-.verify-notice{margin-top:16px;padding:14px;border-radius:18px;background:#f3f3f5;color:#666;font-size:12px;line-height:1.5}
-.dark .verify-notice{background:#202024;color:#aaa}
-</style>
-</head>
-<body>
-<main class="verify-wrap">
-  <div class="verify-card">
-    <div class="verify-top">
-      <div class="verify-brand"><div class="verify-mark" aria-hidden="true">CE</div><div><div class="verify-title">Contract Engine</div><div class="verify-kicker">Verificación</div></div></div>
-      <span class="verify-local">LOCAL</span>
-    </div>
-    <div id="status" class="verify-status">Validando…</div>
-    <p id="summary" style="margin:0;color:var(--wm-muted);font-size:13px;line-height:1.5">Comprobando la estructura del enlace de verificación.</p>
-    <div id="rows"></div>
-    <div class="verify-notice"><strong>Alcance:</strong> esta página valida el formato de los identificadores transportados por el QR y muestra su contenido. No demuestra por sí sola la identidad del firmante ni sustituye una firma electrónica o una comprobación contra un registro de servidor.</div>
-  </div>
-</main>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f8"><meta name="description" content="Verificación del enlace de Contract Engine 100.">
+<link rel="stylesheet" href="./styles/world-ui.css"><title>Contract Engine · Verificación</title>
+</head><body>
+<main class="world-content" style="padding-top:max(24px,env(safe-area-inset-top))">
+<section class="summary-card">
+<div class="section-head"><div><span class="eyebrow">VERIFICATION</span><h1>Contract Engine</h1><span class="muted">Comprobación del QR</span></div><span class="pill">LOCAL</span></div>
+<div id="status" class="hero-value" style="font-size:34px;margin-top:22px">Validando…</div>
+<p id="summary" class="muted">Comprobando identificadores.</p><div id="rows"></div>
+<div class="notice"><strong>Alcance:</strong> esta página comprueba el formato de los identificadores transportados. No demuestra por sí sola identidad, autenticación o firma electrónica contra un servidor.</div>
+</section></main>
 <script>
-(function(){
-  const p=new URLSearchParams(location.search);
-  const id=p.get("id")||"";
-  const version=p.get("version")||"";
-  const hash=p.get("hash")||"";
-  const signature=p.get("signature")||"";
-  const mode=p.get("mode")||"";
-  const idOk=/^[A-Z0-9-]{8,120}$/i.test(id);
-  const hashOk=/^[a-f0-9]{64}$/i.test(hash);
-  const signatureOk=/^[a-f0-9]{32,128}$/i.test(signature);
-  const versionOk=/^\d+(?:\.\d+){0,3}$/.test(version);
-  const valid=idOk&&hashOk&&signatureOk&&versionOk;
-  const status=document.getElementById("status");
-  status.textContent=valid?"Formato válido":"Enlace incompleto";
-  status.className="verify-status "+(valid?"verify-ok":"verify-bad");
-  document.getElementById("summary").textContent=valid?"Los identificadores del enlace tienen un formato compatible con Contract Engine 100.":"Falta información o alguno de los identificadores no tiene el formato esperado.";
-  const fields=[["Expediente",id],["Versión",version],["Hash SHA-256",hash],["Signature ID",signature],["Modo",mode||"—"]];
-  const rows=document.getElementById("rows");
-  for(const [label,value] of fields){
-    const row=document.createElement("div"); row.className="verify-row";
-    const l=document.createElement("span"); l.className="verify-label"; l.textContent=label;
-    const v=document.createElement("span"); v.className="verify-value"; v.textContent=value||"—";
-    row.append(l,v); rows.append(row);
-  }
-})();
-</script>
-</body>
-</html>
+const p=new URLSearchParams(location.search);
+const id=p.get("id")||"",version=p.get("version")||"",hash=p.get("hash")||"",request=p.get("request")||"",mode=p.get("mode")||"";
+const valid=/^[A-Z0-9-]{8,120}$/i.test(id)&&/^\d+(?:\.\d+){0,3}$/.test(version)&&/^[a-f0-9]{64}$/i.test(hash)&&/^[A-Z0-9-]{8,120}$/i.test(request);
+const status=document.querySelector("#status");status.textContent=valid?"Formato válido":"Enlace incompleto";status.className="hero-value "+(valid?"pill good":"pill bad");
+document.querySelector("#summary").textContent=valid?"Los identificadores tienen un formato compatible con Contract Engine 100.":"Falta información o algún identificador no tiene el formato esperado.";
+for(const x of [["Expediente",id],["Versión",version],["SHA-256",hash],["Request ID",request],["Modo",mode||"—"]]){
+ const row=document.createElement("div");row.className="hash-row";
+ const a=document.createElement("span");a.textContent=x[0];const b=document.createElement("b");b.className="break";b.textContent=x[1]||"—";row.append(a,b);document.querySelector("#rows").append(row);
+}
+</script></body></html>
