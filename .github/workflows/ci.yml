@@ -1,14 +1,11 @@
 name: Contract Engine CI
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   smoke:
     runs-on: ubuntu-latest
@@ -17,4 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: node --check app/schema.js
+      - run: node --check app/engine.js
+      - run: node --check app/ui.js
+      - run: node --check app/main.js
       - run: npm test
