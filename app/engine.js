@@ -1,11 +1,17 @@
 import {VERSION,MAX_FILE_BYTES,SCHEMA,RISK_MAP} from "./schema.js";
+import {assessRentalContext,resolveJurisdiction,LEGAL_POLICY_VERSION} from "./legal-policy.js";
+import {generateClauses} from "./clauses.js";
+import {nextSemver} from "./workflow.js";
 
 export const STORAGE_KEY="ce100:v6";
+export const PROFILE_STORAGE_KEY="ce100:profiles:v1";
 export const MAX_SNAPSHOTS=8;
 export const state={
   view:"form",nav:"form",role:"tenant",dark:false,
+  contractId:crypto.randomUUID?.()||String(Date.now()),contractVersion:"1.0.0",lifecycle:"DRAFT",currentStage:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),
   recordId:crypto.randomUUID?.()||String(Date.now()),
-  data:{actor:"tenant",rentalPurpose:"habitual",contractForm:"new",contractLanguage:"es",tensionedZone:false,largeHolder:false,landlordLargeHolder:"unsure",landlordIsCompany:false,touristUse:false,additionalGuaranteeMonths:0,rentIndex:"irav",depositMonths:1},
+  data:{actor:"tenant",rentalPurpose:"habitual",contractForm:"new",contractLanguage:"es",tensionedZone:false,largeHolder:false,landlordLargeHolder:"unsure",landlordIsCompany:false,touristUse:false,protectedHousing:false,newBuildOrMajorRehab:false,priorLeaseWithinFiveYears:"unknown",additionalGuaranteeMonths:0,rentIndex:"irav",depositMonths:1},
+  legalAssessment:null,clauses:[],profiles:{tenant:null,landlord:null},
   docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
 };
 
