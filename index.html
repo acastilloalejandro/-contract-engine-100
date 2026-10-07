@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#fbfbfd" />
-  <title>Contract Engine 100 — Dynamic Contract Form</title>
+  <meta name="description" content="Contract Engine 100: formulario contractual dinámico, revisión verificable y expediente versionado." />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Contract Engine 100 — Field System 4.0</title>
 
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.6.2/dist/easy.qrcode.min.js" crossorigin="anonymous"></script>
 
   <script>
     tailwind.config = {
@@ -100,7 +103,7 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 /* =========================================================
-   CONTRACT ENGINE 100 — FIELD SYSTEM 3.0
+   CONTRACT ENGINE 100 — FIELD SYSTEM 4.0
    Context → Ask → Adapt → Normalize → Validate → Review
    → Consent → Authenticate → Sign → Seal → Verify → Audit
    ========================================================= */
@@ -622,6 +625,15 @@ function validate(schema, data, docs) {
   if (data.startTime && data.endTime && data.startTime === data.endTime)
     warnings.push({field:'endTime',message:'El horario de inicio y fin coincide. Revíselo.'});
 
+  if (data.startTime && data.endTime && data.endTime < data.startTime)
+    errors.push({field:'endTime',message:'La hora de finalización no puede ser anterior a la hora de inicio en esta versión del formulario.'});
+
+  if (Array.isArray(data.workingDays) && data.weeklyRestDay && data.workingDays.includes(data.weeklyRestDay))
+    errors.push({field:'weeklyRestDay',message:'El día de descanso semanal no debe figurar simultáneamente como día de trabajo.'});
+
+  if (data.compensation === 'paid' && isFilled(data.salaryAmount) && Number(data.salaryAmount) <= 0)
+    errors.push({field:'salaryAmount',message:'La remuneración debe ser superior a cero.'});
+
   if (data.compensation === 'paid' && !isFilled(data.currency))
     errors.push({field:'currency',message:'La moneda es obligatoria cuando existe remuneración.'});
 
@@ -997,7 +1009,8 @@ function SmartField({field,value,onChange,error,warning,role,onViewDoc,onExtract
       case 'COUNTRY':
       case 'SELECT':
       case 'SEARCH_SELECT':
-      case 'LANGUAGE':      case 'TIMEZONE':
+      case 'LANGUAGE':
+      case 'TIMEZONE':
         return <select {...common}><option value="">Seleccionar…</option>{optionList.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select>;
       case 'MULTI_SELECT':
         return <select multiple className={`${base} min-h-36`} value={value||[]} onChange={handle} disabled={disabled}>{optionList.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select>;
@@ -1076,6 +1089,45 @@ function SmartField({field,value,onChange,error,warning,role,onViewDoc,onExtract
   );
 }
 
+/* ---------- Verification ---------- */
+const APP_BASE_URL = `${location.origin}${location.pathname.replace(/\/$/, '')}`;
+const AUTH_MODE = 'static-demo';
+
+function buildVerificationUrl(receipt) {
+  const params = new URLSearchParams({
+    id: receipt.recordId,
+    version: String(receipt.version),
+    hash: receipt.hash,
+    signature: receipt.signatureId,
+    mode: AUTH_MODE
+  });
+  return `${APP_BASE_URL}/verify.html?${params.toString()}`;
+}
+
+function VerificationQR({receipt}) {
+  const ref = useRef(null);
+  const [ready,setReady] = useState(false);
+  const url = receipt?.verificationUrl || "";
+  useEffect(()=>{
+    if (!ref.current || !url) return;
+    ref.current.innerHTML = "";
+    if (window.QRCode) {
+      new window.QRCode(ref.current,{
+        text:url, width:220, height:220, quietZone:12,
+        drawer:'canvas', correctLevel:window.QRCode.CorrectLevel?.H
+      });
+      setReady(true);
+    } else {
+      setReady(false);
+    }
+  },[url]);
+  return <div>
+    <div ref={ref} className="min-h-[220px] flex items-center justify-center rounded-2xl bg-white" aria-label="Código QR de verificación"/>
+    {!ready && <div className="text-[11px] text-apple-amber mt-2">Generador QR no disponible en este navegador.</div>}
+    {url && <button className="mt-3 text-apple-blue text-xs font-semibold" onClick={()=>navigator.clipboard?.writeText(url)}>Copiar enlace de verificación</button>}
+  </div>;
+}
+
 /* ---------- Main app ---------- */
 function App() {
   const [dark,setDark] = useState(false);
@@ -1096,21 +1148,7 @@ function App() {
   const [audit,setAudit] = useState([]);
   const [saveState,setSaveState] = useState('guardado');
 
-  useEffect(() => {
-    window.__contractEngineRegisterDocs = (incoming=[]) => {
-      setDocuments(prev => {
-        const existing = new Set(prev.map(d => d.id));
-        return [...prev, ...incoming.filter(d => !existing.has(d.id))];
-      });
-      incoming.forEach(d => addAudit?.('documentAdded', {documentId:d.id, name:d.name, hash:d.hash}));
-    };
-    return () => { delete window.__contractEngineRegisterDocs; };
-  }, [addAudit]);
   const [readSection,setReadSection] = useState(null);
-
-  useEffect(()=>{
-    document.documentElement.classList.toggle('dark',dark);
-  },[dark]);
 
   const addAudit = useCallback((action,meta={})=>{
     setAudit(prev=>[...prev,{
@@ -1124,12 +1162,27 @@ function App() {
       hash:'',
       ...meta
     }]);
-  },[role]);
+  },[role,record.id,record.status]);
+
+  useEffect(() => {
+    window.__contractEngineRegisterDocs = (incoming=[]) => {
+      setDocuments(prev => {
+        const existing = new Set(prev.map(d => d.id));
+        return [...prev, ...incoming.filter(d => !existing.has(d.id))];
+      });
+      incoming.forEach(d => addAudit('documentAdded', {documentId:d.id, name:d.name, hash:d.hash}));
+    };
+    return () => { delete window.__contractEngineRegisterDocs; };
+  }, [addAudit]);
+
+  useEffect(()=>{
+    document.documentElement.classList.toggle('dark',dark);
+  },[dark]);
 
   const [record,setRecord] = useState({
     id:generateId('CR'),
     version:1,
-    schemaVersion:'3.0.0',
+    schemaVersion:'4.0.0',
     dataVersion:1,
     documentVersion:1,
     status:RECORD_STATES.DRAFT,
@@ -1171,15 +1224,25 @@ function App() {
     return m;
   },[validation.warnings]);
 
+  const localDraft = useMemo(()=>{
+    const safeData = {};
+    Object.entries(normalized).forEach(([key,value])=>{
+      const def = SCHEMA[key];
+      if (def?.sensitivity === 'restricted' || def?.sensitivity === 'personal') return;
+      if (def?.type === 'FILE' || def?.type === 'MULTI_FILE' || def?.type === 'PASSPORT' || def?.type === 'NATIONAL_ID' || def?.type === 'RESIDENCE_ID') return;
+      safeData[key] = value;
+    });
+    return { record:{...record,status:record.status}, data:safeData, savedAt:nowISO() };
+  },[record,normalized]);
+
   useEffect(()=>{
-    localStorage.setItem('contract-engine-draft', JSON.stringify({
-      record,
-      data: normalized,
-      audit,
-      savedAt:nowISO()
-    }));
-    setSaveState('guardado');
-  },[record,data,audit,normalized]);
+    try {
+      localStorage.setItem('contract-engine-draft', JSON.stringify(localDraft));
+      setSaveState('guardado sin PII sensible');
+    } catch (e) {
+      setSaveState('no disponible');
+    }
+  },[localDraft]);
 
   const update = (id,value)=>{
     setSaveState('guardando');
@@ -1242,22 +1305,27 @@ function App() {
   };
 
   const authenticate = async ()=>{
+    const secure = window.isSecureContext === true;
+    const webAuthnAvailable = !!window.PublicKeyCredential && secure;
+    addAudit('authenticationCapabilityChecked',{secureContext:secure,webAuthnAvailable,mode:AUTH_MODE});
     setRecord(prev=>({...prev,status:RECORD_STATES.SIGNATURE_PENDING}));
-    addAudit('authenticationRequested');
     setView('signature');
   };
 
   const sign = async ()=>{
+    if (!hash || !validation.isValid) return;
     const signedAt = nowISO();
     const signaturePayload = {
       recordId:record.id,
       version:record.version,
       hash,
       signerRole:role,
-      signedAt
+      signedAt,
+      authMode:AUTH_MODE
     };
     const signatureId = await sha256(safeStringify(signaturePayload));
-    const receipt = {...signaturePayload,signatureId:signatureId.slice(0,32),verificationId:generateId('VRF')};
+    const receipt = {...signaturePayload,signatureId:signatureId.slice(0,64),verificationId:generateId('VRF')};
+    receipt.verificationUrl = buildVerificationUrl(receipt);
     setSignatureReceipt(receipt);
     setRecord(prev=>({
       ...prev,
@@ -1265,7 +1333,7 @@ function App() {
       updatedAt:signedAt,
       version:prev.version+1
     }));
-    addAudit('signatureCreated',{signatureId:receipt.signatureId});
+    addAudit('demoReceiptCreated',{signatureId:receipt.signatureId,verificationUrl:receipt.verificationUrl});
     setView('success');
   };
 
@@ -1366,7 +1434,7 @@ function App() {
               <button disabled={!validation.isValid || pct<100} onClick={proceedReview} className={`w-full tap rounded-2xl py-4 font-bold text-sm flex items-center justify-center gap-2 ${validation.isValid && pct===100?'bg-black dark:bg-white text-white dark:text-black':'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}>
                 Revisar expediente <Icon name="arrowRight" size={17}/>
               </button>
-              <div className="text-[10px] text-gray-400 text-center">Borrador local: {saveState}. La autenticación y la firma son de demostración hasta conectar proveedores reales en producción.</div>
+              <div className="text-[10px] text-gray-400 text-center">Borrador local: {saveState}. Este sitio genera un recibo criptográfico de demostración; no constituye firma electrónica cualificada ni autenticación de identidad.</div>
             </GlassCard>
           </>
         )}
@@ -1460,13 +1528,14 @@ function App() {
             <div>
               <div className="text-[10px] font-mono tracking-widest text-gray-400">AUTH REQUIRED</div>
               <h1 className="text-2xl font-bold">Autenticar</h1>
-              <p className="text-sm text-gray-500 mt-1">En una app iOS real, esta operación se conectaría a LocalAuthentication/Keychain. Aquí se utiliza una confirmación explícita de demostración.</p>
+              <p className="text-sm text-gray-500 mt-1">Esta versión está publicada como sitio estático. Comprueba si el navegador ofrece WebAuthn en contexto seguro, pero no simula una credencial ni almacena biometría.</p>
             </div>
             <GlassCard className="text-center space-y-4">
               <div className="mx-auto w-20 h-20 rounded-3xl bg-blue-50 dark:bg-blue-950/30 text-apple-blue flex items-center justify-center"><Icon name="scan" size={42}/></div>
-              <div className="font-bold text-lg">Confirmar identidad del dispositivo</div>
+              <div className="font-bold text-lg">Comprobar capacidad de autenticación</div>
               <p className="text-sm text-gray-500">No se almacenan datos biométricos en este prototipo.</p>
-              <button className="w-full tap rounded-2xl py-4 bg-black dark:bg-white text-white dark:text-black font-bold" onClick={authenticate}>Continuar con autenticación</button>
+              <button className="w-full tap rounded-2xl py-4 bg-black dark:bg-white text-white dark:text-black font-bold" onClick={authenticate}>Comprobar y continuar</button>
+              <div className="text-[10px] text-gray-400">Modo actual: STATIC-DEMO. La autenticación criptográfica real requiere challenge de servidor y credencial WebAuthn persistida.</div>
             </GlassCard>
           </div>
         )}
@@ -1499,7 +1568,7 @@ function App() {
             <div className="text-center py-3">
               <div className="mx-auto w-20 h-20 rounded-full bg-apple-green text-white flex items-center justify-center"><Icon name="check" size={38}/></div>
               <h1 className="text-2xl font-bold mt-4">Expediente activo</h1>
-              <p className="text-sm text-gray-500 mt-1">La versión firmada se identifica por su hash y recibo.</p>
+              <p className="text-sm text-gray-500 mt-1">La versión se identifica por su hash y un recibo local. La verificación pública solo muestra los datos transportados por el QR.</p>
             </div>
 
             <GlassCard className="space-y-4">
@@ -1516,12 +1585,8 @@ function App() {
                 <div className="flex justify-between gap-4"><span className="text-gray-500">Signature ID</span><span className="font-mono truncate max-w-[65%]">{signatureReceipt.signatureId}</span></div>
               </div>
               <div className="rounded-2xl border border-black/5 dark:border-white/10 p-4 text-center">
-                <div className="mx-auto w-28 h-28 rounded-2xl bg-black text-white flex items-center justify-center">
-                  <div className="grid grid-cols-5 gap-1 p-3 opacity-90">
-                    {Array.from({length:25},(_,i)=><div key={i} className={`w-3 h-3 rounded-[2px] ${(i*7+3)%4!==0?'bg-white':'bg-transparent'}`}/>)}
-                  </div>
-                </div>
-                <div className="text-[10px] text-gray-400 mt-3">QR de verificación: {signatureReceipt.verificationId}</div>
+                <VerificationQR receipt={signatureReceipt}/>
+                <div className="text-[10px] text-gray-400 mt-3">Identificador: {signatureReceipt.verificationId}</div>
               </div>
             </GlassCard>
 
