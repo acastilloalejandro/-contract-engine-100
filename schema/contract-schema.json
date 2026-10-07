@@ -1,29 +1,245 @@
-
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Contract Engine 100 Record",
   "type": "object",
-  "required": ["relationshipType", "country", "workerFullName", "workerNationality", "employerFullName", "position", "startDate"],
+  "additionalProperties": true,
+  "required": [
+    "relationshipType",
+    "country",
+    "workerFullName",
+    "workerDateOfBirth",
+    "workerNationality",
+    "employerFullName",
+    "employerNationality",
+    "employerIdNumber",
+    "workerEmail",
+    "workerPhone",
+    "position",
+    "dutiesDescription",
+    "workplaceAddress",
+    "startDate",
+    "compensation",
+    "workingDays",
+    "startTime",
+    "endTime",
+    "weeklyRestDay",
+    "workerPassport"
+  ],
   "properties": {
-    "relationshipType": {"type": "string"},
-    "country": {"type": "string", "minLength": 2},
-    "city": {"type": "string"},
-    "jurisdiction": {"type": "string"},
-    "workerFullName": {"type": "string", "minLength": 2},
-    "workerDateOfBirth": {"type": "string", "format": "date"},
-    "workerNationality": {"type": "string", "minLength": 2},
-    "employerFullName": {"type": "string", "minLength": 2},
-    "employerNationality": {"type": "string", "minLength": 2},
-    "employerIdNumber": {"type": "string"},
-    "workerEmail": {"type": "string", "format": "email"},
-    "workerPhone": {"type": "string"},
-    "position": {"type": "string", "minLength": 2},
-    "dutiesDescription": {"type": "string", "minLength": 10},
-    "startDate": {"type": "string", "format": "date"},
-    "endDate": {"type": "string", "format": "date"},
-    "salaryAmount": {"type": "number", "minimum": 0},
-    "currency": {"type": "string"},
-    "paymentFrequency": {"type": "string"},
-    "paymentMethod": {"type": "string"}
-  }
+    "workerRole": {
+      "type": "string"
+    },
+    "relationshipType": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "workerFullName": {
+      "type": "string"
+    },
+    "workerDateOfBirth": {
+      "type": "string",
+      "format": "date"
+    },
+    "workerNationality": {
+      "type": "string"
+    },
+    "employerFullName": {
+      "type": "string"
+    },
+    "employerNationality": {
+      "type": "string"
+    },
+    "employerIdNumber": {
+      "type": "string"
+    },
+    "workerEmail": {
+      "type": "string"
+    },
+    "workerPhone": {
+      "type": "string"
+    },
+    "emergencyContact": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "position": {
+      "type": "string"
+    },
+    "dutiesDescription": {
+      "type": "string"
+    },
+    "workplaceAddress": {
+      "type": "string"
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "trialPeriod": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 365
+    },
+    "compensation": {
+      "type": "string"
+    },
+    "salaryAmount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "currency": {
+      "type": "string"
+    },
+    "paymentFrequency": {
+      "type": "string"
+    },
+    "paymentMethod": {
+      "type": "string"
+    },
+    "workingDays": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "startTime": {
+      "type": "string"
+    },
+    "endTime": {
+      "type": "string"
+    },
+    "weeklyRestDay": {
+      "type": "string"
+    },
+    "liveIn": {
+      "type": "boolean"
+    },
+    "accommodationDetails": {
+      "type": "string"
+    },
+    "travelRequired": {
+      "type": "boolean"
+    },
+    "travelDetails": {
+      "type": "string"
+    },
+    "workerPassport": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "workerNationalID": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "residenceDocument": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "additionalDocuments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nda": {
+      "type": "boolean"
+    },
+    "ndaTerms": {
+      "type": "string"
+    },
+    "workerRightsAcknowledged": {
+      "type": "boolean"
+    },
+    "readCompensation": {
+      "type": "boolean"
+    },
+    "readSchedule": {
+      "type": "boolean"
+    },
+    "consentIdentity": {
+      "type": "boolean"
+    },
+    "consentDocuments": {
+      "type": "boolean"
+    },
+    "consentContract": {
+      "type": "boolean"
+    },
+    "workerCountryDerived": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "compensation": {
+            "const": "paid"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "salaryAmount",
+          "currency",
+          "paymentFrequency",
+          "paymentMethod"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "liveIn": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "accommodationDetails"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "travelRequired": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "travelDetails"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "nda": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "ndaTerms"
+        ]
+      }
+    }
+  ]
 }
