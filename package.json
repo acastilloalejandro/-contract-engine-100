@@ -1,8 +1,6 @@
 {
-  "name": "contract-engine-100",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node tests/smoke.test.mjs"
-  }
+  "name":"contract-engine-100",
+  "private":true,
+  "type":"module",
+  "scripts":{"test":"node tests/smoke.test.mjs"}
 }
