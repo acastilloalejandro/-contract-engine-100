@@ -11,14 +11,14 @@ The browser application remains static, while the trust endpoints run as serverl
 - `AUTHID_BASE_URL=https://id.authid.ai`
 - `AUTHID_UI_BASE_URL=https://id.authid.ai/`
 
-authID documents API-key-to-Bearer-token exchange and the Proof flow. Keep both API-key values exclusively in the server environment. citeturn2search2turn3search0
+authID documents API-key-to-Bearer-token exchange and the Proof flow. Keep both API-key values exclusively in the server environment.
 
 ### Signaturit
 
 - `SIGNATURIT_ACCESS_TOKEN`
 - `SIGNATURIT_BASE_URL=https://api.sandbox.signaturit.com/v3` for development
 
-Use the production base URL only after the Sandbox integration has been tested and the production token has been issued. Signaturit documents OAuth2 bearer authentication, signature creation, status retrieval, events and audit-trail downloads. citeturn0search0
+Use the production base URL only after the Sandbox integration has been tested and the production token has been issued. Signaturit documents OAuth2 bearer authentication, signature creation, status retrieval, events and audit-trail downloads.
 
 ## Production boundary
 
