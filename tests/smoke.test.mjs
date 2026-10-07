@@ -14,4 +14,4 @@ assert.match(clauses,/generateClauses/);
 assert.match(css,/stage-nav/);assert.match(css,/clause-card/);assert.match(verify,/Request ID/);assert.match(verify,/Política/);
 assert.match(schema,/OPTIMIZATIONS=/);assert.equal((schema.match(/"/g)||[]).length>150,true);
 assert.equal(manifest.display,"standalone");assert.equal(manifest.lang,"es");
-console.log("Spain Housing Rental v6.1 smoke tests: OK");
+console.log("Spain Housing Rental v6.1 smoke tests: OK");\n// CI checkpoint: five-stage rental architecture.
