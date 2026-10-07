@@ -3,7 +3,7 @@ import {VERSION,MAX_FILE_BYTES,SCHEMA,RISK_MAP} from "./schema.js";
 export const STORAGE_KEY="ce100:v5";
 export const MAX_SNAPSHOTS=5;
 export const state={
-  view:"form",role:"worker",dark:false,
+  view:"form",nav:"form",role:"worker",dark:false,
   recordId:crypto.randomUUID?.()||String(Date.now()),
   data:{workerRole:"worker",country:"SA",city:"Jeddah",jurisdiction:"Jeddah, Saudi Arabia",compensation:"paid",currency:"SAR",contractLanguage:"es",liveIn:false,travelRequired:false,nda:false},
   docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
