@@ -212,7 +212,22 @@ function bind(){
   $("identityBtn").onclick=startIdentityVerification;
   $("cancelSignBtn").onclick=()=>{state.view="review";state.nav="review";updateViews();feedback("tap");};
   $("newBtn").onclick=reset;
-  document.querySelectorAll(".world-tab").forEach(b=>b.onclick=()=>{const n=b.dataset.nav;if(n==="form"){state.view="form";state.nav="form";renderForm();}else if(n==="review"){state.nav="review";prepareReview();}else if(n==="state"){state.view="state";state.nav="state";renderForm();updateViews();}else{state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center");}feedback("tap");});
+  document.querySelectorAll(".world-tab").forEach(b=>{
+    b.onclick=()=>{
+      const n=b.dataset.nav;
+      if(n==="form"){
+        state.view="form";state.nav="form";renderForm();
+      }else if(n==="review"){
+        state.nav="review";prepareReview();
+      }else if(n==="state"){
+        state.view="state";state.nav="state";renderForm();updateViews();
+      }else{
+        state.view="form";state.nav="docs";renderForm();
+        document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});
+      }
+      feedback("tap");
+    };
+  });
   $("sections").addEventListener("input",handleInput);
   $("sections").addEventListener("change",handleChange);
   document.addEventListener("click",e=>{const read=e.target.closest("[data-read]");if(read)speak(read.dataset.read);const open=e.target.closest("[data-open]");if(open){const d=state.docs.find(x=>x.id===open.dataset.open);if(d?.url)window.open(d.url,"_blank","noopener,noreferrer");}});
@@ -220,6 +235,7 @@ function bind(){
 }
 
 function init(){
+  window.__createQR=createQR;
   restore();
   state.dark=localStorage.getItem("ce-theme")==="dark";
   document.documentElement.classList.toggle("dark",state.dark);
