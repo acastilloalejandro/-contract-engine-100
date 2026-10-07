@@ -1,0 +1,56 @@
+:root {
+  color-scheme: light;
+  --wm-bg: #f7f7f8;
+  --wm-card: #f3f3f5;
+  --wm-white: #ffffff;
+  --wm-text: #111111;
+  --wm-muted: #8b8b90;
+  --wm-border: rgba(0,0,0,.055);
+  --wm-blue: #0a84ff;
+  --wm-green: #18b957;
+  --wm-red: #ff453a;
+  --wm-shadow: 0 2px 14px rgba(0,0,0,.035);
+}
+html.dark { color-scheme: dark; }
+body { background: var(--wm-bg) !important; color: var(--wm-text); }
+.dark body { background: #0b0b0d !important; color: #fff; }
+.world-shell { min-height: 100dvh; background: var(--wm-bg); }
+.dark .world-shell { background: #0b0b0d; }
+.world-content { max-width: 500px; margin: 0 auto; }
+.world-topbar { position: sticky; top: 0; z-index: 20; padding-top: max(8px, env(safe-area-inset-top)); background: linear-gradient(var(--wm-bg) 72%, transparent); }
+.dark .world-topbar { background: linear-gradient(#0b0b0d 72%, transparent); }
+.world-mark { width: 36px; height: 36px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800; letter-spacing: -.02em; }
+.dark .world-mark { background: #fff; color: #111; }
+.world-hero { background: var(--wm-white); border: 1px solid var(--wm-border); border-radius: 28px; padding: 20px; box-shadow: var(--wm-shadow); }
+.dark .world-hero { background: #151517; border-color: rgba(255,255,255,.07); }
+.world-kicker { font-size: 11px; color: var(--wm-muted); font-weight: 700; letter-spacing: .02em; }
+.world-balance { margin-top: 3px; font-size: 48px; line-height: .98; letter-spacing: -.055em; font-weight: 800; }
+.world-balance small { font-size: .45em; color: #b7b7bc; vertical-align: 13%; margin-left: 2px; }
+.world-hero-sub { margin-top: 9px; font-size: 12px; color: var(--wm-muted); line-height: 1.45; }
+.world-actions { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-top: 17px; }
+.world-action { min-height: 42px; padding: 0 15px; border-radius: 999px; border: 1px solid var(--wm-border); background: #f2f2f3; color: #111; font-size: 13px; font-weight: 750; }
+.world-action.primary { background: #111; color: #fff; border-color: #111; }
+.dark .world-action { background: #202024; color: #fff; border-color: rgba(255,255,255,.08); }
+.dark .world-action.primary { background: #fff; color: #111; border-color: #fff; }
+.world-action:disabled { opacity: .42; }
+.world-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.world-mini-card { min-height: 96px; border-radius: 22px; padding: 14px; background: var(--wm-white); border: 1px solid var(--wm-border); box-shadow: var(--wm-shadow); }
+.dark .world-mini-card { background: #151517; border-color: rgba(255,255,255,.07); }
+.world-mini-card .value { margin-top: 8px; font-size: 19px; font-weight: 800; letter-spacing: -.03em; }
+.world-nav { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(460px, calc(100% - 20px)); z-index: 40; padding: 7px; border-radius: 24px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.07); box-shadow: 0 10px 35px rgba(0,0,0,.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.dark .world-nav { background: rgba(25,25,27,.92); border-color: rgba(255,255,255,.08); box-shadow: 0 10px 35px rgba(0,0,0,.35); }
+.world-nav-inner { display: grid; grid-template-columns: repeat(4,1fr); gap: 3px; }
+.world-tab { min-height: 52px; border: 0; border-radius: 18px; background: transparent; color: var(--wm-muted); font-size: 10px; font-weight: 700; display: grid; place-items: center; gap: 3px; }
+.world-tab.active { background: #f0f0f2; color: #111; }
+.dark .world-tab.active { background: #242428; color: #fff; }
+.world-section-title { padding: 2px 2px 0; }
+.world-section-title h2 { font-size: 20px; letter-spacing: -.035em; }
+.glass { background: var(--wm-white); border: 1px solid var(--wm-border); box-shadow: var(--wm-shadow); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.dark .glass { background: #151517; border-color: rgba(255,255,255,.07); box-shadow: none; }
+.field { background: #f4f4f5; border-color: rgba(0,0,0,.07); border-radius: 16px; }
+.dark .field { background: #1f1f22; border-color: rgba(255,255,255,.08); }
+.field:focus { border-color: rgba(10,132,255,.75); box-shadow: 0 0 0 3px rgba(10,132,255,.10); }
+.tap { min-height: 44px; min-width: 44px; }
+.world-top-space { padding-top: 6px; }
+@media (max-width: 380px) { .world-balance { font-size: 42px; } }
+@media (prefers-reduced-motion: reduce) { .animate-up { animation: none; } }
