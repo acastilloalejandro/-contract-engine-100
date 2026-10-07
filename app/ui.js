@@ -75,7 +75,8 @@ export function renderReview(){
 }
 
 export function updateViews(){
-  for(const [id,v] of [["formView","form"],["reviewView","review"],["protectedView","protected"],["signView","sign"],["stateView","state"]])$(id).classList.toggle("hidden",state.view!==v);
-  document.querySelectorAll(".world-tab").forEach(b=>b.classList.toggle("active",(state.view==="form"&&b.dataset.nav==="form")||(state.view==="review"&&b.dataset.nav==="review")||(state.view==="state"&&b.dataset.nav==="state")));
+  for(const [id,v] of [["formView","form"],["reviewView","review"],["protectedView","protected"],["signView","sign"],["stateView","state"]])
+    $(id).classList.toggle("hidden",state.view!==v);
+  document.querySelectorAll(".world-tab").forEach(b=>b.classList.toggle("active",b.dataset.nav===state.nav));
   if(state.view==="review"||state.view==="sign"||state.view==="state")renderReview();
 }
