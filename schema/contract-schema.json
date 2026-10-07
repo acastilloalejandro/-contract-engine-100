@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Contract Engine 100 Record",
+  "title": "Contract Engine 100 · Field System 5.0",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -61,14 +61,14 @@
       "type": "string"
     },
     "workerEmail": {
-      "type": "string"
+      "type": "string",
+      "format": "email"
     },
     "workerPhone": {
       "type": "string"
     },
     "emergencyContact": {
-      "type": "object",
-      "additionalProperties": true
+      "type": "string"
     },
     "position": {
       "type": "string"
@@ -178,6 +178,107 @@
       "type": "boolean"
     },
     "workerCountryDerived": {
+      "type": "string"
+    },
+    "workerPreferredLanguage": {
+      "type": "string"
+    },
+    "contractLanguage": {
+      "type": "string"
+    },
+    "interpreterRequired": {
+      "type": "boolean"
+    },
+    "workerUnderstandsContract": {
+      "type": "boolean"
+    },
+    "workerIndependentCopy": {
+      "type": "boolean"
+    },
+    "workerCanContactFamily": {
+      "type": "string"
+    },
+    "workerHasPhoneAccess": {
+      "type": "string"
+    },
+    "workerCanLeaveSite": {
+      "type": "string"
+    },
+    "workerDocumentAccess": {
+      "type": "string"
+    },
+    "workerRecruitmentDeception": {
+      "type": "string"
+    },
+    "workerRecruitmentDebt": {
+      "type": "string"
+    },
+    "workerWageWithholding": {
+      "type": "string"
+    },
+    "workerThreats": {
+      "type": "string"
+    },
+    "workerViolence": {
+      "type": "string"
+    },
+    "workerIsolation": {
+      "type": "string"
+    },
+    "workerAbuseVulnerability": {
+      "type": "string"
+    },
+    "workerAbusiveConditions": {
+      "type": "string"
+    },
+    "workerExcessiveOvertime": {
+      "type": "string"
+    },
+    "workerRestrictionMovement": {
+      "type": "string"
+    },
+    "recruitmentFee": {
+      "type": "number",
+      "minimum": 0
+    },
+    "wageDeductions": {
+      "type": "number",
+      "minimum": 0
+    },
+    "deductionExplanation": {
+      "type": "string"
+    },
+    "paymentHistory": {
+      "type": "string"
+    },
+    "excludedDuties": {
+      "type": "string"
+    },
+    "terminationNotice": {
+      "type": "string"
+    },
+    "breaks": {
+      "type": "string"
+    },
+    "overtimePolicy": {
+      "type": "string"
+    },
+    "housingSafety": {
+      "type": "string"
+    },
+    "travelExpenses": {
+      "type": "string"
+    },
+    "independentReviewRequested": {
+      "type": "boolean"
+    },
+    "privacyAcknowledgement": {
+      "type": "boolean"
+    },
+    "assistanceContact": {
+      "type": "string"
+    },
+    "disputeMechanism": {
       "type": "string"
     }
   },
