@@ -3,7 +3,7 @@ import {
   state,restore,saveLocal,audit,validate,riskAssessment,integrityData,publicData,
   documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest
 } from "./engine.js";
-import {renderForm,renderReview,updateViews,$,esc} from "./ui.js";
+import {renderForm,renderReview,refreshFormMeta,updateViews,$,esc} from "./ui.js";
 
 function speak(text){
   if(!("speechSynthesis" in window)) return;
@@ -24,7 +24,7 @@ async function prepareReview(){
   }
   const r=riskAssessment();
   if(state.role==="worker"&&r.level!=="NORMAL"){
-    state.view="protected";
+    state.view="protected";state.nav="review";
     audit("protectiveGate",{level:r.level,score:r.score});
     saveLocal();renderForm();updateViews();return;
   }
@@ -35,7 +35,7 @@ async function prepareReview(){
   catch{alert("No se pudo calcular la huella SHA-256 en este contexto seguro.");return;}
   state.snapshots=[...state.snapshots,{version:state.snapshots.length+1,data:publicData(),hash:state.hash,createdAt:new Date().toISOString()}].slice(-5);
   audit("reviewStarted",{hash:state.hash});
-  state.view="review";saveLocal();renderForm();updateViews();window.scrollTo({top:0,behavior:"smooth"});
+  state.view="review";state.nav="review";saveLocal();renderForm();updateViews();window.scrollTo({top:0,behavior:"smooth"});
 }
 
 async function prepareSignature(){
@@ -80,7 +80,11 @@ async function createQR(){
 
 function handleChange(e){
   const t=e.target;
-  if(t.dataset.upload){addDocuments(t.files,t.dataset.upload).then(()=>{state.prepared=null;saveLocal();renderForm();});return;}
+  if(t.dataset.upload){
+    addDocuments(t.files,t.dataset.upload).then(()=>{state.prepared=null;saveLocal();renderForm();});
+    return;
+  }
+  let fieldId=t.dataset.field||t.dataset.multi;
   if(t.dataset.multi){
     const id=t.dataset.multi;
     state.data[id]=[...document.querySelectorAll("[data-multi='"+CSS.escape(id)+"']:checked")].map(x=>x.value);
@@ -90,14 +94,19 @@ function handleChange(e){
     if(t.dataset.field==="workerRole"&&["worker","employer","reviewer"].includes(v))state.role=v;
   }else return;
   state.prepared=null;
-  audit("fieldChanged",{fieldId:t.dataset.field||t.dataset.multi});
-  saveLocal();renderForm();
+  audit("fieldChanged",{fieldId});
+  saveLocal();
+  const conditional=new Set(["workerRole","compensation","liveIn","travelRequired","nda","interpreterRequired","wageDeductions"]);
+  if(conditional.has(fieldId)) renderForm(); else refreshFormMeta();
 }
 
 function handleInput(e){
   const id=e.target.dataset.field;
   if(!id||["checkbox","radio"].includes(e.target.type))return;
-  state.data[id]=e.target.value;saveLocal();
+  state.data[id]=e.target.value;
+  state.prepared=null;
+  saveLocal();
+  refreshFormMeta();
 }
 
 function reset(){
@@ -125,11 +134,11 @@ function bind(){
     if(n==="form"){state.view="form";renderForm();}
     else if(n==="review")prepareReview();
     else if(n==="state"){state.view="state";renderForm();updateViews();}
-    else {state.view="form";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});}
+    else {state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});}
   });
   $("sections").addEventListener("input",handleInput);
   $("sections").addEventListener("change",handleChange);
-  $("sections").addEventListener("blur",e=>{if(e.target.dataset.field)renderForm();},true);
+
   document.addEventListener("click",e=>{
     const read=e.target.closest("[data-read]");if(read)speak(read.dataset.read);
     const open=e.target.closest("[data-open]");
