@@ -3,17 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#fbfbfd">
+<meta name="theme-color" content="#f7f7f8">
+<meta name="description" content="Verificación de formato y contenido transportado por Contract Engine 100.">
+<link rel="stylesheet" href="./styles/world-ui.css">
 <title>Contract Engine 100 · Verificación</title>
-<style>:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,sans-serif;color:#111;background:#f5f5f7}*{box-sizing:border-box}body{margin:0;padding:24px}.card{max-width:720px;margin:40px auto;background:#fff;border:1px solid #ddd;border-radius:24px;padding:24px;box-shadow:0 12px 40px #0000000d}h1{margin:0 0 8px;font-size:28px}p{line-height:1.55;color:#666}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef6ff;color:#0759b5;font-size:12px;font-weight:700}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #eee;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}.label{color:#777;font-family:inherit}.value{word-break:break-all;text-align:right}.notice{margin-top:18px;padding:14px;border-radius:16px;background:#fff7e7;color:#744d00;font-size:12px;line-height:1.5}</style>
+<style>
+body{margin:0;padding:24px}
+.verify-wrap{max-width:500px;margin:0 auto;padding-top:max(24px,env(safe-area-inset-top))}
+.verify-card{background:var(--wm-white);border:1px solid var(--wm-border);border-radius:28px;padding:20px;box-shadow:var(--wm-shadow)}
+.dark .verify-card{background:#151517;border-color:rgba(255,255,255,.07);box-shadow:none}
+.verify-mark{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#111;color:#fff;font-weight:800;font-size:11px}
+.dark .verify-mark{background:#fff;color:#111}
+.verify-status{margin:22px 0 8px;font-size:32px;line-height:1;font-weight:850;letter-spacing:-.045em}
+.verify-row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--wm-border);font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+.verify-label{color:var(--wm-muted)}
+.verify-value{text-align:right;word-break:break-all}
+.verify-notice{margin-top:16px;padding:14px;border-radius:18px;background:#f3f3f5;color:#666;font-size:12px;line-height:1.5}
+.dark .verify-notice{background:#202024;color:#aaa}
+</style>
 </head>
-<body><main class="card"><span class="pill">VERIFICACIÓN DE FORMATO</span><h1>Contract Engine 100</h1><p id="summary">Cargando datos de verificación…</p><div id="rows"></div><div class="notice"><strong>Alcance:</strong> esta página valida la estructura del enlace y muestra el hash/identificadores transportados por el QR. No demuestra por sí sola identidad del firmante ni sustituye una firma electrónica verificable por un servidor.</div></main>
+<body>
+<main class="verify-wrap">
+  <div class="verify-card">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="verify-mark" aria-hidden="true">CE</div>
+        <div><div class="text-sm font-extrabold tracking-tight">Contract Engine</div><div class="text-[10px] text-gray-400 font-semibold">Verificación</div></div>
+      </div>
+      <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold bg-gray-100 text-gray-700">LOCAL</span>
+    </div>
+    <div id="status" class="verify-status">Validando…</div>
+    <p id="summary" class="text-sm text-gray-500">Comprobando la estructura del enlace de verificación.</p>
+    <div id="rows"></div>
+    <div class="verify-notice"><strong>Alcance:</strong> esta página valida el formato de los identificadores transportados por el QR y muestra su contenido. No demuestra por sí sola la identidad del firmante ni sustituye una firma electrónica o una comprobación contra un registro de servidor.</div>
+  </div>
+</main>
 <script>
-const p=new URLSearchParams(location.search);
-const fields=[["Expediente",p.get("id")],["Versión",p.get("version")],["Hash SHA-256",p.get("hash")],["Signature ID",p.get("signature")],["Modo",p.get("mode")]];
-const hash=/^[a-f0-9]{64}$/i.test(p.get("hash")||"");
-const id=/^[A-Z0-9-]{8,120}$/i.test(p.get("id")||"");
-document.getElementById("summary").textContent=(id&&hash)?"Los identificadores del enlace tienen un formato válido.":"El enlace está incompleto o no tiene un formato válido.";
-document.getElementById("rows").innerHTML=fields.map(([k,v])=>`<div class="row"><span class="label">${k}</span><span class="value">${escapeHtml(v||"—")}</span></div>`).join("");
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
-</script></body></html>
+(function(){
+  const p=new URLSearchParams(location.search);
+  const id=p.get("id")||"";
+  const version=p.get("version")||"";
+  const hash=p.get("hash")||"";
+  const signature=p.get("signature")||"";
+  const mode=p.get("mode")||"";
+  const idOk=/^[A-Z0-9-]{8,120}$/i.test(id);
+  const hashOk=/^[a-f0-9]{64}$/i.test(hash);
+  const signatureOk=/^[a-f0-9]{32,128}$/i.test(signature);
+  const versionOk=/^\d+(?:\.\d+){0,3}$/.test(version);
+  const valid=idOk&&hashOk&&signatureOk&&versionOk;
+  document.getElementById("status").textContent=valid?"Formato válido":"Enlace incompleto";
+  document.getElementById("summary").textContent=valid?"Los identificadores del enlace tienen un formato compatible con Contract Engine 100.":"Falta información o alguno de los identificadores no tiene el formato esperado.";
+  const fields=[["Expediente",id],["Versión",version],["Hash SHA-256",hash],["Signature ID",signature],["Modo",mode||"—"]];
+  const rows=document.getElementById("rows");
+  for(const [label,value] of fields){
+    const row=document.createElement("div"); row.className="verify-row";
+    const l=document.createElement("span"); l.className="verify-label"; l.textContent=label;
+    const v=document.createElement("span"); v.className="verify-value"; v.textContent=value||"—";
+    row.append(l,v); rows.append(row);
+  }
+})();
+</script>
+</body>
+</html>
