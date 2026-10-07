@@ -1,10 +1,11 @@
 {
-  "name":"Contract Engine 100",
-  "short_name":"Contract Engine",
+  "name":"Alquiler España · Contract Engine",
+  "short_name":"Alquiler España",
   "start_url":"./",
   "scope":"./",
   "display":"standalone",
   "background_color":"#f7f7f8",
   "theme_color":"#f7f7f8",
-  "lang":"es"
+  "lang":"es",
+  "description":"Expediente guiado para contratos de alquiler de vivienda en España."
 }
