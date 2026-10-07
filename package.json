@@ -2,5 +2,8 @@
   "name":"contract-engine-100",
   "private":true,
   "type":"module",
-  "scripts":{"test":"node tests/smoke.test.mjs"}
+  "scripts":{
+    "test":"node tests/smoke.test.mjs",
+    "check:api":"node --check api/_lib/http.js && node --check api/_lib/authid.js && node --check api/identity/start.js && node --check api/identity/status.js && node --check api/signaturit/create.js && node --check api/signaturit/status.js && node --check api/signaturit/webhook.js"
+  }
 }

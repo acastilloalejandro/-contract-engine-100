@@ -18,4 +18,5 @@ jobs:
       - run: node --check app/engine.js
       - run: node --check app/ui.js
       - run: node --check app/main.js
+      - run: npm run check:api
       - run: npm test
