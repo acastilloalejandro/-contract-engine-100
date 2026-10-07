@@ -154,7 +154,7 @@ export async function createSignatureRequest(){
   const validation=validate();
   if(!validation.isValid) return false;
   if(state.role==="worker"&&(riskAssessment().level!=="NORMAL"||state.data.independentReviewRequested===true)){
-    state.view="protected";audit("protectiveGate",{level:riskAssessment().level});return false;
+    state.view="protected";state.nav="review";audit("protectiveGate",{level:riskAssessment().level});return false;
   }
   if(!state.data.consentIdentity||!state.data.consentDocuments||!state.data.consentContract){
     alert("Faltan confirmaciones requeridas.");return false;
@@ -170,6 +170,6 @@ export async function createSignatureRequest(){
   };
   state.qrUrl=buildVerificationURL();
   audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});
-  state.view="sign";
+  state.view="sign";state.nav="review";
   return true;
 }
