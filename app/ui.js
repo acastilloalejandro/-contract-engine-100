@@ -29,18 +29,31 @@ function control(f){
     "<div id='"+id+"-error' class='field-error'></div>";
 }
 
-export function renderForm(){
+function formMetrics(){
   const val=validate(),r=riskAssessment(),fs=SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
   const req=fs.filter(f=>f.required);
   const done=req.filter(f=>f.type==="checkbox"?state.data[f.id]===true:f.type==="file"?!!state.data[f.id]?.id:filled(state.data[f.id])).length;
   const pct=req.length?Math.round(done/req.length*100):0;
-  $("progressValue").textContent=pct+"%";$("progressText").textContent=done+" de "+req.length+" requisitos";$("progressBar").style.width=pct+"%";
+  $("progressValue").textContent=pct+"%";
+  $("progressText").textContent=done+" de "+req.length+" requisitos";
+  $("progressBar").style.width=pct+"%";
   $("stateBadge").textContent=state.prepared?"SIGNATURE_PREPARED":pct<100?"INCOMPLETE":val.isValid?"DRAFT":"REVIEW_REQUIRED";
-  $("riskPill").textContent=r.level;$("riskPill").className="pill "+r.level.toLowerCase();$("riskFlags").textContent=r.flags.length;$("riskScore").textContent=r.score;$("riskState").textContent=r.level;
-  $("validationPill").textContent=val.errors.length+" errores";$("validationPill").className="pill "+(val.errors.length?"bad":"good");
+  $("riskPill").textContent=r.level;
+  $("riskPill").className="pill "+r.level.toLowerCase();
+  $("riskFlags").textContent=r.flags.length;
+  $("riskScore").textContent=r.score;
+  $("riskState").textContent=r.level;
+  $("validationPill").textContent=val.errors.length+" errores";
+  $("validationPill").className="pill "+(val.errors.length?"bad":"good");
   $("validationSummary").innerHTML=val.errors.slice(0,4).map(x=>"<div class='validation-item error'><b>"+esc(x.field)+"</b><span>"+esc(x.message)+"</span></div>").join("")+
     val.warnings.slice(0,4).map(x=>"<div class='validation-item warning'><b>"+esc(x.field)+"</b><span>"+esc(x.message)+"</span></div>").join("")+
     (!val.errors.length&&!val.warnings.length?"<div class='validation-item success'><b>Todo correcto</b><span>El expediente supera las validaciones actuales.</span></div>":"");
+  return {val,r,fs};
+}
+export function refreshFormMeta(){ formMetrics(); }
+
+export function renderForm(){
+  const {val,r,fs}=formMetrics();
   const groups={};for(const f of fs)(groups[f.section]??=[]).push(f);
   $("sections").innerHTML=Object.entries(groups).map(([name,list])=>"<section class='panel'><div class='section-head'><div><span class='eyebrow'>"+esc(name.toUpperCase())+"</span><h2>"+esc(name)+"</h2></div><span class='counter'>"+list.filter(f=>filled(state.data[f.id])).length+"/"+list.length+"</span></div>"+list.map(f=>"<div class='field-block' data-block='"+esc(f.id)+"'>"+control(f)+"</div>").join("")+"</section>").join("");
   $("protectedContent").innerHTML="<div class='summary-card'><div class='metric-grid'><div class='mini-card'><span>Nivel</span><strong>"+r.level+"</strong></div><div class='mini-card'><span>Señales</span><strong>"+r.flags.length+"</strong></div><div class='mini-card'><span>Puntuación</span><strong>"+r.score+"</strong></div></div>"+r.flags.map(f=>"<div class='risk-row'><span>"+esc(f.label)+"</span><b>"+esc(f.severity)+"</b></div>").join("")+"<div class='notice'>Este control protege al trabajador y requiere revisión humana. No es un diagnóstico jurídico.</div></div>";
