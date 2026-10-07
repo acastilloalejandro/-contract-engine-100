@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contract Engine Trust Integrations",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "verificationId": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["required", "pending", "verified", "review", "failed", "expired"]
+        },
+        "provider": { "type": "string" },
+        "checkedAt": { "type": "string", "format": "date-time" },
+        "document": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["id", "passport", "residence", "driver_license"]
+            },
+            "country": { "type": "string" },
+            "documentId": { "type": "string" },
+            "expiry": { "type": "string", "format": "date" }
+          },
+          "required": ["type", "country", "documentId"]
+        },
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "documentAuthenticity": { "type": "string", "enum": ["pass", "fail", "review"] },
+            "dataConsistency": { "type": "string", "enum": ["pass", "fail", "review"] },
+            "liveness": { "type": "string", "enum": ["pass", "fail", "review", "not-run"] }
+          },
+          "required": ["documentAuthenticity", "dataConsistency", "liveness"]
+        }
+      },
+      "required": ["verificationId", "status", "provider", "checkedAt"]
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requestId": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "sent",
+            "opened",
+            "signed",
+            "completed",
+            "declined",
+            "expired",
+            "cancelled",
+            "audit_ready"
+          ]
+        },
+        "provider": { "type": "string" },
+        "documentHash": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "auditTrailAvailable": { "type": "boolean" }
+      },
+      "required": ["requestId", "status", "provider", "documentHash"]
+    }
+  }
+}
