@@ -76,12 +76,45 @@ export function integrityData(){const out={};for(const f of SCHEMA){const v=stat
 export const documentManifest=()=>state.docs.map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));
 export async function sha256Text(value){if(!crypto.subtle)throw new Error("Web Crypto unavailable");const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");}
 export async function sha256File(file){const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");}
-export function audit(action,meta={}){state.audit=[...state.audit,{eventId:crypto.randomUUID?.()||String(Date.now()),timestamp:new Date().toISOString(),actor:state.role,action,meta}].slice(-100);}
-export function saveLocal(onDone){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:VERSION,recordId:state.recordId,role:state.role,data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),snapshots:state.snapshots,savedAt:new Date().toISOString()}));onDone?.("Guardado local · "+new Date().toLocaleTimeString());}catch{onDone?.("No se pudo guardar el borrador local.");}},350);}
+export function audit(action,meta={}){state.audit=[...state.audit,{eventId:crypto.randomUUID?.()||String(Date.now()),timestamp:new Date().toISOString(),actor:state.role,action,meta}].slice(-100);state.updatedAt=new Date().toISOString();}
+export function saveLocal(onDone){
+  clearTimeout(state.saveTimer);
+  state.saveTimer=setTimeout(()=>{
+    try{
+      syncDerived();
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({
+        appVersion:VERSION,policyVersion:LEGAL_POLICY_VERSION,
+        contractId:state.contractId,recordId:state.contractId,contractVersion:state.contractVersion,
+        lifecycle:state.lifecycle,currentStage:state.currentStage,createdAt:state.createdAt,updatedAt:state.updatedAt,
+        role:state.role,data:publicData(),docs:documentManifest(),audit:state.audit.slice(-80),
+        snapshots:state.snapshots.slice(-MAX_SNAPSHOTS),hash:state.hash,prepared:state.prepared,
+        legalAssessment:state.legalAssessment,clauses:state.clauses,savedAt:new Date().toISOString()
+      }));
+      onDone?.("Guardado local · "+new Date().toLocaleTimeString());
+    }catch{onDone?.("No se pudo guardar el borrador local.");}
+  },250);
+}
+export function restore(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!saved)return;
+    state.contractId=saved.contractId||saved.recordId||state.contractId;
+    state.recordId=state.contractId;state.contractVersion=saved.contractVersion||"1.0.0";
+    state.lifecycle=saved.lifecycle||"DRAFT";state.currentStage=Number(saved.currentStage)||1;
+    state.createdAt=saved.createdAt||state.createdAt;state.updatedAt=saved.updatedAt||state.updatedAt;
+    state.role=saved.role||state.role;state.data={...state.data,...(saved.data||{})};state.data.actor=state.role;
+    state.hash=saved.hash||"";state.prepared=saved.prepared||null;
+    state.audit=Array.isArray(saved.audit)?saved.audit:[];state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];
+    state.legalAssessment=saved.legalAssessment||null;state.clauses=Array.isArray(saved.clauses)?saved.clauses:[];
+  }catch{}
+  syncDerived();
+}
+export async function addDocuments(fileList,fieldId){
+  for(const file of[...fileList||[]]){
+    if(file.size>MAX_FILE_BYTES){alert(file.name+": supera 10 MB.");continue;}
+    const doc={id:"DOC-"+(crypto.randomUUID?.()||Date.now()),name:file.name,type:file.type||"application/octet-stream",size:file.size,hash:await sha256File(file),status:"NEEDS_REVIEW",version:1,file,url:URL.createObjectURL(file),fieldId};
+    state.docs.push(doc);
+    state.data[fieldId]=[...(Array.isArray(state.data[fieldId])?state.data[fieldId]:[]),doc];
+    audit("documentAdded",{documentId:doc.id,fieldId,hash:doc.hash});
+  }
+}
 export function restore(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!saved)return;state.recordId=saved.recordId||state.recordId;state.role=saved.role||state.role;state.data={...state.data,...(saved.data||{})};state.data.actor=state.role;state.audit=Array.isArray(saved.audit)?saved.audit:[];state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];}catch{}}
-export async function addDocuments(fileList,fieldId){for(const file of[...fileList||[]]){if(file.size>MAX_FILE_BYTES){alert(file.name+": supera 10 MB.");continue;}const doc={id:"DOC-"+(crypto.randomUUID?.()||Date.now()),name:file.name,type:file.type||"application/octet-stream",size:file.size,hash:await sha256File(file),status:"NEEDS_REVIEW",version:1,file,url:URL.createObjectURL(file)};state.docs.push(doc);state.data.additionalDocuments=[...(state.data.additionalDocuments||[]),doc];audit("documentAdded",{documentId:doc.id,hash:doc.hash});}}
-export function releaseObjectUrls(){for(const d of state.docs){try{URL.revokeObjectURL(d.url)}catch{}}}
-export function buildVerificationURL(){if(!state.prepared)return"";const base=location.href.replace(/index\.html.*$/,"");return base+"verify.html?id="+encodeURIComponent(state.prepared.recordId)+"&version="+encodeURIComponent(state.prepared.version)+"&hash="+encodeURIComponent(state.prepared.hash)+"&request="+encodeURIComponent(state.prepared.requestId)+"&mode=static";}
-export async function createSignatureRequest(){const v=validate();if(!v.isValid)return false;if(state.role==="tenant"&&riskAssessment().level==="HIGH"){state.view="protected";state.nav="review";audit("protectiveGate",{level:"HIGH"});return false;}if(!state.data.signatureMethod||!state.data.identityVerification)return false;if(!state.hash){state.hash=await sha256Text(JSON.stringify({recordId:state.recordId,version:VERSION,data:integrityData(),documents:documentManifest()}));}state.prepared={recordId:state.recordId,version:VERSION,hash:state.hash,preparedAt:new Date().toISOString(),requestId:crypto.randomUUID?.()||String(Date.now())};state.qrUrl=buildVerificationURL();audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});state.view="sign";state.nav="review";return true;}
-
-// v6.1 workflow integration pending.
