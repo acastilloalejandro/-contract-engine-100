@@ -1,24 +1,32 @@
-# Contract Engine 100 · Field System 4.0
+# Contract Engine 100 · Field System 5.0
 
-Formulario contractual dinámico, iPhone-first y orientado a revisión verificable.
+Frontend estático, iPhone-first y orientado a registro contractual, verificación documental y protección del trabajador.
 
-## Estado actual
-- Motor de formulario declarativo y dependencias.
-- Validación cruzada y reglas condicionales.
-- Hash SHA-256 con representación canónica estable y manifiesto de documentos.
-- Gestión de documentos con revisión, procedencia y liberación de object URLs.
-- QR real con enlace de verificación.
-- Verificación estática del formato del QR.
-- Comprobación de capacidad WebAuthn sin simular una credencial.
-- Borrador local con reducción de exposición de datos sensibles y guardado con debounce.
-- UI iPhone-first inspirada en patrones de finanzas móviles: métrica principal, acciones rápidas, tarjetas compactas y navegación inferior.
-- GitHub Actions para smoke tests.
+## Estructura
 
-## UI
-La gramática visual toma como referencia la experiencia móvil actual de World Money, que presenta una métrica financiera principal, acciones rápidas, tarjetas y navegación inferior. La implementación de este repositorio usa identidad y componentes propios, sin copiar recursos propietarios.
+- index.html: shell de la aplicación.
+- styles/world-ui.css: sistema visual local.
+- app/schema.js: esquema declarativo y catálogo de 100 optimizaciones.
+- app/engine.js: validación, riesgo, hashing, documentos y persistencia.
+- app/ui.js: renderizado accesible.
+- app/main.js: orquestación de eventos y flujo.
+- verify.html: verificación estática.
+- manifest.webmanifest: instalación tipo app.
 
-## Publicación
-GitHub Pages puede servir index.html directamente desde main y /(root).
+## UX/UI
 
-## Importante
-Esta versión sigue siendo un frontend estático. No proporciona por sí sola identidad verificable, firma electrónica cualificada, OCR server-side ni almacenamiento seguro de producción.
+La interfaz usa una composición inspirada en patrones públicos de aplicaciones financieras móviles: métrica principal, acciones rápidas, tarjetas compactas y navegación inferior. World Money indica actualmente un nuevo diseño orientado a finanzas y su ficha de App Store identifica la versión 4.0.2900. La implementación aquí mantiene identidad, código y activos propios.
+
+## Seguridad y protección
+
+Las respuestas privadas no se persisten en localStorage ni se incluyen en el QR público. Los campos restringidos pueden cubrirse en la huella de integridad sin exponerse.
+
+La capa de protección utiliza señales para revisión humana. No implementa propiedad sobre personas, confinamiento, retención coercitiva ni control coercitivo del movimiento.
+
+## Firma
+
+WebAuthn solo se detecta como capacidad. La firma solo se prepara. No se simulan credenciales, biometría ni firmas cualificadas.
+
+## Producción
+
+Antes de producción faltan backend, autorización por rol, almacenamiento cifrado, WebAuthn real, proveedor de firma, verificación server-side, OCR/document intelligence, CSP, gestión de claves, observabilidad y revisión jurídica por jurisdicción.
