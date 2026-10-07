@@ -17,7 +17,7 @@ function speak(text){
 async function prepareReview(){
   const v=validate();
   if(!v.isValid){
-    state.view="form";renderForm();
+    state.view="form";state.nav="form";renderForm();
     const f=v.errors[0]?.field;
     document.querySelector("[data-block='"+CSS.escape(f||"")+"']")?.scrollIntoView({behavior:"smooth",block:"center"});
     return;
@@ -123,17 +123,17 @@ function bind(){
   $("reviewBtnBottom").onclick=prepareReview;
   $("docsBtn").onclick=()=>document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});
   $("saveBtn").onclick=()=>{saveLocal(msg=>$("saveState").textContent=msg);};
-  $("backFormBtn").onclick=()=>{state.view="form";renderForm();};
+  $("backFormBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("prepareBtn").onclick=prepareSignature;
-  $("protectedBackBtn").onclick=()=>{state.view="form";renderForm();};
+  $("protectedBackBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("authBtn").onclick=checkAuthentication;
-  $("cancelSignBtn").onclick=()=>{state.view="review";updateViews();};
+  $("cancelSignBtn").onclick=()=>{state.view="review";state.nav="review";updateViews();};
   $("newBtn").onclick=reset;
   document.querySelectorAll(".world-tab").forEach(b=>b.onclick=()=>{
     const n=b.dataset.nav;
-    if(n==="form"){state.view="form";renderForm();}
-    else if(n==="review")prepareReview();
-    else if(n==="state"){state.view="state";renderForm();updateViews();}
+    if(n==="form"){state.view="form";state.nav="form";renderForm();}
+    else if(n==="review"){state.nav="review";prepareReview();}
+    else if(n==="state"){state.view="state";state.nav="state";renderForm();updateViews();}
     else {state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});}
   });
   $("sections").addEventListener("input",handleInput);
