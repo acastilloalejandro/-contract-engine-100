@@ -117,4 +117,33 @@ export async function addDocuments(fileList,fieldId){
     audit("documentAdded",{documentId:doc.id,fieldId,hash:doc.hash});
   }
 }
-export function restore(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!saved)return;state.recordId=saved.recordId||state.recordId;state.role=saved.role||state.role;state.data={...state.data,...(saved.data||{})};state.data.actor=state.role;state.audit=Array.isArray(saved.audit)?saved.audit:[];state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];}catch{}}
+export function releaseObjectUrls(){for(const d of state.docs){try{URL.revokeObjectURL(d.url)}catch{}}}
+export function buildVerificationURL(){
+  if(!state.prepared)return"";
+  const base=location.href.replace(/index\.html.*$/,"");
+  return base+"verify.html?id="+encodeURIComponent(state.prepared.contractId)+"&version="+encodeURIComponent(state.prepared.version)+"&hash="+encodeURIComponent(state.prepared.hash)+"&request="+encodeURIComponent(state.prepared.requestId)+"&policy="+encodeURIComponent(state.prepared.policyVersion);
+}
+export async function createSignatureRequest(){
+  const v=validate();if(!v.isValid||!state.data.signatureMethod||!state.data.identityVerification)return false;
+  if(!state.hash)state.hash=await sha256Text(JSON.stringify({contractId:state.contractId,version:state.contractVersion,policyVersion:LEGAL_POLICY_VERSION,data:integrityData(),documents:documentManifest()}));
+  state.prepared={contractId:state.contractId,recordId:state.contractId,version:state.contractVersion,policyVersion:LEGAL_POLICY_VERSION,hash:state.hash,preparedAt:new Date().toISOString(),requestId:crypto.randomUUID?.()||String(Date.now())};
+  state.lifecycle="PENDING_SIGNATURE";state.qrUrl=buildVerificationURL();
+  audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});state.view="sign";state.nav="review";return true;
+}
+export function saveProfile(kind){
+  const snapshot={kind,savedAt:new Date().toISOString(),data:kind==="tenant"
+    ?{tenantName:state.data.tenantName,tenantId:state.data.tenantId,tenantEmail:state.data.tenantEmail,tenantPhone:state.data.tenantPhone,tenantNationality:state.data.tenantNationality,occupants:state.data.occupants,minors:state.data.minors,pets:state.data.pets}
+    :{landlordName:state.data.landlordName,landlordId:state.data.landlordId,landlordIsCompany:state.data.landlordIsCompany,landlordLargeHolder:state.data.landlordLargeHolder}};
+  state.profiles[kind]=snapshot;
+  const all=JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY)||"{}");all[kind]=snapshot;localStorage.setItem(PROFILE_STORAGE_KEY,JSON.stringify(all));
+  audit("profileSaved",{kind});return snapshot;
+}
+export function restoreProfiles(){try{state.profiles=JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY)||"{}")}catch{state.profiles={tenant:null,landlord:null}}}
+export function applyProfile(kind){
+  const p=state.profiles[kind];if(!p?.data)return false;
+  state.data={...state.data,...p.data};syncDerived();audit("profileApplied",{kind});return true;
+}
+export function openNextContractVersion(level="minor"){
+  if(state.hash)state.contractVersion=nextSemver(state.contractVersion,level);
+  state.hash="";state.prepared=null;state.lifecycle="DRAFT";audit("contractVersionOpened",{version:state.contractVersion});saveLocal();return state.contractVersion;
+}
