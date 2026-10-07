@@ -7,9 +7,9 @@ function speak(text){if(!("speechSynthesis"in window))return;speechSynthesis.can
 async function prepareReview(){
   const v=validate();
   if(!v.isValid){state.view="form";state.nav="form";renderForm();const f=v.errors[0]?.field;document.querySelector("[data-block='"+CSS.escape(f||"")+"']")?.scrollIntoView({behavior:"smooth",block:"center"});return;}
-  const canonical=JSON.stringify({contractId:state.contractId,version:state.contractVersion,policyVersion:v.legal.policyVersion,data:integrityData(),documents:documentManifest()});
+  let canonical=JSON.stringify({contractId:state.contractId,version:state.contractVersion,policyVersion:v.legal.policyVersion,data:integrityData(),documents:documentManifest()});
   let nextHash;try{nextHash=await sha256Text(canonical);}catch{alert("No se pudo calcular SHA-256 en este contexto seguro.");return;}
-  if(state.hash&&state.hash!==nextHash)openNextContractVersion("minor");
+  if(state.hash&&state.hash!==nextHash){openNextContractVersion("minor");canonical=JSON.stringify({contractId:state.contractId,version:state.contractVersion,policyVersion:v.legal.policyVersion,data:integrityData(),documents:documentManifest()});try{nextHash=await sha256Text(canonical);}catch{alert("No se pudo recalcular SHA-256 tras versionar el expediente.");return;}}
   state.hash=nextHash;state.snapshots=[...state.snapshots,{version:state.contractVersion,data:publicData(),hash:state.hash,createdAt:new Date().toISOString()}].slice(-8);
   state.lifecycle="REVIEW";state.view="review";state.nav="review";audit("reviewStarted",{hash:state.hash,policyVersion:v.legal.policyVersion});saveLocal();renderReview();updateViews();window.scrollTo({top:0,behavior:"smooth"});
 }
