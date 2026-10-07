@@ -9,7 +9,7 @@ export const MAX_SNAPSHOTS=8;
 export const state={
   view:"form",nav:"form",role:"tenant",dark:false,
   contractId:crypto.randomUUID?.()||String(Date.now()),contractVersion:"1.0.0",lifecycle:"DRAFT",currentStage:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),
-  recordId:crypto.randomUUID?.()||String(Date.now()),
+  recordId:"",
   data:{actor:"tenant",rentalPurpose:"habitual",contractForm:"new",contractLanguage:"es",tensionedZone:false,largeHolder:false,landlordLargeHolder:"unsure",landlordIsCompany:false,touristUse:false,protectedHousing:false,newBuildOrMajorRehab:false,priorLeaseWithinFiveYears:"unknown",additionalGuaranteeMonths:0,rentIndex:"irav",depositMonths:1},
   legalAssessment:null,clauses:[],profiles:{tenant:null,landlord:null},
   docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
