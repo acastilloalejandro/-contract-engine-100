@@ -1,1 +1,29 @@
 
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contract Engine 100 Record",
+  "type": "object",
+  "required": ["relationshipType", "country", "workerFullName", "workerNationality", "employerFullName", "position", "startDate"],
+  "properties": {
+    "relationshipType": {"type": "string"},
+    "country": {"type": "string", "minLength": 2},
+    "city": {"type": "string"},
+    "jurisdiction": {"type": "string"},
+    "workerFullName": {"type": "string", "minLength": 2},
+    "workerDateOfBirth": {"type": "string", "format": "date"},
+    "workerNationality": {"type": "string", "minLength": 2},
+    "employerFullName": {"type": "string", "minLength": 2},
+    "employerNationality": {"type": "string", "minLength": 2},
+    "employerIdNumber": {"type": "string"},
+    "workerEmail": {"type": "string", "format": "email"},
+    "workerPhone": {"type": "string"},
+    "position": {"type": "string", "minLength": 2},
+    "dutiesDescription": {"type": "string", "minLength": 10},
+    "startDate": {"type": "string", "format": "date"},
+    "endDate": {"type": "string", "format": "date"},
+    "salaryAmount": {"type": "number", "minimum": 0},
+    "currency": {"type": "string"},
+    "paymentFrequency": {"type": "string"},
+    "paymentMethod": {"type": "string"}
+  }
+}
