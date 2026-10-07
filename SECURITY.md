@@ -1,7 +1,13 @@
 # Security
 
-No se deben introducir API keys, contraseñas, tokens, datos biométricos ni secretos en el frontend o en Git.
+No incluir API keys, contraseñas, tokens, credenciales ni datos biométricos en el repositorio.
 
-Los campos sensibles se deben procesar con mínimo privilegio y permanecer fuera del QR público. La verificación pública debe exponer únicamente los datos necesarios.
+Las respuestas private permanecen en memoria durante la sesión y se excluyen de localStorage y del QR público. Los campos restricted pueden incluirse en el hash de integridad interno sin exponerse.
 
-La autenticación y la firma del prototipo están expresamente marcadas como `STATIC-DEMO`. Para producción, el servidor debe emitir el challenge, validar la respuesta y conservar la evidencia correspondiente.
+Los documentos se hashean en el dispositivo y sus object URLs se liberan al finalizar la sesión.
+
+WebAuthn real requiere challenge del servidor, credencial registrada y validación server-side. Esta versión solo comprueba capacidad.
+
+Preparar una firma no crea una firma electrónica. Debe integrarse un proveedor adecuado.
+
+La protección activa revisión humana ante señales de posible explotación. No se implementan funciones de propiedad sobre personas, confinamiento, retención coercitiva ni control coercitivo del movimiento.
