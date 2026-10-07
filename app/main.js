@@ -45,9 +45,37 @@ async function prepareSignature(){
 }
 
 async function startIdentityVerification(){
-  $("authStatus").textContent="Verificación de identidad: pendiente de proveedor externo.";
-  audit("identityVerificationStarted",{mode:"provider-adapter"});
-  saveLocal();
+  const accountNumber=prompt("Cuenta authID (AccountNumber)");
+  if(!accountNumber)return;
+  $("authStatus").textContent="Creando sesión de identidad…";
+  try{
+    const r=await fetch("./api/identity/start",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({accountNumber,recordId:state.recordId})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.detail||data.error||"No se pudo iniciar la verificación.");
+    state.identity={...state.identity,status:"pending",provider:"authID",verificationId:data.operationId,checkedAt:""};
+    audit("identityVerificationStarted",{provider:"authID",operationId:data.operationId});
+    saveLocal();
+    $("authStatus").textContent="Verificación iniciada. Abriendo captura segura…";
+    const popup=window.open(data.uiUrl,"_blank","noopener,noreferrer");
+    if(!popup) location.href=data.uiUrl;
+  }catch(error){
+    $("authStatus").textContent="No se pudo iniciar la verificación: "+error.message;
+  }
+}
+
+async function refreshIdentityStatus(){
+  if(!state.identity.verificationId)return;
+  try{
+    const r=await fetch("./api/identity/status",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({operationId:state.identity.verificationId})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.detail||data.error||"No se pudo consultar el estado.");
+    state.identity={...state.identity,status:data.status,provider:data.provider||"authID",checkedAt:data.checkedAt||new Date().toISOString(),checks:data.checks||null};
+    audit("identityStatusUpdated",{status:data.status,provider:data.provider});
+    saveLocal();renderReview();updateViews();
+    $("authStatus").textContent="Identidad: "+data.status;
+  }catch(error){
+    $("authStatus").textContent="No se pudo consultar la identidad: "+error.message;
+  }
 }
 
 async function checkAuthentication(){
@@ -134,6 +162,7 @@ function bind(){
   $("protectedBackBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("authBtn").onclick=checkAuthentication;
   $("identityBtn").onclick=startIdentityVerification;
+  $("identityStatusBtn").onclick=refreshIdentityStatus;
   $("cancelSignBtn").onclick=()=>{state.view="review";state.nav="review";updateViews();};
   $("newBtn").onclick=reset;
   document.querySelectorAll(".world-tab").forEach(b=>b.onclick=()=>{
