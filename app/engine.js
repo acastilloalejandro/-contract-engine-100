@@ -18,38 +18,57 @@ export const state={
 export const filled=v=>v!==undefined&&v!==null&&v!==""&&!(Array.isArray(v)&&v.length===0);
 export const visibleFields=()=>SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
 
+function syncDerived(){
+  const legal=assessRentalContext(state.data);
+  if(legal.jurisdiction.tensionedZoneStatus==="verified")state.data.tensionedZone=true;
+  else if(legal.jurisdiction.tensionedZoneStatus==="not_listed")state.data.tensionedZone=false;
+  if(state.data.landlordLargeHolder==="yes")state.data.largeHolder=true;
+  if(state.data.landlordLargeHolder==="no")state.data.largeHolder=false;
+  state.legalAssessment=assessRentalContext(state.data);
+  state.clauses=generateClauses(state.data,state.legalAssessment);
+  return state.legalAssessment;
+}
+export const getLegalAssessment=()=>syncDerived();
+
 export function riskAssessment(){
-  const flags=[],d=state.data;
+  const legal=syncDerived(),flags=[],d=state.data;
   for(const [id,label,weight] of RISK_MAP){
-    const v=d[id];
-    if(id==="tensionedZone"&&v===true)flags.push({id,label,weight,severity:"review"});
-    else if(id==="largeHolder"&&v===true)flags.push({id,label,weight,severity:"review"});
-    else if(id==="documentsComplete"&&!v)flags.push({id,label,weight,severity:"elevated"});
-    else if(id==="rentComplianceEvidence"&&d.tensionedZone===true&&!filled(v))flags.push({id,label,weight,severity:"elevated"});
+    if(id==="documentsComplete"&&!d.documentsComplete)flags.push({id,label,weight,severity:"elevated"});
+    if(id==="rentComplianceEvidence"&&legal.rentControl.applicable&&!filled(d.rentComplianceEvidence))flags.push({id,label,weight,severity:"elevated"});
+    if(id==="tensionedZone"&&legal.rentControl.applicable)flags.push({id,label,weight,severity:"review"});
+    if(id==="largeHolder"&&legal.rentControl.largeHolder)flags.push({id,label,weight,severity:"review"});
+    if(id==="priorLeaseWithinFiveYears"&&d.tensionedZone&&d.priorLeaseWithinFiveYears==="unknown")flags.push({id,label,weight,severity:"elevated"});
   }
-  const score=flags.reduce((n,f)=>n+f.weight,0);
-  return{flags,score,level:score>=4?"HIGH":score>=2?"REVIEW":"NORMAL"};
+  for(const w of legal.warnings)flags.push({id:w.field,label:w.message,weight:1,severity:"review"});
+  const unique=[...new Map(flags.map(x=>[x.id,x])).values()];
+  const score=unique.reduce((n,f)=>n+f.weight,0);
+  return{flags:unique,score,level:score>=5?"HIGH":score>=2?"REVIEW":"NORMAL",legal};
 }
 
 export function validate(){
-  const errors=[],warnings=[],d=state.data;
+  const errors=[],warnings=[],d=state.data,legal=syncDerived();
   for(const f of visibleFields()){
     if(!f.required)continue;
     const v=d[f.id];
-    if(f.type==="checkbox"?v!==true:f.type==="file"?!(v&&v.id):!filled(v))errors.push({field:f.id,message:"Falta: "+f.label+"."});
+    const missing=f.type==="checkbox"?v!==true:f.type==="file"?!(v&&v.id):f.type==="files"?!(Array.isArray(v)&&v.length):!filled(v);
+    if(missing)errors.push({field:f.id,message:"Falta: "+f.label+"."});
   }
-  if(d.startDate&&d.endDate&&d.endDate<d.startDate)errors.push({field:"endDate",message:"La fecha final es anterior a la fecha inicial."});
+  if(d.postalCode&&!/^\d{5}$/.test(String(d.postalCode).trim()))errors.push({field:"postalCode",message:"El código postal debe contener 5 dígitos."});
   if(Number(d.occupants||0)<1)errors.push({field:"occupants",message:"Debe existir al menos una persona ocupante."});
-  if(Number(d.depositMonths)!==1)warnings.push({field:"depositMonths",message:"La fianza legal ordinaria de vivienda es una mensualidad; revisa el supuesto aplicable."});
-  if(Number(d.additionalGuaranteeMonths)<0)errors.push({field:"additionalGuaranteeMonths",message:"La garantía adicional no puede ser negativa."});
-  if(Number(d.additionalGuaranteeMonths)>2)errors.push({field:"additionalGuaranteeMonths",message:"La garantía adicional supera dos mensualidades en el supuesto general sujeto al límite legal."});
-  if(Number(d.agencyFees||0)>0)errors.push({field:"agencyFees",message:"La gestión inmobiliaria y la formalización del contrato no deben repercutirse al arrendatario."});
-  if(d.tensionedZone===true&&!filled(d.rentComplianceEvidence))errors.push({field:"rentComplianceEvidence",message:"Documenta la base y evidencia utilizada para la limitación de renta."});
-  if(d.tensionedZone===true&&d.largeHolder===true&&!filled(d.referenceRent))warnings.push({field:"referenceRent",message:"Comprueba el índice o sistema de referencia aplicable."});
-  if(d.touristUse===true&&d.rentalPurpose==="habitual")errors.push({field:"touristUse",message:"El uso turístico entra en conflicto con la finalidad de vivienda habitual declarada."});
+  if(d.startDate&&d.endDate&&d.endDate<d.startDate)errors.push({field:"endDate",message:"La fecha final es anterior a la fecha inicial."});
+  if(d.rentalPurpose==="habitual"&&Number(d.agreedDurationYears||0)>0&&legal.minimumMandatoryYears&&Number(d.agreedDurationYears)<legal.minimumMandatoryYears)warnings.push({field:"agreedDurationYears",message:"La duración pactada puede quedar sujeta a prórrogas obligatorias; revisa la redacción contractual."});
   if(d.rentalPurpose==="habitual"&&d.habitualResidence!==true)errors.push({field:"habitualResidence",message:"Confirma el destino a residencia habitual."});
-  if(state.role==="tenant"){if(d.tenantComprehension!==true)errors.push({field:"tenantComprehension",message:"Confirma comprensión o asistencia."});if(d.tenantIndependentCopy!==true)errors.push({field:"tenantIndependentCopy",message:"Confirma que dispones de copia independiente."});}
-  return{errors,warnings,isValid:errors.length===0};
+  if(Number(d.depositMonths)!==1)warnings.push({field:"depositMonths",message:"La fianza ordinaria de vivienda se configura como una mensualidad; revisa el supuesto especial."});
+  if(Number(d.additionalGuaranteeMonths)<0)errors.push({field:"additionalGuaranteeMonths",message:"La garantía adicional no puede ser negativa."});
+  if(Number(d.additionalGuaranteeMonths)>2)warnings.push({field:"additionalGuaranteeMonths",message:"La garantía adicional supera dos mensualidades en el supuesto general; requiere revisión jurídica."});
+  if(Number(d.agencyFees||0)>0)errors.push({field:"agencyFees",message:"Los gastos de gestión inmobiliaria y formalización se imputan al arrendador en el régimen de vivienda sujeto a la LAU."});
+  if(legal.rentControl.applicable){
+    if(legal.rentControl.maximumRent===null)errors.push({field:"referenceRent",message:"No se ha podido calcular el límite de renta con la evidencia aportada."});
+    if(legal.rentControl.rentWithinCap===false)errors.push({field:"rentAmount",message:"La renta declarada supera el límite calculado."});
+    if(!filled(d.rentComplianceEvidence))errors.push({field:"rentComplianceEvidence",message:"Documenta la base del cumplimiento del régimen de limitación."});
+  }
+  for(const w of legal.warnings)if(!warnings.some(x=>x.field===w.field&&x.message===w.message))warnings.push(w);
+  return{errors,warnings,isValid:errors.length===0,legal};
 }
 
 export function publicData(){const out={};for(const f of SCHEMA){const v=state.data[f.id];if(!filled(v)||f.private||f.restricted)continue;if(f.type==="file")out[f.id]={id:v.id,name:v.name,type:v.type,size:v.size,hash:v.hash,status:v.status,version:v.version};else if(f.type==="files")out[f.id]=(v||[]).map(d=>({id:d.id,name:d.name,type:d.type,size:d.size,hash:d.hash,status:d.status,version:d.version}));else out[f.id]=v;}return out;}
