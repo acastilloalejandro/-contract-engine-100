@@ -23,7 +23,7 @@ async function prepareReview(){
     return;
   }
   const r=riskAssessment();
-  if(state.role==="worker"&&r.level!=="NORMAL"){
+  if(state.role==="tenant"&&r.level!=="NORMAL"){
     state.view="protected";state.nav="review";
     audit("protectiveGate",{level:r.level,score:r.score});
     saveLocal();renderForm();updateViews();return;
@@ -70,7 +70,7 @@ async function createQR(){
   }
   const modal=document.createElement("div");
   modal.className="modal";
-  modal.innerHTML="<div class='modal-card'><div class='section-head'><div><span class='eyebrow'>QR</span><h2>Verificación</h2></div><button class='icon-btn' data-close type='button' aria-label='Cerrar'>×</button></div><div id='qrHost' class='qr-holder'></div><button class='primary-btn' data-copy type='button'>Copiar enlace</button><a class='secondary-btn' href='"+esc(url)+"' target='_blank' rel='noopener noreferrer'>Abrir verificación</a></div>";
+  modal.innerHTML="<div class='modal-card'><div class='section-head'><div><span class='eyebrow'>QR</span><h2>Verificación</h2></div><button class='icon-btn' data-close type='button' aria-label='Cerrar'>×</button></div><div id='qrHost' class='qr-holder'></div><button class='primary-btn' data-copy type='button'>Copiar enlace</button><a class='secosignatureMethodry-btn' href='"+esc(url)+"' target='_blank' rel='noopener noreferrer'>Abrir verificación</a></div>";
   document.body.append(modal);
   new window.QRCode(modal.querySelector("#qrHost"),{text:url,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.M,quietZone:12,quietZoneColor:"#fff",colorDark:"#111",colorLight:"#fff"});
   modal.querySelector("[data-close]").onclick=()=>modal.remove();
@@ -91,12 +91,12 @@ function handleChange(e){
   }else if(t.dataset.field){
     const v=t.type==="checkbox"?t.checked:t.value;
     state.data[t.dataset.field]=v;
-    if(t.dataset.field==="workerRole"&&["worker","employer","reviewer"].includes(v))state.role=v;
+    if(t.dataset.field==="actor"&&["worker","employer","reviewer"].includes(v))state.role=v;
   }else return;
   state.prepared=null;
   audit("fieldChanged",{fieldId});
   saveLocal();
-  const conditional=new Set(["workerRole","compensation","liveIn","travelRequired","nda","interpreterRequired","wageDeductions"]);
+  const conditional=new Set(["actor","rentAmount","tensionedZone","largeHolder","signatureMethod","independentReview","wageDeductions"]);
   if(conditional.has(fieldId)) renderForm(); else refreshFormMeta();
 }
 
@@ -121,7 +121,7 @@ function bind(){
   };
   $("reviewBtn").onclick=prepareReview;
   $("reviewBtnBottom").onclick=prepareReview;
-  $("docsBtn").onclick=()=>document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});
+  $("docsBtn").onclick=()=>document.querySelector("[data-block='additionalDocuments']")?.scrollIntoView({behavior:"smooth",block:"center"});
   $("saveBtn").onclick=()=>{saveLocal(msg=>$("saveState").textContent=msg);};
   $("backFormBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("prepareBtn").onclick=prepareSignature;
@@ -134,7 +134,7 @@ function bind(){
     if(n==="form"){state.view="form";state.nav="form";renderForm();}
     else if(n==="review"){state.nav="review";prepareReview();}
     else if(n==="state"){state.view="state";state.nav="state";renderForm();updateViews();}
-    else {state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});}
+    else {state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='additionalDocuments']")?.scrollIntoView({behavior:"smooth",block:"center"});}
   });
   $("sections").addEventListener("input",handleInput);
   $("sections").addEventListener("change",handleChange);
