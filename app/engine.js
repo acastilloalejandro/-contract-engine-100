@@ -6,7 +6,9 @@ export const state={
   view:"form",nav:"form",role:"worker",dark:false,
   recordId:crypto.randomUUID?.()||String(Date.now()),
   data:{workerRole:"worker",country:"SA",city:"Jeddah",jurisdiction:"Jeddah, Saudi Arabia",compensation:"paid",currency:"SAR",contractLanguage:"es",liveIn:false,travelRequired:false,nda:false},
-  docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
+  docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null,
+  identity:{status:"required",provider:"",verificationId:"",checkedAt:"",document:null,checks:null},
+  signature:{status:"ready",provider:"",requestId:"",documentHash:"",createdAt:"",updatedAt:"",auditTrailAvailable:false}
 };
 
 export const filled=v=>v!==undefined&&v!==null&&v!==""&&!(Array.isArray(v)&&v.length===0);
@@ -49,6 +51,8 @@ export function validate(){
       errors.push({field:"workerPreferredLanguage",message:"Selecciona el idioma de asistencia."});
   }
   if(!state.docs.length) warnings.push({field:"documents",message:"No hay documentos cargados."});
+  if(state.signature.status==="completed"&&state.signature.documentHash!==state.hash)
+    errors.push({field:"signature",message:"La firma completada no coincide con la huella contractual actual."});
   return {errors,warnings,isValid:errors.length===0};
 }
 
@@ -102,7 +106,11 @@ export function saveLocal(onDone){
       localStorage.setItem(STORAGE_KEY,JSON.stringify({
         version:VERSION,recordId:state.recordId,role:state.role,
         data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),
-        snapshots:state.snapshots,savedAt:new Date().toISOString()
+        snapshots:state.snapshots,savedAt:new Date().toISOString(),
+        trust:{
+          identity:{status:state.identity.status,provider:state.identity.provider,verificationId:state.identity.verificationId,checkedAt:state.identity.checkedAt},
+          signature:{status:state.signature.status,provider:state.signature.provider,requestId:state.signature.requestId,documentHash:state.signature.documentHash,createdAt:state.signature.createdAt,updatedAt:state.signature.updatedAt,auditTrailAvailable:state.signature.auditTrailAvailable}
+        }
       }));
       onDone?.("Guardado local · "+new Date().toLocaleTimeString());
     }catch{onDone?.("No se pudo guardar el borrador local.");}
@@ -118,6 +126,8 @@ export function restore(){
     state.data={...state.data,...(saved.data||{})};
     state.audit=Array.isArray(saved.audit)?saved.audit:[];
     state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];
+    if(saved.trust?.identity) state.identity={...state.identity,...saved.trust.identity};
+    if(saved.trust?.signature) state.signature={...state.signature,...saved.trust.signature};
   }catch{}
 }
 
@@ -141,6 +151,17 @@ export function releaseObjectUrls(){
   for(const d of state.docs){try{URL.revokeObjectURL(d.url)}catch{}}
 }
 
+export function trustIntegrationStatus(){
+  return {
+    identityStatus:state.identity.status,
+    identityProvider:state.identity.provider||"none",
+    signatureStatus:state.signature.status,
+    signatureProvider:state.signature.provider||"none",
+    signatureRequestId:state.signature.requestId||"",
+    auditTrailAvailable:!!state.signature.auditTrailAvailable
+  };
+}
+
 export function buildVerificationURL(){
   if(!state.prepared) return "";
   const base=location.href.replace(/index\.html.*$/,"");
@@ -159,6 +180,12 @@ export async function createSignatureRequest(){
   if(!state.data.consentIdentity||!state.data.consentDocuments||!state.data.consentContract){
     alert("Faltan confirmaciones requeridas.");return false;
   }
+  if(state.identity.status!=="verified"){
+    state.identity.status="required";
+    audit("identityVerificationRequired");
+    alert("La identidad debe verificarse mediante un proveedor externo antes de enviar la solicitud de firma.");
+    return false;
+  }
   if(!state.hash){
     const canonical=JSON.stringify({recordId:state.recordId,version:VERSION,data:integrityData(),documents:documentManifest()});
     state.hash=await sha256Text(canonical);
@@ -168,8 +195,9 @@ export async function createSignatureRequest(){
     preparedAt:new Date().toISOString(),
     requestId:crypto.randomUUID?.()||String(Date.now())
   };
+  state.signature={status:"ready",provider:"signaturit",requestId:state.prepared.requestId,documentHash:state.hash,createdAt:state.prepared.preparedAt,updatedAt:state.prepared.preparedAt,auditTrailAvailable:false};
   state.qrUrl=buildVerificationURL();
-  audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});
+  audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash,provider:"signaturit"});
   state.view="sign";state.nav="review";
   return true;
 }
