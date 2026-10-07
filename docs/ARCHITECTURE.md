@@ -1,34 +1,41 @@
-# Contract Engine 100 · Architecture
+# Architecture · Field System 5.0
 
 ## Pipeline
-CAPTAR → CLASIFICAR → PREGUNTAR → NORMALIZAR → VALIDAR → REVISAR → AUTENTICAR → FIRMAR → SELLAR → VERIFICAR → AUDITAR
 
-## Capas
-UI → Form Engine → Schema Engine → Rules Engine → Validation → Document Engine → Authentication → Signature → Verification → Audit → Persistence/API
+CAPTAR → CLASIFICAR → PREGUNTAR → NORMALIZAR → VALIDAR → REVISAR → PROTEGER → AUTENTICAR → PREPARAR FIRMA → VERIFICAR → AUDITAR
 
-## Record
-ContractRecord mantiene identificador, versión, estado, jurisdicción, partes, identidad, condiciones laborales, documentos, consentimientos, autenticación, firma, verificación y auditoría.
+## Módulos
 
-## Declarative schema
-Cada campo puede definir tipo, etiqueta, obligatoriedad, opciones, visibilidad, habilitación, validación, dependencias, sensibilidad y procedencia. El motor soporta reglas compuestas all, any y not, además de dependencias de datos.
+index.html → app/main.js → app/ui.js + app/engine.js → app/schema.js
 
-## Provenance
-Los valores distinguen entre USER_INPUT, DOCUMENT_EXTRACTED, SYSTEM_DERIVED, IMPORTED, VERIFIED y AI_SUGGESTED. La confianza nunca sustituye la revisión humana.
+## Data boundaries
+
+publicData() excluye respuestas private/restricted. integrityData() incluye campos restricted para la huella, pero excluye respuestas private. El QR contiene identificadores de verificación, no documentos ni respuestas privadas.
+
+## Validation
+
+Se separan errores bloqueantes y advertencias. Se comprueban fechas, jornada, descanso, deducciones, idioma/asistencia y documentos.
+
+## Protection Engine
+
+RISK_MAP transforma señales privadas en NORMAL/REVIEW/HIGH. HIGH activa Protective Gate y exige revisión humana. No es un diagnóstico jurídico.
+
+## Document Engine
+
+Cada archivo recibe id, MIME, tamaño, SHA-256, estado, versión y object URL. Los object URLs se liberan al cerrar.
 
 ## Integrity
-La huella del expediente usa una representación canónica que excluye object URLs, objetos File y metadatos de procedencia volátiles. Los documentos se representan mediante un manifiesto estable con identificador, nombre, tipo, tamaño, hash, versión y estados de revisión.
+
+La huella usa una representación canónica estable, sin object URLs y sin respuestas privadas.
+
+## Authentication / Signature
+
+El cliente solo detecta capacidad WebAuthn y prepara una solicitud de firma. No almacena biometría ni fabrica firmas.
 
 ## UX/UI
-La capa compartida styles/world-ui.css aplica una gramática iPhone-first inspirada en patrones modernos de finanzas móviles: métrica principal, acciones rápidas, tarjetas compactas y navegación inferior. La identidad visual y los recursos del proyecto son propios.
 
-## Security boundary
-Los identificadores restringidos y documentos no forman parte del payload público del QR. WebAuthn y firma electrónica reales requieren servidor, challenge y evidencia verificable. El frontend estático no almacena biometría ni pretende crear una identidad.
-
-## Verification
-verify.html valida estructura y formato del enlace transportado por el QR. Una implementación productiva debe verificar la representación firmada contra un registro de servidor.
-
-## Accessibility
-Interfaz táctil, Dynamic Type, VoiceOver, dark mode, safe areas, teclado móvil, estados visibles, reducción de movimiento y zoom del sistema.
+styles/world-ui.css es un sistema visual local iPhone-first basado en patrones públicos de composición de apps financieras, con identidad propia y sin recursos propietarios de terceros.
 
 ## Testing
-Smoke tests, validación de esquema, reglas condicionales, hashing, QR, seguridad, estados, accesibilidad y recuperación deben ejecutarse en CI.
+
+CI ejecuta node --check sobre cada módulo y npm test.
