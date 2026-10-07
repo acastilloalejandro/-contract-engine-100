@@ -12,9 +12,17 @@ body{margin:0;padding:24px}
 .verify-wrap{max-width:500px;margin:0 auto;padding-top:max(24px,env(safe-area-inset-top))}
 .verify-card{background:var(--wm-white);border:1px solid var(--wm-border);border-radius:28px;padding:20px;box-shadow:var(--wm-shadow)}
 .dark .verify-card{background:#151517;border-color:rgba(255,255,255,.07);box-shadow:none}
+.verify-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.verify-brand{display:flex;align-items:center;gap:12px}
 .verify-mark{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#111;color:#fff;font-weight:800;font-size:11px}
 .dark .verify-mark{background:#fff;color:#111}
+.verify-kicker{font-size:10px;color:var(--wm-muted);font-weight:700}
+.verify-title{font-size:14px;font-weight:800}
+.verify-local{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#f0f0f2;color:#555;font-size:10px;font-weight:750}
+.dark .verify-local{background:#242428;color:#ddd}
 .verify-status{margin:22px 0 8px;font-size:32px;line-height:1;font-weight:850;letter-spacing:-.045em}
+.verify-ok{color:var(--wm-green)}
+.verify-bad{color:var(--wm-red)}
 .verify-row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--wm-border);font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
 .verify-label{color:var(--wm-muted)}
 .verify-value{text-align:right;word-break:break-all}
@@ -25,15 +33,12 @@ body{margin:0;padding:24px}
 <body>
 <main class="verify-wrap">
   <div class="verify-card">
-    <div class="flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="verify-mark" aria-hidden="true">CE</div>
-        <div><div class="text-sm font-extrabold tracking-tight">Contract Engine</div><div class="text-[10px] text-gray-400 font-semibold">Verificación</div></div>
-      </div>
-      <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold bg-gray-100 text-gray-700">LOCAL</span>
+    <div class="verify-top">
+      <div class="verify-brand"><div class="verify-mark" aria-hidden="true">CE</div><div><div class="verify-title">Contract Engine</div><div class="verify-kicker">Verificación</div></div></div>
+      <span class="verify-local">LOCAL</span>
     </div>
     <div id="status" class="verify-status">Validando…</div>
-    <p id="summary" class="text-sm text-gray-500">Comprobando la estructura del enlace de verificación.</p>
+    <p id="summary" style="margin:0;color:var(--wm-muted);font-size:13px;line-height:1.5">Comprobando la estructura del enlace de verificación.</p>
     <div id="rows"></div>
     <div class="verify-notice"><strong>Alcance:</strong> esta página valida el formato de los identificadores transportados por el QR y muestra su contenido. No demuestra por sí sola la identidad del firmante ni sustituye una firma electrónica o una comprobación contra un registro de servidor.</div>
   </div>
@@ -51,7 +56,9 @@ body{margin:0;padding:24px}
   const signatureOk=/^[a-f0-9]{32,128}$/i.test(signature);
   const versionOk=/^\d+(?:\.\d+){0,3}$/.test(version);
   const valid=idOk&&hashOk&&signatureOk&&versionOk;
-  document.getElementById("status").textContent=valid?"Formato válido":"Enlace incompleto";
+  const status=document.getElementById("status");
+  status.textContent=valid?"Formato válido":"Enlace incompleto";
+  status.className="verify-status "+(valid?"verify-ok":"verify-bad");
   document.getElementById("summary").textContent=valid?"Los identificadores del enlace tienen un formato compatible con Contract Engine 100.":"Falta información o alguno de los identificadores no tiene el formato esperado.";
   const fields=[["Expediente",id],["Versión",version],["Hash SHA-256",hash],["Signature ID",signature],["Modo",mode||"—"]];
   const rows=document.getElementById("rows");
