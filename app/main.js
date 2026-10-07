@@ -44,6 +44,12 @@ async function prepareSignature(){
   saveLocal();renderForm();updateViews();
 }
 
+async function startIdentityVerification(){
+  $("authStatus").textContent="Verificación de identidad: pendiente de proveedor externo.";
+  audit("identityVerificationStarted",{mode:"provider-adapter"});
+  saveLocal();
+}
+
 async function checkAuthentication(){
   const secure=window.isSecureContext===true;
   const supported=secure&&!!window.PublicKeyCredential&&!!navigator.credentials;
@@ -127,6 +133,7 @@ function bind(){
   $("prepareBtn").onclick=prepareSignature;
   $("protectedBackBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("authBtn").onclick=checkAuthentication;
+  $("identityBtn").onclick=startIdentityVerification;
   $("cancelSignBtn").onclick=()=>{state.view="review";state.nav="review";updateViews();};
   $("newBtn").onclick=reset;
   document.querySelectorAll(".world-tab").forEach(b=>b.onclick=()=>{
