@@ -1,7 +1,7 @@
 name: Contract Engine CI
 on:
   push:
-    branches: [main]
+    branches: [main, feat/spain-housing-rental-v6]
   pull_request:
     branches: [main]
 permissions:
