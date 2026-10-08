@@ -7,8 +7,8 @@ export const HOUSING_FLOW: FormField[] = [
   { id: "tenancy.purpose", label: "¿Para qué se utilizará?", type: "select", required: true, options: [
     { value: "habitual", label: "Vivienda habitual" }, { value: "temporary", label: "Vivienda temporal" }, { value: "other", label: "Otro supuesto" }
   ]},
-  { id: "tenancy.temporaryCause", label: "¿Cuál es la causa real de temporalidad?", type: "textarea", required: true, visibleWhen: d => d["tenancy.purpose"] === "temporary" },
-  { id: "tenancy.temporaryCauseEvidenceIds", label: "Acreditación de la causa", type: "file", required: true, visibleWhen: d => d["tenancy.purpose"] === "temporary" },
+  { id: "tenancy.temporaryCause", dependsOn: ["tenancy.purpose"], label: "¿Cuál es la causa real de temporalidad?", type: "textarea", required: true, visibleWhen: d => d["tenancy.purpose"] === "temporary" },
+  { id: "tenancy.temporaryCauseEvidenceIds", dependsOn: ["tenancy.temporaryCause"], label: "Acreditación de la causa", type: "file", required: true, visibleWhen: d => d["tenancy.purpose"] === "temporary" },
   { id: "jurisdiction.municipality", label: "Municipio", type: "text", required: true },
   { id: "dateContext.contractDate", label: "Fecha del contrato", type: "date", required: true },
   { id: "dateContext.startDate", label: "Fecha de inicio", type: "date", required: true },
