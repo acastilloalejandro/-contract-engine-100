@@ -90,6 +90,6 @@ export interface ValidationIssue {
 export interface RuleSnapshot {
   ruleSetId: string;
   engineVersion: string;
-  rules: { id: string; version: string }[];
+  rules: { id: string; version: string; source?: { authority: string; citation: string; url?: string } }[];
   evaluatedAt: string;
 }
