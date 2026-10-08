@@ -7,9 +7,24 @@ export interface AnswerChange {
   next: unknown;
 }
 
+function fieldData(state: ContractState): Record<string, unknown> {
+  return {
+    "property.type": state.property.type,
+    "tenancy.purpose": state.tenancy.purpose,
+    "tenancy.temporaryCause": state.tenancy.temporaryCause,
+    "tenancy.temporaryCauseEvidenceIds": state.tenancy.temporaryCauseEvidenceIds,
+    "jurisdiction.municipality": state.jurisdiction.municipality,
+    "dateContext.contractDate": state.dateContext.contractDate,
+    "dateContext.startDate": state.dateContext.startDate,
+    "dateContext.endDate": state.dateContext.endDate,
+    "economics.requestedRent": state.economics.requestedRent,
+    "economics.deposit": state.economics.deposit
+  };
+}
+
 export function isVisible(field: FormField, state: ContractState): boolean {
   if (!field.visibleWhen) return true;
-  return field.visibleWhen(state as unknown as Record<string, unknown>);
+  return field.visibleWhen(fieldData(state));
 }
 
 export function visibleFields(fields: FormField[], state: ContractState): FormField[] {
