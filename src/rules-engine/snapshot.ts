@@ -9,7 +9,7 @@ export function buildRuleSnapshot(state: ContractState, evaluatedAt = new Date()
   return {
     ruleSetId: "housing-es",
     engineVersion: ENGINE_VERSION,
-    rules: rules.map(rule => ({ id: rule.id, version: rule.version })),
+    rules: rules.map(rule => ({ id: rule.id, version: rule.version, source: rule.source })),
     evaluatedAt
   };
 }
