@@ -6,7 +6,7 @@ export interface LegalRule {
   jurisdiction: string;
   effectiveFrom: string;
   effectiveTo?: string;
-  priority?: number;
+  priority?: number;\n  source?: { authority: string; citation: string; url?: string };
   evaluate(state: ContractState): ValidationIssue[];
 }
 
