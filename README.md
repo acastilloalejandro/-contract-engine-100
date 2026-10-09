@@ -1,10 +1,38 @@
-# Contract Engine 100 · Field System 5.2.1
+# Contract Engine 100 · Field System 5.2.2
 
 > **Autoría del proyecto:** Alejandro Hernández Castillo · **Contacto:** [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com) · **Titularidad y licencias:** consulte [NOTICE.md](NOTICE.md) y [LICENSE](LICENSE).
 
 Motor contractual modular, móvil primero, para crear expedientes guiados, validar datos y separar los datos privados del contenido compartible.
 
 > **Estado de entrega (9 de octubre de 2026):** la versión 5.2.1 está integrada en `main` y publicada en GitHub Pages. La API de autenticación no está desplegada y `config.js` mantiene `authBaseUrl` vacío. Las licencias y avisos de autoría deben revisarse junto con los derechos de contribución y dependencias.
+
+## Estado actual
+
+- **Frontend estático:** workflow de publicación completado correctamente. [Abrir la aplicación](https://acastilloalejandro.github.io/-contract-engine-100/).
+- **Calidad de código:** los cambios de formulario 5.2.1 incluyen búsqueda local y filtro de campos obligatorios pendientes; consulta las ejecuciones de CI del SHA actual.
+- **Autenticación e identidad reales:** no disponibles para usuarios reales hasta crear y desplegar la API, configurar D1, dominio, secretos y proveedores, y superar pruebas de integración.
+- **Uso recomendado:** demo técnica y entorno de evaluación. No utilizar todavía para formalizar contratos reales, almacenar documentación sensible ni acreditar identidad o firma.
+
+## Qué incluye
+
+- Formulario declarativo, validación mejorada, advertencias que requieren reconocimiento, persistencia local de adjuntos con IndexedDB, huellas de integridad, QR generado desde una biblioteca local y aviso explícito de no verificación.
+- Vista previa local del borrador contractual agrupada por secciones, campos obligatorios pendientes e impresión/guardado como PDF mediante el navegador. No produce un contrato legal certificado ni un PDF firmado.
+- Búsqueda por nombre de campo o sección, filtro de obligatorios pendientes y recuperación visible de los errores de validación.
+- Pantallas de acceso e incorporación y un adaptador para conectar correo/contraseña, Google/Apple, OTP y verificación documental con proveedores externos. Estas pantallas no equivalen a un servicio de autenticación desplegado.
+- API de referencia en Cloudflare Workers + D1 para sesiones, OAuth, correo, teléfono y estado de identidad, pendiente de despliegue y configuración.
+- Pruebas automatizadas de humo, invariantes, autenticación, onboarding, contrato de API y regresiones de minimización de datos y validación de archivos.
+- El workflow de publicación ejecuta un smoke test posterior al despliegue de la página raíz, verificador, configuración, manifest, CSS, módulos y generador QR.
+- Arquitectura modular para que empleo doméstico, alquiler residencial y otros contratos mantengan esquemas y reglas separados.
+
+## Autoría, licencia y uso de la propiedad intelectual
+
+- **Autor del proyecto:** Alejandro Hernández Castillo.
+- **Contacto para consultas sobre licencias o permisos:** [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com).
+- **Aviso de autoría:** [NOTICE.md](NOTICE.md).
+- **Licencia de código que conserva el repositorio:** [LICENSE](LICENSE), MIT. MIT permite usos, copias, modificaciones y redistribuciones condicionados a conservar los avisos y la licencia. La nota de autoría no transforma MIT en una licencia restrictiva.
+- **Componentes de terceros:** sus licencias y atribuciones prevalecen respecto de esos componentes; revisar los avisos y las dependencias antes de redistribuir.
+- **Marcas e identidad visual:** la licencia de código no concede por sí sola derechos sobre marcas, logotipos ni una falsa apariencia de afiliación.
+- **Límite importante:** un repositorio público permite acceder al contenido visible. Los avisos documentan autoría y condiciones, pero no bloquean técnicamente la copia. La protección de arquitectura, los secretos empresariales y la aplicación de derechos dependen de los hechos y de la legislación aplicable; esto no es asesoramiento jurídico.
 
 ## Estado actual
 
