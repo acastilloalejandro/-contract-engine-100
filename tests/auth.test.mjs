@@ -7,8 +7,8 @@ const auth = fs.readFileSync(path.join(root, "app", "auth.js"), "utf8");
 const docs = fs.readFileSync(path.join(root, "docs", "AUTH-ONBOARDING.md"), "utf8");
 
 assert.match(auth, /credentials:\s*"include"/);
-assert.match(auth, /\/v1\/auth\/oauth\/google/);
-assert.match(auth, /\/v1\/auth\/oauth\/apple/);
+assert.match(auth, /startOAuth/);
+assert.match(auth, /"google", "apple"/);
 assert.match(auth, /\/v1\/onboarding\/phone\/start/);
 assert.match(auth, /\/v1\/onboarding\/phone\/confirm/);
 assert.match(auth, /\/v1\/onboarding\/identity\/start/);
