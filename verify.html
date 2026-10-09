@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f7f8"><meta name="description" content="Verificación del enlace de Contract Engine 100.">
+<meta name="theme-color" content="#f7f7f8"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="description" content="Verificación del enlace de Contract Engine 100.">
 <link rel="stylesheet" href="./styles/world-ui.css"><title>Contract Engine · Verificación</title>
 </head><body>
 <main class="world-content" style="padding-top:max(24px,env(safe-area-inset-top))">
@@ -11,14 +11,4 @@
 <p id="summary" class="muted">Comprobando identificadores.</p><div id="rows"></div>
 <div class="notice"><strong>Alcance:</strong> esta página comprueba el formato de los identificadores transportados. No demuestra por sí sola identidad, autenticación o firma electrónica contra un servidor.</div>
 </section></main>
-<script>
-const p=new URLSearchParams(location.search);
-const id=p.get("id")||"",version=p.get("version")||"",hash=p.get("hash")||"",request=p.get("request")||"",mode=p.get("mode")||"";
-const valid=/^[A-Z0-9-]{8,120}$/i.test(id)&&/^\d+(?:\.\d+){0,3}$/.test(version)&&/^[a-f0-9]{64}$/i.test(hash)&&/^[A-Z0-9-]{8,120}$/i.test(request);
-const status=document.querySelector("#status");status.textContent=valid?"Formato válido":"Enlace incompleto";status.className="hero-value "+(valid?"pill good":"pill bad");
-document.querySelector("#summary").textContent=valid?"Los identificadores tienen un formato compatible con Contract Engine 100.":"Falta información o algún identificador no tiene el formato esperado.";
-for(const x of [["Expediente",id],["Versión",version],["SHA-256",hash],["Request ID",request],["Modo",mode||"—"]]){
- const row=document.createElement("div");row.className="hash-row";
- const a=document.createElement("span");a.textContent=x[0];const b=document.createElement("b");b.className="break";b.textContent=x[1]||"—";row.append(a,b);document.querySelector("#rows").append(row);
-}
-</script></body></html>
+<script type="module" src="./app/verify.js"></script></body></html>
