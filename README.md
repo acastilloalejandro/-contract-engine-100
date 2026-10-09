@@ -18,6 +18,7 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - Pantallas de acceso e incorporación y un adaptador para conectar correo/contraseña, Google/Apple, OTP y verificación documental con proveedores externos. Estas pantallas no equivalen a un servicio de autenticación desplegado.
 - API de referencia en Cloudflare Workers + D1 para sesiones, OAuth, correo, teléfono y estado de identidad, pendiente de despliegue y configuración.
 - Pruebas automatizadas de humo, invariantes, autenticación, onboarding, contrato de API y regresiones v5.2.0 de minimización de datos y validación de archivos.
+- El workflow de publicación ejecuta un smoke test posterior al despliegue de la página raíz, verificador, configuración, manifest, CSS, módulos y generador QR.
 - Arquitectura modular para que empleo doméstico, alquiler residencial y otros contratos mantengan esquemas y reglas separados.
 
 ## Estructura principal
@@ -30,7 +31,6 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - `tests/`: regresiones y pruebas de invariantes.
 - [Arquitectura modular y límites de confianza](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [estado y gates de producción](docs/PRODUCTION-GATES.md), [matriz de 50 optimizaciones](docs/OPTIMIZATION-ROADMAP-50.md).
 - [Historial de cambios](CHANGELOG.md).
-- [Hoja de ruta de las 50 optimizaciones y bloqueos](docs/OPTIMIZATION-ROADMAP-50.md).
 
 ## Cambios preparados para 5.2.0
 
