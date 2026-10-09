@@ -24,13 +24,13 @@ async function prepareReview(){
     return;
   }
   if(v.warnings.length){
-    const warningText=v.warnings.map(w=>"• "+w.message).join("\\n");
-    const accepted=window.confirm("Hay advertencias que requieren tu revisión:\\n\\n"+warningText+"\\n\\nContinuar no implica validez jurídica ni firma electrónica. ¿Has revisado estas advertencias?");
+    const warningText=v.warnings.map(w=>"• "+w.message).join("\n");
+    const accepted=window.confirm("Hay advertencias que requieren tu revisión:\n\n"+warningText+"\n\nContinuar no implica validez jurídica ni firma electrónica. ¿Has revisado estas advertencias?");
     if(!accepted) return;
     audit("warningsAcknowledged",{fields:v.warnings.map(w=>w.field)});
   }
   const r=riskAssessment();
-  if(state.role==="worker"&&r.level!=="NORMAL"){
+  if(r.level!=="NORMAL"){
     state.view="protected";state.nav="review";
     audit("protectiveGate",{level:r.level,score:r.score});
     saveLocal();renderForm();updateViews();return;
