@@ -25,7 +25,7 @@ The Worker stores hashes of session cookies, email verification tokens and OAuth
 
 ## Important deployment boundary: use a shared custom domain
 
-The current frontend is hosted at https://acastilloalejandro.github.io. A separate workers.dev API is cross-site. This implementation sends an HttpOnly Secure cookie with SameSite=None plus credentialed CORS, but browser third-party-cookie protections can still interfere with session continuity.
+The current frontend is hosted at https://acastilloalejandro.github.io. A separate workers.dev API is cross-site. The Worker now issues a `__Host-ce_session` cookie with `HttpOnly`, `Secure`, `Path=/`, no `Domain` attribute and `SameSite=Lax`. A GitHub Pages frontend and a separate API origin still have cross-origin limitations; use a controlled custom domain and test actual browser behavior instead of relying on third-party cookie support.
 
 **For production, serve the frontend and API under one registrable domain**, for example https://app.example.com and https://api.example.com. Configure APP_ORIGIN and API_ORIGIN to the exact origins. Do not assume cookies will work reliably between GitHub Pages and an unrelated API domain.
 
@@ -85,7 +85,7 @@ Configure provider redirect URLs to these exact values:
 - Apple Services ID: https://api.example.com/v1/auth/oauth/apple/callback
 - Stripe Identity webhook: https://api.example.com/v1/webhooks/stripe
 
-Subscribe Stripe to the Identity Verification Session events used by the Worker, especially identity.verification_session.verified, identity.verification_session.requires_input, identity.verification_session.processing, identity.verification_session.canceled and identity.verification_session.redacted.
+Subscribe Stripe to `identity.verification_session.verified`, `identity.verification_session.requires_input`, `identity.verification_session.processing` and `identity.verification_session.canceled`. A `redacted` event may be monitored for data-retention operations, but deliberately does not alter identity status: redaction of provider-held data is not itself a failed identity decision.
 
 6. Configure the public frontend config.js only after deployment:
 
