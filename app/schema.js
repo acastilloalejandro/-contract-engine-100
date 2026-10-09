@@ -1,4 +1,4 @@
-export const VERSION="5.2.0";
+export const VERSION="5.2.1";
 export const MAX_FILE_BYTES=10*1024*1024;
 export const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 export const COUNTRIES=[["SA","Arabia Saudí","SAR"],["ES","España","EUR"],["FR","Francia","EUR"],["PH","Filipinas","PHP"],["IN","India","INR"],["ID","Indonesia","IDR"]];
