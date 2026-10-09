@@ -2,6 +2,19 @@
 
 No presentar la aplicación como lista para producción hasta que se hayan completado todas las puertas aplicables y se hayan guardado las evidencias de verificación.
 
+## Regla bloqueante de seguridad
+
+**La seguridad real depende también de la configuración administrativa, la infraestructura desplegada y las pruebas de autorización.** El código fuente y los tests locales no demuestran por sí solos que esos controles estén activos.
+
+La liberación queda bloqueada hasta disponer de evidencias verificables de los tres ámbitos:
+
+1. **Configuración administrativa:** protección efectiva de `main`, checks requeridos, permisos mínimos de Actions, MFA de la cuenta mantenedora, gestión de secretos y alertas de seguridad. Registrar los ajustes comprobados, no solo las instrucciones para activarlos.
+2. **Infraestructura desplegada:** Worker y D1 reales, secretos gestionados fuera del repositorio, dominios/orígenes correctos, cookies y cabeceras comprobadas sobre respuestas de producción, migraciones y recuperación probadas.
+3. **Autorización:** pruebas negativas con al menos dos cuentas de prueba independientes y datos persistidos en la infraestructura real. Debe denegarse el acceso cruzado a cada recurso privado, incluyendo sesiones, desafíos, identidad y documentos. Añadir pruebas para ID alterado, usuario anónimo, recurso inexistente/caducado y rol insuficiente.
+
+Cada evidencia debe indicar entorno, commit probado, fecha, resultado y responsable de revisión. Si no existe evidencia, el estado es **pendiente**, no aprobado. Los tests simulados y los workflows verdes solo cubren el código y las comprobaciones que efectivamente ejecutan.
+
+
 
 ## Estado actualizado de seguridad y autorización (9 de octubre de 2026)
 
