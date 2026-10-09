@@ -3,13 +3,19 @@
   "name": "bithome · Inmobiliaria Bitcoin",
   "short_name": "bithome",
   "description": "Preparación de expedientes inmobiliarios con Bitcoin en España.",
-  "start_url": "./",
+  "start_url": "./real-estate/",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f7f8",
-  "theme_color": "#f7f7f8",
+  "background_color": "#f6f8fb",
+  "theme_color": "#f6f8fb",
   "lang": "es",
   "icons": [
+    {
+      "src": "./icons/bithome.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "./icons/contract-engine.svg",
       "sizes": "any",
