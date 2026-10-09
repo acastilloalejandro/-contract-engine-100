@@ -5,6 +5,7 @@ let mode = "login";
 let pendingPhoneChallenge = null;
 let sessionUser = null;
 let entryMode = "demo";
+let entryCallbacks = {};
 
 function message(text, kind = "info") {
   const node = $("accessAlert");
@@ -88,7 +89,7 @@ async function advanceOnboarding(user) {
     showPanel("identityPanel");
     return;
   }
-  await enterApplication("authenticated", user);
+  await enterApplication("authenticated", user, entryCallbacks.onEnterDemo, entryCallbacks.onEnterAuthenticated);
 }
 
 async function resumeSession() {
@@ -116,6 +117,7 @@ async function enterApplication(nextMode, user = null, onEnterDemo, onEnterAuthe
 }
 
 export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
+  entryCallbacks = { onEnterDemo, onEnterAuthenticated };
   const gate = $("accessGate");
   const app = $("app");
   if (!gate || !app) {
