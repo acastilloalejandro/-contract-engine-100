@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "Cite Contract Engine 100 when referencing this project."
+title: "Contract Engine 100"
+type: software
+authors:
+  - family-names: "Hernández Castillo"
+    given-names: "Alejandro"
+version: "5.2.1"
+date-released: "2026-10-09"
+repository-code: "https://github.com/acastilloalejandro/-contract-engine-100"
+url: "https://acastilloalejandro.github.io/-contract-engine-100/"
+contact:
+  - name: "Alejandro Hernández Castillo"
+    email: "acastilloalejandro@icloud.com"
+license: "MIT"
