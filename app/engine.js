@@ -264,6 +264,8 @@ export async function restore(){
         data:safeData,documentCount:0,audit:state.audit,snapshots:[],
         savedAt:new Date().toISOString()
       }));
+      // Remove the legacy copy only after the sanitized replacement is safely written.
+      localStorage.removeItem(sourceKey);
       audit("legacyDraftMigrated",{fromVersion:String(saved.version||"unknown")});
     }catch{}
   }
