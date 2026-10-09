@@ -4,7 +4,6 @@ const $ = id => document.getElementById(id);
 let mode = "login";
 let pendingPhoneChallenge = null;
 let sessionUser = null;
-let entryMode = "demo";
 let entryCallbacks = {};
 
 function message(text, kind = "info") {
@@ -48,10 +47,6 @@ function setMode(next) {
     : "Usa la contraseña asociada a tu cuenta.";
 }
 
-function providerReturnToApp() {
-  return new URL("./", location.href).href;
-}
-
 function authenticatedSession(payload) {
   const user = payload?.user || payload?.account || payload;
   const subject = user?.id || user?.sub || user?.userId || user?.email;
@@ -76,8 +71,8 @@ async function advanceOnboarding(user) {
   try {
     status = await auth.onboardingStatus();
   } catch (error) {
-    message(error.message || "No se pudo consultar el estado de incorporación.", "error");
     showPanel("authPanel");
+    message(error.message || "No se pudo consultar el estado de incorporación.", "error");
     return;
   }
   if (!phoneIsVerified(status)) {
@@ -105,7 +100,6 @@ async function resumeSession() {
 }
 
 async function enterApplication(nextMode, user = null, onEnterDemo, onEnterAuthenticated) {
-  entryMode = nextMode;
   sessionUser = user;
   $("accessGate").hidden = true;
   $("app").hidden = false;
@@ -186,8 +180,8 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
     }
   });
 
-  $("googleBtn").addEventListener("click", () => startProvider("google", onEnterAuthenticated));
-  $("appleBtn").addEventListener("click", () => startProvider("apple", onEnterAuthenticated));
+  $("googleBtn").addEventListener("click", () => startProvider("google"));
+  $("appleBtn").addEventListener("click", () => startProvider("apple"));
   $("demoBtn").addEventListener("click", () => enterApplication("demo", null, onEnterDemo, onEnterAuthenticated));
 
   async function startProvider(provider) {
@@ -291,8 +285,5 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
   });
 
   // Preserve an explicit return target for trusted same-origin post-provider redirects.
-  const returnTarget = providerReturnToApp();
-  if (returnTarget.startsWith(location.origin)) document.documentElement.dataset.appReturn = "configured";
-
   if (configured) void resumeSession();
 }
