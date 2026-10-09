@@ -14,19 +14,19 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests">
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Contract Engine">
+<meta name="apple-mobile-web-app-title" content="bithome">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="./icons/contract-engine.svg">
+<link rel="icon" type="image/svg+xml" href="./icons/bithome.svg">
 <link rel="stylesheet" href="./styles/world-ui.css">
 <title>bithome · Transacciones inmobiliarias con Bitcoin</title>
 </head>
 <body>
-<div style="max-width:1100px;margin:12px auto;padding:12px 18px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#172334;font-family:system-ui"><strong>Nuevo módulo inmobiliario España + Bitcoin</strong><p style="margin:7px 0">Prepara un borrador de compraventa con valoración EUR/BTC, revisión jurídica y exportación local. No realiza pagos ni firmas notariales.</p><a href="./real-estate/index.html" style="color:#194b90;font-weight:700">Abrir formulario inmobiliario →</a></div>
+<section class="bithome-portal" aria-label="Acceder a bithome"><div class="portal-brand"><span class="portal-mark" aria-hidden="true">b·</span><div><span class="portal-kicker">BITHOME · ESPAÑA × BITCOIN</span><h2>Tu compraventa, con un flujo claro.</h2><p>Nuevo formulario inmobiliario en modo claro, adaptado a iPhone. Prepara un borrador de operación con BTC y EUR sin ejecutar pagos, almacenar claves ni realizar verificaciones.</p></div></div><a class="portal-cta" href="./real-estate/index.html">Abrir bithome <span aria-hidden="true">→</span></a></section>
 <main id="accessGate" class="access-gate" aria-labelledby="accessTitle">
   <div class="access-wrap">
-    <a class="brand access-brand" href="./" aria-label="Contract Engine 100">
-      <span class="brand-mark" aria-hidden="true">CE</span>
-      <span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Contract OS 5.2.1</span></span>
+    <a class="brand access-brand" href="./" aria-label="bithome · motor contractual histórico">
+      <span class="brand-mark" aria-hidden="true">b·</span>
+      <span><span class="brand-name">bithome</span><span class="brand-sub">100 · Contract OS 5.2.1</span></span>
     </a>
     <section class="access-card">
       <div class="hero-kicker">WORKSPACE CONTRACTUAL</div>
@@ -92,7 +92,7 @@
 </main>
 
 <div id="app" class="app-shell" hidden>
-<header class="topbar"><a class="brand" href="./" aria-label="Contract Engine 100"><span class="brand-mark" aria-hidden="true">CE</span><span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Field System 5.2.1</span></span></a><div class="topbar-actions"><span id="sessionBadge" class="pill">DEMO · LOCAL</span><span id="stateBadge" class="pill">DRAFT</span><button id="logoutBtn" class="secondary-btn logout-btn" type="button" hidden>Cerrar sesión</button><button id="themeBtn" class="icon-btn" type="button" aria-label="Cambiar tema">◐</button></div></header>
+<header class="topbar"><a class="brand" href="./" aria-label="Contract Engine 100"><span class="brand-mark" aria-hidden="true">b·</span><span><span class="brand-name">bithome</span><span class="brand-sub">100 · Field System 5.2.1</span></span></a><div class="topbar-actions"><span id="sessionBadge" class="pill">DEMO · LOCAL</span><span id="stateBadge" class="pill">DRAFT</span><button id="logoutBtn" class="secondary-btn logout-btn" type="button" hidden>Cerrar sesión</button><button id="themeBtn" class="icon-btn" type="button" aria-label="Cambiar tema">◐</button></div></header>
 <main class="world-content">
 <section id="formView" class="view" aria-labelledby="formTitle">
 <div class="world-hero"><div class="hero-kicker">EXPEDIENTE CONTRACTUAL</div><div id="progressValue" class="hero-value">0%</div><div id="formTitle" class="hero-sub">Registro progresivo · <span id="progressText">0 de 0 requisitos</span></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="quick-actions"><button id="reviewBtn" class="quick-action primary" type="button">Revisar</button><button id="docsBtn" class="quick-action" type="button">Documentos</button><button id="saveBtn" class="quick-action" type="button">Guardar</button></div></div>
