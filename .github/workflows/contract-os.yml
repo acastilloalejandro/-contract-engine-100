@@ -16,7 +16,9 @@ on:
       - "package-lock.json"
       - "README.md"
       - "SECURITY.md"
-      - ".github/workflows/contract-os.yml"
+      - ".github/**"
+      - "docs/**"
+      - "SECURITY.md"
   push:
     branches:
       - main
