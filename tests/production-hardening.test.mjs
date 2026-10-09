@@ -50,6 +50,7 @@ assert.match(contractPreview, /NO FIRMADO/);
 assert.match(contractPreview, /VALIDADO JURÍDICAMENTE/);
 assert.ok(postdeploy.includes("app/contract-preview.js"));
 assert.match(postdeploy, /application-version/);
+assert.match(postdeploy, /versionMarker/);
 assert.match(postdeploy, /Post-deploy Pages smoke test passed/);
 assert.match(index, /vendor\/qrcode\.min\.js/);
 assert.match(index, /Content-Security-Policy/);
