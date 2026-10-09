@@ -83,6 +83,7 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - `src/`, `schema/`, `legal/`: contratos de tipos, validación y registro de reglas.
 - `workers/api/src/index.js`, `workers/api/schema.sql`, `workers/api/wrangler.toml`: backend Cloudflare de referencia.
 - `tests/`: regresiones y pruebas de invariantes.
+- [Política de propiedad intelectual y licencias](docs/IP-POLICY.md), [aviso de autoría](NOTICE.md), [autores](AUTHORS.md), [contribución](CONTRIBUTING.md), [cita del software](CITATION.cff), [seguridad](SECURITY.md).
 - [Arquitectura modular y límites de confianza](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [estado y gates de producción](docs/PRODUCTION-GATES.md), [matriz de 50 optimizaciones](docs/OPTIMIZATION-ROADMAP-50.md).
 - [Historial de cambios](CHANGELOG.md).
 
