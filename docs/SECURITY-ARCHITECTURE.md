@@ -34,6 +34,14 @@ El navegador, el almacenamiento local, las entradas del usuario, los parámetros
 | Robo o exposición de documentos del usuario | Avisos sobre los límites del almacenamiento en navegador | Para uso real, backend con autorización por recurso, cifrado en tránsito y reposo, gestión/rotación de claves, retención/borrado y registro de auditoría |
 | Suplantación de identidad o firma | La documentación distingue huellas de integridad de identidad y firma | Autenticación, identidad y firma deben validarse en servidor y con proveedores/protocolos auditados |
 
+### Integridad de eventos externos y límites de intentos
+
+El Worker de referencia reclama el intento de confirmación telefónica mediante una actualización SQL condicional (propietario correcto, no caducado, no usado y menos de cinco intentos). Esto reduce carreras entre solicitudes concurrentes; la conducta debe probarse también contra D1 real.
+
+Los eventos de Stripe requieren firma válida, identificador de evento y fecha de creación. Se registra el ID del evento para evitar reprocesar entregas, y las actualizaciones de estado incluyen una guarda de orden temporal y no permiten degradar estados terminales mediante eventos no terminales tardíos. Los eventos `redacted` se tratan como una operación de ciclo de vida de datos, no como prueba de identidad fallida. La tabla deduplica durante una ventana operativa de 30 días; no sustituye controles de secretos, auditoría de proveedor ni reconciliación periódica.
+
+Si se desplegó una base D1 con una versión anterior del esquema, aplicar la migración documentada antes del Worker actualizado. Las pruebas incluidas usan una base simulada y no prueban transacciones/semántica SQL de D1 real.
+
 ### Sesiones y cabeceras de API
 
 El backend de referencia fija ahora la cookie de sesión a `__Host-ce_session`, con `Secure`, `HttpOnly`, `Path=/`, sin atributo `Domain` y `SameSite=Lax`; las respuestas del Worker incluyen cabeceras restrictivas de no caché, CSP para respuestas API, anti-framing, política de permisos y HSTS. Esto es código de referencia y pruebas de contrato, no evidencia de que el Worker esté desplegado. Antes de usarlo, hay que probar el flujo completo en el dominio de producción y todos los navegadores compatibles.
