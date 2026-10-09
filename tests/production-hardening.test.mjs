@@ -18,6 +18,7 @@ const config = read("config.js");
 const gates = read("docs/PRODUCTION-GATES.md");
 const saveBlock = engine.slice(engine.indexOf("export function saveLocal"), engine.indexOf("export async function restore"));
 const serviceWorker = read("sw.js");
+const postdeploy = read("scripts/postdeploy-smoke.mjs");
 const manifest = JSON.parse(read("manifest.webmanifest"));
 
 assert.equal(pkg.version, "5.2.0");
@@ -47,6 +48,9 @@ assert.match(contractPreview, /EXCLUDED_SECTIONS/);
 assert.match(contractPreview, /EXCLUDED_FIELDS/);
 assert.match(contractPreview, /NO FIRMADO/);
 assert.match(contractPreview, /VALIDADO JURÍDICAMENTE/);
+assert.match(postdeploy, /app\\/contract-preview\\.js/);
+assert.match(postdeploy, /application-version/);
+assert.match(postdeploy, /Post-deploy Pages smoke test passed/);
 assert.match(index, /vendor\/qrcode\.min\.js/);
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /connect-src 'self'/);
