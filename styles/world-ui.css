@@ -157,3 +157,49 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 .logout-btn{padding:0 12px;min-height:36px;font-size:11px;white-space:nowrap}
 .topbar-actions .logout-btn{border-radius:999px}
 @media(max-width:380px){.access-gate{padding-inline:10px}.access-card{padding:20px;border-radius:23px}.access-card h1{font-size:27px}.topbar-actions{gap:5px}.topbar-actions .logout-btn{padding-inline:9px}}
+
+
+/* Contract draft preview and native print-to-PDF. */
+.contract-draft-host{margin-top:12px;}
+.contract-draft__toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 2px;}
+.contract-draft__toolbar h2{margin:4px 0;font-size:19px;letter-spacing:-.035em;}
+.contract-draft__toolbar .muted{margin:4px 0 0;}
+.contract-draft__toolbar .primary-btn{flex:0 0 auto;max-width:210px;}
+.contract-draft__page{padding:clamp(18px,4vw,32px);border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface);box-shadow:var(--shadow);}
+.contract-draft__header{padding-bottom:22px;border-bottom:1px solid var(--line);}
+.contract-draft__overline{font-size:10px;letter-spacing:.12em;font-weight:850;color:var(--muted);}
+.contract-draft__header h1{font-size:clamp(24px,5vw,34px);line-height:1.08;letter-spacing:-.045em;margin:12px 0;}
+.contract-draft__status{font-size:12px;font-weight:800;}
+.contract-draft__jurisdiction{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
+.contract-draft__notice{padding:14px;margin:18px 0;border:1px solid color-mix(in srgb,var(--amber) 38%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--amber) 7%,var(--surface));font-size:12px;line-height:1.55;}
+.contract-draft__notice strong{font-size:10px;letter-spacing:.05em;}
+.contract-draft__notice p{margin:6px 0 0;}
+.contract-draft__section{margin-top:22px;break-inside:avoid;}
+.contract-draft__section h3,.contract-draft__pending h3{font-size:14px;letter-spacing:-.02em;padding-bottom:8px;border-bottom:1px solid var(--line);}
+.contract-draft__section dl{margin:0;}
+.contract-draft__field{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.5fr);gap:14px;padding:9px 0;border-bottom:1px solid var(--line);}
+.contract-draft__field dt{font-size:11px;font-weight:700;color:var(--muted);}
+.contract-draft__field dd{margin:0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.contract-draft__pending{margin-top:24px;padding:14px;border-radius:14px;background:var(--surface-2);font-size:12px;}
+.contract-draft__pending p{color:var(--muted);}
+.contract-draft__pending ul{padding-left:20px;}
+.contract-draft__complete{margin-top:24px;font-size:12px;color:var(--muted);}
+.contract-draft__footer{margin-top:30px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:9px;overflow-wrap:anywhere;}
+.contract-draft__footer p{margin:5px 0;}
+@media(max-width:430px){.contract-draft__toolbar{align-items:stretch;flex-direction:column}.contract-draft__toolbar .primary-btn{max-width:none;width:100%}.contract-draft__field{grid-template-columns:1fr;gap:3px}}
+@media print{
+  @page{size:A4;margin:16mm;}
+  html,body{background:#fff!important;color:#111!important;min-width:0!important;}
+  body *{visibility:hidden!important;}
+  #reviewView{display:block!important;visibility:visible!important;position:absolute!important;inset:0!important;width:100%!important;margin:0!important;padding:0!important;}
+  #reviewView>*:not(#contractDraftPreview){display:none!important;}
+  #contractDraftPreview,#contractDraftPreview *{visibility:visible!important;}
+  #contractDraftPreview{display:block!important;position:static!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important;color:#111!important;box-shadow:none!important;width:100%!important;}
+  .contract-draft__toolbar{display:none!important;}
+  .contract-draft__page{padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#111!important;box-shadow:none!important;}
+  .contract-draft__notice,.contract-draft__pending{background:#fff!important;color:#111!important;border:1px solid #888!important;}
+  .contract-draft__header,.contract-draft__section,.contract-draft__pending{break-inside:avoid;}
+  .contract-draft__field{border-bottom:1px solid #ddd!important;}
+  .contract-draft__field dt,.contract-draft__footer,.contract-draft__jurisdiction{color:#333!important;}
+  .contract-draft__section h3,.contract-draft__pending h3{border-bottom:1px solid #888!important;}
+}
