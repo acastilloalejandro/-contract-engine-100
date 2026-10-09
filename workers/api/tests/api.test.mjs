@@ -81,7 +81,10 @@ async function hashTokenForTest(value) {
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-function authorizationDb({ sessions = [], users = [], phoneChallenges = [], identitySessions = [] } = {}) {
+function authorizationDb({
+  sessions = [], users = [], phoneChallenges = [], identitySessions = [],
+  processedStripeEvents = [], phoneChallengeClaimChanges = 1
+} = {}) {
   const calls = [];
   const db = {
     calls,
@@ -109,10 +112,52 @@ function authorizationDb({ sessions = [], users = [], phoneChallenges = [], iden
               item.provider_session_id === params[0] && item.user_id === params[1]
             ) || null;
           }
+          if (sql.includes("FROM stripe_webhook_events WHERE event_id = ?")) {
+            return processedStripeEvents.includes(params[0]) ? { event_id: params[0] } : null;
+          }
           return null;
         },
         async run() {
           calls.push({ type: "run", sql, params });
+          if (sql.includes("UPDATE phone_challenges SET attempts = attempts + 1")) {
+            return { meta: { changes: phoneChallengeClaimChanges } };
+          }
+          if (sql.includes("INSERT OR IGNORE INTO stripe_webhook_events")) {
+            const eventId = params[0];
+            if (processedStripeEvents.includes(eventId)) return { meta: { changes: 0 } };
+            processedStripeEvents.push(eventId);
+            return { meta: { changes: 1 } };
+          }
+          if (sql.includes("UPDATE identity_sessions SET status = ?")) {
+            const [status, , eventCreated, id, userId] = params;
+            const row = identitySessions.find(item => item.id === id && item.user_id === userId);
+            if (!row || Number(row.last_event_created_at || 0) > Number(eventCreated)) {
+              return { meta: { changes: 0 } };
+            }
+            if (["verified", "failed"].includes(row.status) && row.status !== status) {
+              return { meta: { changes: 0 } };
+            }
+            const rank = { requires_input: 1, processing: 2, verified: 3, failed: 3 };
+            if (Number(row.last_event_created_at || 0) === Number(eventCreated) &&
+                (rank[status] || 0) < (rank[row.status] || 0)) {
+              return { meta: { changes: 0 } };
+            }
+            row.status = status;
+            row.last_event_created_at = Number(eventCreated);
+            return { meta: { changes: 1 } };
+          }
+          if (sql.includes("UPDATE users SET identity_status = 'verified'")) {
+            const user = users.find(item => item.id === params[0]);
+            if (user) user.identity_status = "verified";
+            return { meta: { changes: user ? 1 : 0 } };
+          }
+          if (sql.includes("UPDATE users SET identity_status = ?")) {
+            const [status, id] = params;
+            const user = users.find(item => item.id === id);
+            if (!user || user.identity_status === "verified") return { meta: { changes: 0 } };
+            user.identity_status = status;
+            return { meta: { changes: 1 } };
+          }
           return { meta: { changes: 1 } };
         }
       };
@@ -211,8 +256,9 @@ assert.equal(crossUserDb.calls.filter(call =>
 
 const identityEventSecret = "test-stripe-webhook-secret";
 const foreignIdentityPayload = JSON.stringify({
-  id: "evt-cross-user-test",
+  id: "evt_crossUserTest",
   type: "identity.verification_session.verified",
+  created: Math.floor(Date.now() / 1000),
   data: {
     object: {
       id: "vs-session-owned-by-b",
@@ -255,5 +301,138 @@ assert.ok(identityDb.calls.some(call =>
 assert.equal(identityDb.calls.filter(call =>
   call.type === "run" && /UPDATE (identity_sessions|users SET identity_status)/i.test(call.sql)
 ).length, 0, "a provider session owned by another user must not change identity status");
+
+
+
+// Atomic phone-attempt claims must reject a race in which another request
+// has already consumed the last available attempt.
+const challengeRaceDb = authorizationDb({
+  sessions: [{ token_hash: sessionHash, user_id: userA.id, expires_at: nowForAuthorization + 3600 }],
+  users: [userA],
+  phoneChallengeClaimChanges: 0,
+  phoneChallenges: [{
+    id: "challenge-owner-a-1234567890",
+    user_id: userA.id,
+    phone: "+34600111222",
+    attempts: 4,
+    expires_at: nowForAuthorization + 600,
+    used_at: null
+  }]
+});
+const racedPhoneConfirmation = await worker.fetch(new Request(API_ORIGIN + "/v1/onboarding/phone/confirm", {
+  method: "POST",
+  headers: {
+    Origin: APP_ORIGIN,
+    Cookie: "__Host-ce_session=" + sessionToken,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ challengeId: "challenge-owner-a-1234567890", code: "123456" })
+}), { ...env, DB: challengeRaceDb });
+assert.equal(racedPhoneConfirmation.status, 400);
+assert.equal((await racedPhoneConfirmation.json()).code, "PHONE_CHALLENGE_EXPIRED");
+assert.ok(challengeRaceDb.calls.some(call =>
+  call.type === "run" &&
+  call.sql.includes("attempts < 5") &&
+  call.sql.includes("expires_at > ?")
+), "phone-code attempt reservation must enforce expiry and maximum attempts atomically");
+
+// A real owned Stripe event may move a pending identity session to verified.
+const verifiedEventCreated = nowForAuthorization - 10;
+const verifiedPayload = JSON.stringify({
+  id: "evt_verifiedExample123",
+  type: "identity.verification_session.verified",
+  created: verifiedEventCreated,
+  data: { object: {
+    id: "vs-session-owned-by-a",
+    type: "document",
+    status: "verified",
+    metadata: { user_id: "user-a" }
+  } }
+});
+const verifiedSignature = await hmacSignature(
+  verifiedPayload, identityEventSecret, String(Math.floor(Date.now() / 1000))
+);
+const verifiedUser = { ...userA, identity_status: "processing" };
+const verifiedDb = authorizationDb({
+  users: [verifiedUser],
+  identitySessions: [{
+    id: "local-identity-a",
+    provider_session_id: "vs-session-owned-by-a",
+    user_id: "user-a",
+    status: "processing",
+    last_event_created_at: verifiedEventCreated - 1
+  }]
+});
+const verifiedResponse = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Stripe-Signature": verifiedSignature },
+  body: verifiedPayload
+}), { ...env, DB: verifiedDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(verifiedResponse.status, 200);
+assert.equal(await verifiedResponse.text(), "ok");
+assert.equal(verifiedDb.calls.some(call => call.sql.includes("UPDATE identity_sessions SET status = ?")), true);
+assert.equal(verifiedDb.calls.some(call => call.sql.includes("INSERT OR IGNORE INTO stripe_webhook_events")), true);
+assert.equal(verifiedDb.calls.filter(call => call.sql.includes("UPDATE users SET identity_status = 'verified'")).length, 1);
+assert.equal(verifiedUser.identity_status, "verified");
+
+// Replaying the exact Stripe event is idempotent and cannot re-run mutations.
+const callsAfterFirstVerified = verifiedDb.calls.filter(call => call.type === "run").length;
+const duplicateResponse = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Stripe-Signature": verifiedSignature },
+  body: verifiedPayload
+}), { ...env, DB: verifiedDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(await duplicateResponse.text(), "duplicate");
+assert.equal(verifiedDb.calls.filter(call => call.type === "run").length, callsAfterFirstVerified);
+
+// An older processing event cannot roll an already verified session/user back.
+const stalePayload = JSON.stringify({
+  id: "evt_staleProcessing123",
+  type: "identity.verification_session.processing",
+  created: verifiedEventCreated - 5,
+  data: { object: {
+    id: "vs-session-owned-by-a",
+    type: "document",
+    status: "processing",
+    metadata: { user_id: "user-a" }
+  } }
+});
+const staleSignature = await hmacSignature(
+  stalePayload, identityEventSecret, String(Math.floor(Date.now() / 1000))
+);
+const staleResponse = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Stripe-Signature": staleSignature },
+  body: stalePayload
+}), { ...env, DB: verifiedDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(await staleResponse.text(), "ignored");
+assert.equal(verifiedDb.calls.filter(call => call.type === "run" &&
+  call.sql.includes("UPDATE identity_sessions SET status = ?")).length, 1);
+assert.equal(verifiedDb.calls.filter(call => call.type === "run" &&
+  call.sql.includes("UPDATE users SET identity_status = ?")).length, 0);
+assert.equal(verifiedUser.identity_status, "verified");
+
+// A redaction notification is a data-lifecycle event, not a failed identity result.
+const redactedPayload = JSON.stringify({
+  id: "evt_redactedExample123",
+  type: "identity.verification_session.redacted",
+  created: Math.floor(Date.now() / 1000),
+  data: { object: {
+    id: "vs-session-owned-by-a",
+    type: "document",
+    status: "verified",
+    metadata: { user_id: "user-a" }
+  } }
+});
+const redactedSignature = await hmacSignature(
+  redactedPayload, identityEventSecret, String(Math.floor(Date.now() / 1000))
+);
+const redactedResponse = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Stripe-Signature": redactedSignature },
+  body: redactedPayload
+}), { ...env, DB: verifiedDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(await redactedResponse.text(), "ignored");
+assert.equal(verifiedUser.identity_status, "verified");
 
 console.log("Worker API and authorization regression tests: OK");
