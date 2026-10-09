@@ -1,0 +1,8 @@
+# This records responsibility, not independent approval.
+# A single maintainer cannot provide independent review of their own pull request.
+* @acastilloalejandro
+/.github/ @acastilloalejandro
+/workers/ @acastilloalejandro
+/tests/ @acastilloalejandro
+/docs/ @acastilloalejandro
+/legal/ @acastilloalejandro
