@@ -206,10 +206,6 @@ export function saveLocal(onDone){
       localStorage.setItem(state.storageKey||STORAGE_KEY,JSON.stringify({
         version:VERSION,recordId:state.recordId,role:state.role,
         data:publicData(),documentCount:state.docs.length,
-        documents:state.docs.filter(d=>d.persisted).map(d=>({
-          id:d.id,fieldId:d.fieldId,name:d.name,type:d.type,size:d.size,hash:d.hash,
-          status:d.status,version:d.version
-        })),
         audit:state.audit.slice(-50),snapshots:state.snapshots,savedAt:new Date().toISOString()
       }));
       onDone?.("Borrador local guardado · "+new Date().toLocaleTimeString());
@@ -239,9 +235,6 @@ export async function restore(){
     for(const id of PRIVATE_DOCUMENT_FIELDS){
       if(state.data[id]?.id&&!state.docs.some(doc=>doc.id===state.data[id].id)) state.data[id]=null;
     }
-    const storedIds=new Set(state.docs.map(doc=>doc.id));
-    for(const meta of saved.documents||[])
-      if(!storedIds.has(meta.id)) audit("documentRestoreMissing",{documentId:meta.id});
   }catch{
     state.docs=[];
     state.data.additionalDocuments=[];
