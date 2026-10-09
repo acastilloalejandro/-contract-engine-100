@@ -129,6 +129,21 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
   $("accessState").textContent = configured
     ? "Autenticación conectada: la sesión y la identidad se comprobarán en el servidor."
     : "Autenticación real sin configurar. La demo no crea una cuenta ni verifica identidad.";
+  const query = new URLSearchParams(location.search);
+  if (query.get("email_verified") === "1") {
+    message("Correo verificado. Ya puedes iniciar sesión.", "success");
+  } else if (["email_verification_failed", "oauth_callback_failed", "oauth_cancelled", "account_linking_required"].includes(query.get("auth_error"))) {
+    const errorMessages = {
+      email_verification_failed: "El enlace de verificación no es válido o ha caducado. Solicita uno nuevo.",
+      oauth_callback_failed: "No se ha podido completar el acceso con el proveedor. Vuelve a intentarlo.",
+      oauth_cancelled: "Se ha cancelado el acceso con el proveedor.",
+      account_linking_required: "Ya existe una cuenta con ese correo. Inicia sesión con el método original antes de vincular otro proveedor."
+    };
+    message(errorMessages[query.get("auth_error")], "error");
+  }
+  if (query.has("email_verified") || query.has("auth_error")) {
+    history.replaceState(null, "", location.pathname);
+  }
   if (!configured) {
     $("demoTitle").textContent = "Explorar sin cuenta";
     $("demoDescription").textContent = "Puedes probar el formulario con datos ficticios. No introduzcas DNI, teléfonos, documentos ni información contractual real en este modo.";
@@ -155,7 +170,7 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
       if (mode === "register") {
         const result = await auth.register({ email, password });
         if (result?.requiresEmailVerification === true || result?.emailVerified === false) {
-          message("Cuenta creada. Confirma el correo y vuelve para iniciar sesión.", "success");
+          message("Si el registro procede, recibirás un correo de verificación. Confirma el correo antes de iniciar sesión.", "success");
           setMode("login");
           return;
         }
