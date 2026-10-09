@@ -1,5 +1,27 @@
 # Changelog
 
+## 5.2.0 — endurecimiento estático y local (2026-10-09, rama candidata)
+
+- Sincronizar el número de versión en esquema, paquete, lockfile e interfaz.
+- Eliminar país y jurisdicción predeterminados; advertir de que un texto de jurisdicción no es una validación legal.
+- Excluir campos `private` y `restricted` del borrador JSON y de la huella de integridad.
+- Persistir/restaurar binarios de adjuntos localmente con IndexedDB y limpiar adjuntos del expediente al iniciar uno nuevo.
+- Restringir adjuntos en cliente a PDF, JPEG, PNG y WebP con límite de 10 MB y comprobaciones iniciales de cabecera, MIME y extensión.
+- Empaquetar el generador QR localmente y añadir licencia MIT para eliminar la carga de CDN en tiempo de ejecución.
+- Separar el verificador QR estático y mostrar `NO VERIFICADO`, con límites explícitos de lo que comprueba.
+- Añadir CSP en metadatos, política de referrer, icono/manifest PWA y service worker de shell versionado.
+- Solicitar reconocimiento de advertencias antes de revisión, mejorar acceso al bloque documental y limitar la vista revisora a campos no privados/restringidos.
+- Añadir pruebas de regresión para versión, minimización de datos, validación de archivos, moneda/jurisdicción y recursos PWA.
+- Registrar el alcance y estado de las 50 recomendaciones en [OPTIMIZATION-ROADMAP-50.md](docs/OPTIMIZATION-ROADMAP-50.md).
+
+### Límites que permanecen
+
+- Estos cambios todavía no están fusionados ni publicados hasta que el PR y CI finalicen.
+- La autenticación, OAuth, OTP, identidad, firma electrónica y comprobación del QR en servidor siguen sin estar operativas.
+- IndexedDB es almacenamiento local sin cifrado de aplicación; no utilizar con documentos o expedientes reales.
+- La validación del archivo ocurre en el cliente y no sustituye análisis antimalware del servidor.
+- La CSP de metadatos debe ajustarse a los orígenes reales antes de habilitar una API externa; faltan cabeceras HTTP, E2E, pruebas en navegadores reales y revisión independiente.
+
 Los cambios funcionales y de entrega se registran aquí. Una entrada no implica por sí sola que el producto completo esté listo para producción.
 
 ## 5.1.0 — frontend estático publicado (2026-10-09)
