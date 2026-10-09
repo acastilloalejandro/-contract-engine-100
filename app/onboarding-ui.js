@@ -123,8 +123,13 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
   gate.hidden = false;
 
   const configured = auth.isConfigured();
-  $("providerAuth").hidden = !configured;
-  $("authPanel").hidden = !configured;
+  $("providerAuth").hidden = false;
+  $("authPanel").hidden = false;
+  $("authEmail").disabled = !configured;
+  $("authPassword").disabled = !configured;
+  $("authSubmit").disabled = !configured;
+  $("googleBtn").disabled = !configured;
+  $("appleBtn").disabled = !configured;
   $("demoPanel").hidden = false;
   $("accessState").textContent = configured
     ? "Autenticación conectada: la sesión y la identidad se comprobarán en el servidor."
