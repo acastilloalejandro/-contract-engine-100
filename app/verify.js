@@ -6,7 +6,7 @@ const request = params.get("request") || "";
 const mode = params.get("mode") || "";
 
 const idPattern = /^[A-Z0-9-]{8,120}$/i;
-const versionPattern = /^\\d+\\.\\d+\\.\\d+(?:[-+][A-Z0-9.-]+)?$/i;
+const versionPattern = /^\d+\.\d+\.\d+(?:[-+][A-Z0-9.-]+)?$/i;
 const hashPattern = /^[a-f0-9]{64}$/i;
 const valid = id.length <= 120 && request.length <= 120 &&
   idPattern.test(id) && idPattern.test(request) &&
