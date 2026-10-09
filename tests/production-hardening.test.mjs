@@ -35,7 +35,7 @@ assert.match(engine, /STORAGE_KEY="ce100:v5\.2"/);
 assert.match(engine, /LEGACY_STORAGE_KEY="ce100:v5"/);
 assert.match(engine, /sanitizeSavedData/);
 assert.match(engine, /localStorage\.removeItem\(sourceKey\)/);
-assert.match(schema, /additionalDocuments","files",\{private:true\}/);
+assert.match(schema, /F\("additionalDocuments","Documentos","Otros documentos y anexos","files",\{private:true\}\)/);
 assert.doesNotMatch(saveBlock, /documents:\s*state\.docs\.filter/);
 assert.match(main, /await restore\(\)/);
 assert.doesNotMatch(main, /cdn\.jsdelivr\.net/);
