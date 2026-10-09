@@ -13,7 +13,7 @@ export const state={
 };
 
 export const filled=v=>v!==undefined&&v!==null&&v!==""&&!(Array.isArray(v)&&v.length===0);
-export const visibleFields=()=>SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
+export const visibleFields=()=>SCHEMA.filter(f=>f.id==="workerRole"||(state.role==="reviewer"?(!f.private&&!f.restricted&&f.when(state.data)):(!f.actor||f.actor.includes(state.role))&&f.when(state.data)));
 
 export function riskAssessment(){
   const flags=[];
