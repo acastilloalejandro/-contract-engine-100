@@ -12,6 +12,9 @@ function apiBase() {
   if (url.protocol !== "https:" && url.hostname !== "localhost") {
     throw new Error("La API de autenticación debe utilizar HTTPS.");
   }
+  if (url.username || url.password || url.search || url.hash) {
+    throw new Error("Configura la URL base de la API sin credenciales, consulta ni fragmento.");
+  }
   return url;
 }
 
@@ -24,7 +27,8 @@ export class AuthConfigurationError extends Error {
 
 async function request(path, { method = "GET", body, signal } = {}) {
   const api = apiBase();
-  const response = await fetch(api.origin + api.pathname.replace(/\\/$/, "") + path, {
+  const basePath = api.pathname.endsWith("/") ? api.pathname.slice(0, -1) : api.pathname;
+  const response = await fetch(api.origin + basePath + path, {
     method, credentials: "include",
     headers: { "Accept": "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
     body: body ? JSON.stringify(body) : undefined, signal
