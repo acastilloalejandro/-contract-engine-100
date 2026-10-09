@@ -150,7 +150,7 @@ async function currentUser(request, env) {
   const tokenHash = await sha256(token);
   const now = Math.floor(Date.now() / 1000);
   const row = await env.DB.prepare(
-    "SELECT u.id, u.email, u.email_verified, u.phone, u.phone_verified, u.identity_status " +
+    "SELECT u.id, u.email, u.email_verified, u.phone_verified, u.identity_status " +
     "FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ? LIMIT 1"
   ).bind(tokenHash, now).first();
   if (!row) {
@@ -215,7 +215,7 @@ async function register(request, env) {
   const existing = await env.DB.prepare("SELECT id FROM users WHERE email = ? LIMIT 1").bind(email).first();
   if (existing) {
     // This endpoint does not distinguish existing accounts in a successful response.
-    return json(request, env, { requiresEmailVerification: true, emailVerified: false });
+    return json(request, env, { requiresEmailVerification: true, emailVerified: false }, 202);
   }
   const now = Math.floor(Date.now() / 1000);
   const userId = crypto.randomUUID();
@@ -273,11 +273,11 @@ async function login(request, env) {
     "SELECT id, email, email_verified, password_hash, password_salt, password_iterations, phone_verified, identity_status " +
     "FROM users WHERE email = ? AND auth_provider = 'password' LIMIT 1"
   ).bind(email).first();
-  if (!user || !user.password_hash || !user.password_salt) {
-    throw new HttpError(401, "INVALID_CREDENTIALS", "No se pudo iniciar sesión. Revisa las credenciales.");
-  }
-  const digest = await passwordDigest(password, user.password_salt, Number(user.password_iterations) || PASSWORD_ITERATIONS);
-  if (!equalBytes(digest, fromB64url(user.password_hash))) {
+  // Perform the same expensive derivation for unknown accounts to reduce email-enumeration timing differences.
+  const salt = user?.password_salt || "c2VjdXJlLWR1bW15LXNhbHQ";
+  const digest = await passwordDigest(password, salt, Number(user?.password_iterations) || PASSWORD_ITERATIONS);
+  const matchesPassword = Boolean(user?.password_hash && equalBytes(digest, fromB64url(user.password_hash)));
+  if (!user || !matchesPassword) {
     throw new HttpError(401, "INVALID_CREDENTIALS", "No se pudo iniciar sesión. Revisa las credenciales.");
   }
   if (user.email_verified !== 1) throw new HttpError(403, "EMAIL_VERIFICATION_REQUIRED", "Confirma el correo desde el enlace enviado antes de iniciar sesión.");
@@ -523,10 +523,11 @@ async function confirmPhone(request, env) {
     .bind(challengeId, user.id).run();
   const result = await twilioRequest(env, "VerificationCheck", { To: challenge.phone, Code: code });
   if (result.status !== "approved") throw new HttpError(400, "PHONE_CODE_INVALID", "El código no es válido o ha caducado.");
-  await env.DB.prepare("UPDATE phone_challenges SET used_at = ? WHERE id = ? AND user_id = ? AND used_at IS NULL")
+  await env.DB.prepare("UPDATE phone_challenges SET used_at = ?, phone = '' WHERE id = ? AND user_id = ? AND used_at IS NULL")
     .bind(now, challengeId, user.id).run();
-  await env.DB.prepare("UPDATE users SET phone = ?, phone_verified = 1 WHERE id = ?")
-    .bind(challenge.phone, user.id).run();
+  // Retain only the verification status, not the phone number itself.
+  await env.DB.prepare("UPDATE users SET phone_verified = 1 WHERE id = ?")
+    .bind(user.id).run();
   return json(request, env, { phoneVerified: true });
 }
 
