@@ -63,3 +63,8 @@ La demo no acredita identidad ni crea una firma electrónica. El navegador no es
 La capa de protección dirige las señales de riesgo a revisión humana. No implementa confinamiento, retención coercitiva de documentos ni control coercitivo del movimiento.
 
 Antes de producción siguen pendientes, como mínimo: despliegue y conexión del backend, verificación QR en servidor, recuperación y borrado de cuenta, autorización por recurso y rol, almacén de documentos cifrado, proveedor de firma, cabeceras de seguridad HTTP, análisis antimalware server-side, observabilidad, copias de seguridad y restauración, pruebas end-to-end, prueba en navegador real y revisión legal, seguridad, privacidad y accesibilidad por jurisdicción. La lista operativa está en [gates de producción](docs/PRODUCTION-GATES.md).
+
+
+### Estado de calidad v5.2.0
+
+La rama candidata debe superar de nuevo `npm test` después de los últimos cambios de privacidad y persistencia. Un resultado fallido en una ejecución anterior no demuestra que el último commit siga fallando; consulta las ejecuciones asociadas al SHA actual antes de publicar.
