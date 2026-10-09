@@ -1,4 +1,4 @@
-name = "contract-engine-auth-api"
+name = "bithome-api"
 main = "src/index.js"
 compatibility_date = "2026-10-09"
 workers_dev = true
@@ -10,5 +10,5 @@ API_ORIGIN = "https://api.example.com"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "contract-engine-auth"
+database_name = "bithome"
 database_id = "REPLACE_WITH_D1_DATABASE_UUID"
