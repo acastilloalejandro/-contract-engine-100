@@ -2,6 +2,7 @@ const configured = process.env.SITE_URL;
 if (!configured) throw new Error("SITE_URL is required.");
 const base = new URL(configured);
 if (base.protocol !== "https:") throw new Error("Pages URL must use HTTPS.");
+if (!base.pathname.endsWith("/")) base.pathname += "/";
 
 const required = [
   "", "verify.html", "config.js", "manifest.webmanifest",
@@ -19,7 +20,8 @@ async function fetchWithRetry(path) {
       if (!response.ok) throw new Error(path + ": HTTP " + response.status);
       const body = await response.text();
       if (!body.length) throw new Error(path + ": empty response");
-      if (path === "" && !/application-version["']\\s+content=["']5\\.2\\.0/.test(body)) {
+      const versionMarker = 'name="application-version" content="5.2.0"';
+      if (path === "" && !body.includes(versionMarker)) {
         throw new Error("The deployed homepage does not advertise version 5.2.0.");
       }
       if (path === "verify.html" && !body.includes("app/verify.js")) {
