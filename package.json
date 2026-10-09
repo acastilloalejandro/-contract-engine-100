@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs"
+    "test": "node tests/smoke.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs && node tests/onboarding.test.mjs"
   }
 }
