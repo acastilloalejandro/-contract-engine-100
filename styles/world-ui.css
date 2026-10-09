@@ -33,7 +33,7 @@ a{color:inherit}
 .brand-sub{font-size:10px;color:var(--muted);margin-top:1px}
 .topbar-actions{display:flex;align-items:center;gap:7px}
 .icon-btn{width:var(--tap);height:var(--tap);border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--text);display:grid;place-items:center;box-shadow:var(--shadow);font-size:18px}
-.world-content{width:min(100%,620px);margin:0 auto;padding:14px 14px 32px}
+.world-content{width:min(100%,620px);margin:0 auto;padding:14px 14px 32px}.verify-page .world-content{padding-top:max(24px,env(safe-area-inset-top))}.verify-page .hero-value{font-size:34px;margin-top:22px}
 .view{animation:ce-in .18s ease-out}
 .world-hero{padding:22px 20px 18px;border-radius:var(--radius-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
 .hero-kicker,.eyebrow{font-size:10px;line-height:1.2;font-weight:800;letter-spacing:.09em;color:var(--muted)}
