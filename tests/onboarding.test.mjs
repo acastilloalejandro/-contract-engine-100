@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname);
 const read = p => fs.readFileSync(path.join(root, p), "utf8");
@@ -11,6 +12,10 @@ const engine = read("app/engine.js");
 const config = read("config.js");
 const css = read("styles/world-ui.css");
 
+execFileSync(process.execPath, ["--check", path.join(root, "app", "onboarding-ui.js")]);
+execFileSync(process.execPath, ["--check", path.join(root, "app", "auth.js")]);
+execFileSync(process.execPath, ["--check", path.join(root, "config.js")]);
+
 assert.match(html, /id="accessGate"/);
 assert.match(html, /id="app" class="app-shell" hidden/);
 assert.match(html, /id="phoneStartForm"/);
@@ -20,7 +25,7 @@ assert.match(gate, /onboardingStatus/);
 assert.match(gate, /phoneIsVerified/);
 assert.match(gate, /identityIsVerified/);
 assert.match(gate, /identityProviderHosts/);
-assert.match(gate, /No introduzcas ni subas tu DNI directamente/);
+assert.match(html, /No introduzcas ni subas tu DNI directamente/);
 assert.match(authSource, /accounts\.google\.com/);
 assert.match(authSource, /appleid\.apple\.com/);
 assert.match(authSource, /La API de autenticación debe utilizar HTTPS/);
