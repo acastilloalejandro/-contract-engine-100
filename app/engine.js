@@ -237,7 +237,7 @@ export async function validateDocumentFile(file){
   if(file.size<=0) return "El archivo está vacío.";
   if(file.size>MAX_FILE_BYTES) return "El archivo supera el límite de 10 MB.";
   const name=String(file.name||"").normalize("NFC");
-  if(!name||name.length>180||/[\\/\\u0000-\\u001f\\u007f]/.test(name)) return "El nombre del archivo no es válido.";
+  if(!name||name.length>180||name.includes("/")||name.includes(String.fromCharCode(92))||[...name].some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127)) return "El nombre del archivo no es válido.";
   const ext=(name.match(/\\.[^.]+$/)?.[0]||"").toLowerCase();
   const rules={
     ".pdf":{mime:"application/pdf",test:b=>b.length>=5&&b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46&&b[4]===0x2d},
@@ -265,7 +265,7 @@ export async function addDocuments(fileList,fieldId){
     if(problem){failures.push(String(file.name||"Archivo")+": "+problem);continue;}
     const hash=await sha256File(file);
     if(state.docs.some(d=>d.hash===hash)){failures.push(String(file.name||"Archivo")+": ya está añadido.");continue;}
-    const cleanName=String(file.name).normalize("NFC").replace(/[\\/\\u0000-\\u001f\\u007f]/g,"_").slice(0,120);
+    const cleanName=String(file.name).normalize("NFC").split("/").join("_").split(String.fromCharCode(92)).join("_").split("").filter(ch=>ch.charCodeAt(0)>=32&&ch.charCodeAt(0)!==127).join("").slice(0,120);
     const doc={
       id:"DOC-"+(crypto.randomUUID?.()||Date.now()),fieldId,name:cleanName,
       type:file.type||"application/octet-stream",size:file.size,hash,status:"NEEDS_REVIEW",
