@@ -14,6 +14,7 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 ## Qué incluye
 
 - Formulario declarativo, validación mejorada, advertencias que requieren reconocimiento, persistencia local de adjuntos con IndexedDB, huellas de integridad, QR generado desde una biblioteca local y aviso explícito de no verificación.
+- Vista previa local del borrador contractual agrupada por secciones, campos obligatorios pendientes e impresión/guardado como PDF mediante el navegador. No produce un contrato legal certificado ni un PDF firmado.
 - Pantallas de acceso e incorporación y un adaptador para conectar correo/contraseña, Google/Apple, OTP y verificación documental con proveedores externos. Estas pantallas no equivalen a un servicio de autenticación desplegado.
 - API de referencia en Cloudflare Workers + D1 para sesiones, OAuth, correo, teléfono y estado de identidad, pendiente de despliegue y configuración.
 - Pruebas automatizadas de humo, invariantes, autenticación, onboarding, contrato de API y regresiones v5.2.0 de minimización de datos y validación de archivos.
@@ -27,7 +28,7 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - `src/`, `schema/`, `legal/`: contratos de tipos, validación y registro de reglas.
 - `workers/api/src/index.js`, `workers/api/schema.sql`, `workers/api/wrangler.toml`: backend Cloudflare de referencia.
 - `tests/`: regresiones y pruebas de invariantes.
-- [Arquitectura modular](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [estado y gates de producción](docs/PRODUCTION-GATES.md).
+- [Arquitectura modular y límites de confianza](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [estado y gates de producción](docs/PRODUCTION-GATES.md), [matriz de 50 optimizaciones](docs/OPTIMIZATION-ROADMAP-50.md).
 - [Historial de cambios](CHANGELOG.md).
 - [Hoja de ruta de las 50 optimizaciones y bloqueos](docs/OPTIMIZATION-ROADMAP-50.md).
 
