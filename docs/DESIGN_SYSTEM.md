@@ -1,28 +1,32 @@
-# Contract Engine 100 · UI Design System 4.0
+# bithome · Fusion Light Design System 1.0
 
-La interfaz adopta una gramática visual inspirada en aplicaciones financieras móviles modernas, en particular el patrón observado en World Money: encabezado compacto, métrica principal grande, acciones rápidas en pastillas, tarjetas de información compactas y navegación inferior.
+Autor: Alejandro Hernández Castillo. Producto: Bithome, web iPhone-first en modo claro.
 
-## Principios
-- iPhone-first, una columna y anchura contenida.
-- Una métrica principal por pantalla, usada aquí para el progreso del expediente.
-- Acciones primarias cortas y táctiles.
-- Tarjetas con superficies neutras, separación suave y mínima decoración.
-- Navegación inferior persistente.
-- Dark mode, safe areas y reducción de movimiento.
-- Zoom del sistema permitido. No se bloquea la ampliación del contenido.
-- No se incorporan logotipos, ilustraciones ni recursos propietarios de terceros.
+Diseño propio basado en patrones generales de usabilidad financiera y guías de interfaz de Apple. «Apple Foundation Fusion Design» es un nombre de enfoque solicitado, no un sistema de diseño oficial acreditado por Apple. No se utiliza código, backend, fotografías, logotipos ni recursos propietarios de World Money.
 
-## Mapeo al producto
-World Money: saldo principal → Contract Engine: progreso del expediente.
-World Money: Buy / Send / More → Contract Engine: Continuar / Revisar / Tema.
-World Money: tarjetas de activos → Contract Engine: campos / documentos / errores / versión.
-World Money: navegación inferior → Contract Engine: Formulario / Documentos / Revisión / Estado.
+## Tokens web
 
-## Componentes
-world-hero, world-mini-card, world-action, world-nav, world-tab, world-section-title y glass forman la capa visual compartida.
+| Token | Valor | Uso |
+|---|---|---|
+| --canvas | #f6f8fb | Fondo |
+| --surface | #ffffff | Tarjetas |
+| --text | #15223b | Texto |
+| --muted | #67738a | Texto secundario |
+| --border | #e6eaf1 | Separadores |
+| --blue | #195cec | Primario |
+| --blue-tint | #edf3ff | Superficies activas |
+| --mint | #0b896a | Confirmaciones no monetarias |
 
-## Rendimiento
-La capa visual está separada en styles/world-ui.css. Se evita el blur pesado en las tarjetas principales. El guardado de borrador usa debounce de 350 ms. Los object URLs de documentos se revocan al eliminar archivos.
+La web usa la pila tipográfica de sistema, sin distribuir fuentes propietarias. Figma usa Inter como equivalencia editable para el documento de diseño, no como fuente empaquetada del frontend.
 
-## Límites
-Esta implementación es una inspiración funcional y visual. No incorpora código, logotipos, imágenes ni activos propietarios de World Money.
+## Componentes y flujos
+
+Marca, aviso de entorno, hero, tarjeta, asistente de cinco pasos, campos declarativos, errores contextuales, selector, casilla, cotización BTC/EUR, revisión narrativa, exportación JSON, progreso y resumen. Paso a paso: Personas → Inmueble → Precio y Bitcoin → Condiciones → Revisión.
+
+Figma contiene tokens reutilizables, componentes de botón y campo, y una pantalla editable con la dirección visual. Archivo: https://www.figma.com/design/aETVQUp6nLu6EkCA62SM3z
+
+## Accesibilidad, seguridad y límites
+
+Diseño responsive, controles táctiles, estados visibles de foco, etiquetas vinculadas, errores aria-invalid, aria-live, preferencia reduced-motion. VoiceOver y Safari iOS deben probarse en dispositivos reales antes de afirmar conformidad WCAG.
+
+El formulario de demostración solo mantiene el estado en memoria. No envía datos al backend y no solicita direcciones de carteras, claves ni semillas. La API de Cloudflare es una referencia sin desplegar: solo almacena tipo de inmueble y fase por usuario autenticado. Ninguna parte de esta implementación ejecuta Bitcoin, custodia fondos, firma escrituras o verifica identidades.

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import {validateRealEstateDraft,publicDraft,MODULE_VERSION} from "../real-estate/schema.js";
-const valid={seller:"Ana",buyer:"Luis",propertyAddress:"Calle Mayor 1",cadastralReference:"1234567AB1234C0001DE",propertyType:"segunda_mano",priceEUR:"200000",btcAmount:"2.12500000",rateSource:"Cotización documentada",rateTimestamp:"2026-10-09T12:30",paymentMethod:"onchain",legalReview:true};
+import {validateRealEstateDraft,publicDraft,computeIndicativeEURPerBTC,isActive,fields,MODULE_VERSION} from "../real-estate/schema.js";
+const valid={seller:"Ana",buyer:"Luis",propertyAddress:"Calle Mayor 1",cadastralReference:"1234567AB1234C0001DE",propertyType:"segunda_mano",priceEUR:"200000",btcAmount:"2.12500000",rateSource:"Cotización documentada",rateTimestamp:"2026-10-09T12:30",paymentMethod:"onchain",btcNetwork:"bitcoin_mainnet",legalReview:true};
 assert.equal(validateRealEstateDraft(valid).valid,true);
 for(const key of ["seller","buyer","propertyAddress","cadastralReference","priceEUR","btcAmount","rateSource","rateTimestamp","paymentMethod"]){assert.equal(validateRealEstateDraft({...valid,[key]:""}).valid,false,key);}
 assert.equal(validateRealEstateDraft({...valid,legalReview:false}).valid,false);
@@ -12,5 +12,16 @@ const exposed=publicDraft({...valid,dni:"12345678Z",seed:"secret",wallet:"bc1som
 assert.equal(JSON.stringify(exposed).includes("12345678Z"),false);
 assert.equal(JSON.stringify(exposed).includes("bc1something"),false);
 assert.equal(exposed.status,"DRAFT_UNVERIFIED");
-assert.equal(MODULE_VERSION,"1.0.0");
+assert.equal(MODULE_VERSION,"1.1.0");
+assert.equal(validateRealEstateDraft({...valid,btcNetwork:"unknown"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,priceEUR:"200000.222"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,btcAmount:"0.000000001"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,rateTimestamp:"2026-02-30T12:30"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,quoteExpiresAt:"2026-10-09T10:30"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,arrasType:"penitenciales",arrasAmountEUR:"300000"}).valid,false);
+assert.equal(validateRealEstateDraft({...valid,arrasType:"penitenciales",arrasAmountEUR:"10000.22"}).valid,true);
+assert.equal(computeIndicativeEURPerBTC("200000","2.12500000"),"94117.64");
+assert.equal(computeIndicativeEURPerBTC("invalid","2"),null);
+assert.equal(isActive(fields.find(f=>f.id==="multisigArbitrator"),valid),false);
+assert.equal(isActive(fields.find(f=>f.id==="multisigArbitrator"),{...valid,paymentMethod:"multisig"}),true);
 console.log("Spanish real estate Bitcoin intake tests: OK");

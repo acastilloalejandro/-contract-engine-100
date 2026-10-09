@@ -8,7 +8,9 @@ const required = [
   "", "verify.html", "config.js", "manifest.webmanifest",
   "styles/world-ui.css", "app/main.js", "app/schema.js", "app/engine.js",
   "app/ui.js", "app/contract-preview.js", "app/verify.js",
-  "vendor/qrcode.min.js", "sw.js"
+  "vendor/qrcode.min.js", "sw.js",
+  "icons/bithome.svg", "real-estate/index.html", "real-estate/style.css",
+  "real-estate/main.js", "real-estate/schema.js"
 ];
 
 async function fetchWithRetry(path) {

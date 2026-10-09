@@ -1,8 +1,63 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; connect-src 'none'"><title>Contrato inmobiliario con Bitcoin · Contract Engine 100</title><link rel="stylesheet" href="./style.css"></head><body><main class="shell">
-<header><a href="../index.html">← Contract Engine 100</a><p class="eyebrow">ESPAÑA · COMPRAVENTA · BITCOIN</p><h1>Tu compraventa, paso a paso.</h1><p>Prepara un expediente de transmisión inmobiliaria con contraprestación en BTC y referencia en euros. Genera un borrador sujeto a revisión profesional.</p></header>
-<section class="notice"><strong>Prototipo local.</strong> No introduzcas DNI/NIE, claves privadas, semillas ni documentos auténticos. No se verifican identidades, pagos, cargas ni firmas notariales. El contenido no se transmite ni se guarda automáticamente.</section>
-<div class="layout"><section class="workspace"><nav class="steps" id="steps" aria-label="Etapas del formulario"></nav><form id="contractForm" novalidate><div id="stepHeading"></div><div id="fields" class="fields"></div><div class="actions"><button type="button" id="previous" class="secondary">Anterior</button><button type="button" id="next">Siguiente</button><button type="submit" id="submit" hidden>Validar y generar borrador</button><button type="reset" id="reset" class="secondary">Empezar de nuevo</button></div><p id="status" role="status" aria-live="polite"></p></form></section>
-<aside><h2>Expediente inmobiliario</h2><dl><dt>Jurisdicción</dt><dd>España</dd><dt>Estado</dt><dd id="recordState">Preparación local</dd><dt>Verificación</dt><dd>No verificado</dd><dt>Firma</dt><dd>Pendiente de notaría</dd></dl><p id="progressNote">Etapa 1 de 5</p><p>El importe BTC no se envía a ninguna red y ningún pago se ejecuta desde aquí.</p></aside></div>
-<section id="result" hidden><h2>Vista previa documental</h2><p id="digest"></p><div id="narrative" class="narrative"></div><details><summary>Ver JSON estructurado</summary><pre id="preview"></pre></details><div class="actions"><button id="download" type="button">Exportar JSON</button><button id="print" type="button" class="secondary">Imprimir / guardar PDF</button></div><p>La huella SHA-256 comprueba bytes, no sustituye firma, sello de tiempo ni autorización notarial.</p></section>
-<footer>© 2026 Alejandro Hernández Castillo · Contract Engine 100 · Documento orientativo sin eficacia notarial.</footer></main><script type="module" src="./main.js"></script></body></html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f9fc">
+<meta name="color-scheme" content="light">
+<meta name="author" content="Alejandro Hernández Castillo">
+<meta name="description" content="bithome: preparación guiada y responsable de compraventas inmobiliarias con Bitcoin en España.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; upgrade-insecure-requests">
+<title>bithome · Compraventa inmobiliaria con Bitcoin</title>
+<link rel="manifest" href="../manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="../icons/bithome.svg"><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al formulario</a>
+<div class="app-shell" id="main">
+  <header class="app-header">
+    <a class="brand" href="./index.html" aria-label="bithome · Inicio"><span class="brand-icon" aria-hidden="true">b<span>·</span></span><span>bithome</span></a>
+    <div class="header-right"><span class="environment"><span class="signal" aria-hidden="true"></span> Entorno de demostración</span><a class="header-link" href="../index.html">Motor anterior <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy"><div class="kicker"><span class="kicker-dot"></span> REAL ESTATE × BITCOIN</div>
+        <h1 id="heroTitle">Un hogar.<br><span>Una nueva forma de acordarlo.</span></h1>
+        <p>Prepara la documentación de una compraventa inmobiliaria con contraprestación pactada en Bitcoin. Un expediente claro, paso a paso y listo para revisión profesional.</p>
+        <div class="hero-tags"><span><span aria-hidden="true">✓</span> EUR + BTC</span><span><span aria-hidden="true">✓</span> Datos en este dispositivo</span><span><span aria-hidden="true">✓</span> Sin custodia</span></div>
+      </div>
+      <div class="hero-card" aria-label="Estado de la operación"><div class="hero-card-head"><span>EXPEDIENTE EN PREPARACIÓN</span><span class="live-dot"></span></div>
+      <div class="hero-card-symbol" aria-hidden="true">⌂</div><div class="hero-card-bottom"><strong>Tu próxima propiedad</strong><small>España · Bitcoin</small></div><div class="hero-card-indicator">BORRADOR <span>↗</span></div></div>
+    </section>
+    <section class="safety" aria-labelledby="safetyTitle"><div class="safety-symbol" aria-hidden="true">ⓘ</div><div><strong id="safetyTitle">Preparación documental, no plataforma de pago.</strong><p>Prototipo sin autenticación de este módulo ni backend conectado. Utiliza datos ficticios: no introduzcas DNI/NIE, direcciones personales reales, documentos, direcciones de cartera, claves ni semillas. No se comprueban cargas, titularidad, firma o pago. No se guarda automáticamente la información.</p></div></section>
+    <div class="app-grid">
+      <section class="workflow" aria-label="Formulario guiado">
+        <div class="section-bar"><div><span class="eyebrow">NUEVA OPERACIÓN</span><h2>Configurar compraventa</h2></div><span class="version">Formulario 1.1</span></div>
+        <nav class="step-nav" id="steps" aria-label="Etapas del expediente"></nav>
+        <form id="contractForm" novalidate>
+          <div class="form-top"><div><span id="stepCounter" class="eyebrow">PASO 01 DE 05</span><h3 id="stepHeading"></h3><p id="stepDescription" class="description"></p></div><span id="stepIcon" class="step-icon" aria-hidden="true">01</span></div>
+          <div id="fields" class="fields"></div>
+          <div class="actions"><button id="previous" type="button" class="button button-subtle">← Anterior</button><div class="action-right"><button id="reset" type="reset" class="button button-ghost">Reiniciar</button><button id="next" type="button" class="button button-primary">Continuar <span aria-hidden="true">→</span></button><button id="submit" type="submit" class="button button-primary" hidden>Generar borrador <span aria-hidden="true">→</span></button></div></div>
+          <p id="status" role="status" aria-live="polite" class="status"></p>
+        </form>
+      </section>
+      <aside class="summary" aria-labelledby="summaryTitle">
+        <div class="summary-top"><span class="eyebrow">VISTA GENERAL</span><span class="summary-top-icon" aria-hidden="true">◎</span></div>
+        <h2 id="summaryTitle">Tu expediente</h2>
+        <p>Todos los pasos de una operación, sin sorpresas.</p>
+        <div class="progress-row"><strong id="progressValue">20%</strong><span id="progressNote">Paso 1 de 5</span></div><div class="progress-track" aria-hidden="true"><span id="progressBar" ></span></div>
+        <div class="summary-list"><div><span>Jurisdicción</span><strong>España</strong></div><div><span>Estado</span><strong id="recordState">Borrador local</strong></div><div><span>Pago</span><strong>Sin ejecutar</strong></div><div><span>Identidad</span><strong>No verificada</strong></div><div><span>Firma</span><strong>No realizada</strong></div></div>
+        <div class="summary-foot"><span aria-hidden="true">◇</span><p>La cadena de bloques no recibe información de este formulario.</p></div>
+      </aside>
+    </div>
+    <section id="result" class="result" hidden aria-labelledby="resultTitle">
+      <div class="result-header"><span class="eyebrow">VISTA PREVIA</span><h2 id="resultTitle">Borrador preparado</h2><p>Pendiente de revisión jurídica, fiscal y notarial. No es una escritura, firma ni comprobante de pago.</p></div>
+      <p id="digest" class="hash"></p><div id="narrative" class="narrative"></div>
+      <details><summary>Datos exportables (JSON)</summary><pre id="preview"></pre></details>
+      <div class="actions"><button id="download" class="button button-primary" type="button">Exportar JSON ↓</button><button id="print" class="button button-subtle" type="button">Imprimir / PDF</button></div>
+      <p class="small-print">Una huella SHA-256 solo permite detectar modificaciones de bytes; no demuestra identidad ni ejecución de pagos.</p>
+    </section>
+  </main>
+  <footer class="footer"><span><strong>bithome</strong> © 2026 Alejandro Hernández Castillo</span><span>Proyecto independiente. No afiliado a Apple ni World.</span><a href="../NOTICE.md">Autoría y licencia</a></footer>
+</div><script type="module" src="./main.js"></script>
+</body></html>

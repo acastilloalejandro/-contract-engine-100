@@ -2,7 +2,7 @@
 
 **Estado: borrador local, sin custodia, sin firma, sin verificación y sin pago.** Autor: Alejandro Hernández Castillo.
 
-Ruta de demostración: `/real-estate/`. Se conserva intacto el formulario laboral original y su versión 5.2.1. El módulo inmobiliario tiene versión independiente 1.0.0 y reglas propias.
+Ruta de demostración: `/real-estate/`. Se conserva intacto el formulario laboral original y su versión 5.2.1. El módulo inmobiliario tiene versión independiente 1.1.0 y reglas propias.
 
 ## Alcance real
 - Identificación textual de las partes, referencia catastral, carácter nuevo/usado, valor EUR, BTC, referencia de cotización y fecha, propuesta de liquidación y revisión.
@@ -30,3 +30,7 @@ Ruta de demostración: `/real-estate/`. Se conserva intacto el formulario labora
 - NIST estándares PQC FIPS 203/204/205.
 
 No convertir este documento en una lista de garantías ya implementadas.
+
+## Implementación experimental Fusion Light 1.1.0
+
+El modo claro, la PWA, el formulario condicional y la exportación local están implementados en `real-estate/`. La API de Cloudflare solo admite metadatos no sensibles por usuario autenticado y sigue sin desplegar. El expediente no se sincroniza con la API. Véase [arquitectura completa](BITHOME-FUSION-LIGHT.md). Una cotización calculada desde importes aportados por el usuario no constituye una referencia de mercado, ni una garantía de pago.

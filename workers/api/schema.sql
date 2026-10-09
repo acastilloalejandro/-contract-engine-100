@@ -92,3 +92,17 @@ CREATE TABLE IF NOT EXISTS audit_events (
   metadata_json TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS audit_events_user_idx ON audit_events(user_id, created_at);
+
+-- Bithome v1: strictly non-sensitive metadata, owned by one authenticated user.
+-- Identity, address, contracts, BTC keys and payment state are not persisted here.
+CREATE TABLE IF NOT EXISTS real_estate_cases (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  property_type TEXT NOT NULL CHECK (property_type IN ('segunda_mano', 'obra_nueva')),
+  phase INTEGER NOT NULL CHECK (phase BETWEEN 1 AND 5),
+  revision INTEGER NOT NULL DEFAULT 1 CHECK (revision >= 1),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS real_estate_cases_owner_idx
+  ON real_estate_cases(user_id, created_at DESC);

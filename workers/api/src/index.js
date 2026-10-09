@@ -715,6 +715,58 @@ async function onboardingStatus(request, env) {
   });
 }
 
+
+/**
+ * Bithome metadata-only case registry, prepared for a future authenticated application.
+ * Never accept identity information, property addresses, wallet addresses, keys or documents.
+ * The local browser draft is not sent to this endpoint.
+ */
+async function realEstateCaseRoute(request, env, path) {
+  const user = await requireUser(request, env);
+  const match = path.match(/^\/v1\/real-estate\/cases\/([0-9a-f-]{36})$/);
+  if (request.method === "GET" && match) {
+    const row = await env.DB.prepare(
+      "SELECT id, property_type, phase, revision, created_at, updated_at " +
+      "FROM real_estate_cases WHERE id = ? AND user_id = ? LIMIT 1"
+    ).bind(match[1], user.id).first();
+    if (!row) throw new HttpError(404, "CASE_NOT_FOUND", "Expediente no encontrado.");
+    return json(request, env, { case: {
+      id: row.id, propertyType: row.property_type, phase: row.phase,
+      revision: row.revision, status: "DRAFT_UNVERIFIED", createdAt: row.created_at, updatedAt: row.updated_at
+    } });
+  }
+  if (request.method === "GET" && !match) {
+    const rows = await env.DB.prepare(
+      "SELECT id, property_type, phase, revision, created_at, updated_at " +
+      "FROM real_estate_cases WHERE user_id = ? ORDER BY created_at DESC LIMIT 25"
+    ).bind(user.id).all();
+    return json(request, env, { cases: (rows.results || []).map(row => ({
+      id: row.id, propertyType: row.property_type, phase: row.phase,
+      revision: row.revision, status: "DRAFT_UNVERIFIED", createdAt: row.created_at, updatedAt: row.updated_at
+    })) });
+  }
+  if (request.method === "POST" && !match) {
+    await requireRateLimit(request, env, "bithome-case-create", 12);
+    const body = await readJson(request);
+    const allowed = new Set(["propertyType", "phase"]);
+    if (!body || typeof body !== "object" || Array.isArray(body) ||
+        Object.keys(body).some(key => !allowed.has(key)) ||
+        !["segunda_mano", "obra_nueva"].includes(body.propertyType) ||
+        !Number.isInteger(body.phase) || body.phase < 1 || body.phase > 5) {
+      throw new HttpError(400, "INVALID_CASE_METADATA", "Solo se admiten tipo de inmueble y fase (1-5); no envíes datos personales.");
+    }
+    const id = crypto.randomUUID();
+    const now = Math.floor(Date.now() / 1000);
+    await env.DB.prepare(
+      "INSERT INTO real_estate_cases (id, user_id, property_type, phase, revision, created_at, updated_at) " +
+      "VALUES (?, ?, ?, ?, 1, ?, ?)"
+    ).bind(id, user.id, body.propertyType, body.phase, now, now).run();
+    return json(request, env, { case: { id, propertyType: body.propertyType,
+      phase: body.phase, revision: 1, status: "DRAFT_UNVERIFIED" } }, 201);
+  }
+  throw new HttpError(405, "METHOD_NOT_ALLOWED", "Método no permitido.");
+}
+
 function validateConfig(env) {
   if (!env.APP_ORIGIN || !env.API_ORIGIN) throw new HttpError(503, "APP_CONFIG_NOT_SET", "Faltan APP_ORIGIN o API_ORIGIN.");
   try {
@@ -759,6 +811,7 @@ export default {
       if (path === "/v1/onboarding/identity/start" && request.method === "POST") return await startIdentity(request, env);
       if (path === "/v1/onboarding/status" && request.method === "GET") return await onboardingStatus(request, env);
       if (path === "/v1/webhooks/stripe" && request.method === "POST") return await stripeWebhook(request, env);
+      if (path === "/v1/real-estate/cases" || /^\/v1\/real-estate\/cases\/[0-9a-f-]{36}$/.test(path)) return await realEstateCaseRoute(request, env, path);
       return json(request, env, { code: "NOT_FOUND", message: "Ruta no encontrada." }, 404);
     } catch (error) {
       if (path.endsWith("/callback")) return redirect(env.APP_ORIGIN + "/?auth_error=oauth_callback_failed");
