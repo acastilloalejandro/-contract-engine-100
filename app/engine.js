@@ -36,11 +36,11 @@ export function validate(){
     if(f.type==="checkbox" ? v!==true : f.type==="file" ? !(v&&v.id) : !filled(v))
       errors.push({field:f.id,message:"Falta: "+f.label+"."});
   }
-  if(d.workerEmail&&!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(String(d.workerEmail).trim()))
+  if(d.workerEmail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(d.workerEmail).trim()))
     errors.push({field:"workerEmail",message:"Introduce un correo electrónico con formato válido."});
   if(d.workerPhone){
-    const phone=String(d.workerPhone).replace(/[()\\s.-]/g,"");
-    if(!/^\\+?\\d{7,15}$/.test(phone)) errors.push({field:"workerPhone",message:"Comprueba el teléfono y su prefijo internacional."});
+    const phone=String(d.workerPhone).replace(/[^0-9+]/g,"");
+    if(!/^\+?\d{7,15}$/.test(phone)) errors.push({field:"workerPhone",message:"Comprueba el teléfono y su prefijo internacional."});
   }
   for(const id of ["trialPeriod","salaryAmount","recruitmentFee","wageDeductions"]){
     if(filled(d[id])&&(!Number.isFinite(Number(d[id]))||Number(d[id])<0))
