@@ -1,5 +1,20 @@
 # Changelog
 
+## 5.2.1 — búsqueda y navegación de formulario (2026-10-09)
+
+- Añadir búsqueda local por nombre de campo y sección, con normalización de acentos.
+- Permitir filtrar campos obligatorios pendientes sin descartar respuestas ya introducidas.
+- Añadir contador de campos visibles, estado vacío accesible y acción para limpiar filtros.
+- Al intentar revisar un expediente incompleto, restablecer los filtros y llevar al primer campo con error.
+- Actualizar la versión de la demo y la caché del service worker para evitar servir recursos antiguos.
+- Incorporar comprobaciones de regresión para los nuevos controles y la versión publicada.
+
+### Límites que permanecen
+
+- La búsqueda y los filtros solo actúan sobre la interfaz del navegador; no verifican la legislación aplicable ni implican autenticación.
+- La demo conserva las restricciones de la versión anterior: no introducir datos reales, documentos sensibles ni utilizarla como sistema contractual de producción.
+
+
 ## 5.2.0 — endurecimiento estático y local (2026-10-09, rama candidata)
 
 - Añadir una previsualización contractual por secciones, lista de campos obligatorios pendientes e impresión/Guardar como PDF del navegador, con avisos visibles de borrador y no validación jurídica.
