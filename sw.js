@@ -1,4 +1,4 @@
-const CACHE_NAME = "ce100-shell-v5.2.0";
+const CACHE_NAME = "ce100-shell-v5.2.1";
 const SHELL = [
   "./",
   "./index.html",

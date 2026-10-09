@@ -4,7 +4,7 @@ import {
   state,restore,saveLocal,audit,validate,riskAssessment,integrityData,publicData,
   documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest,setStorageScope,clearPersistedDocuments,STORAGE_KEY
 } from "./engine.js";
-import {renderForm,renderReview,refreshFormMeta,updateViews,$,esc} from "./ui.js";
+import {renderForm,renderReview,refreshFormMeta,updateViews,setFormFilters,clearFormFilters,$,esc} from "./ui.js";
 
 function speak(text){
   if(!("speechSynthesis" in window)) return;
@@ -18,7 +18,7 @@ function speak(text){
 async function prepareReview(){
   const v=validate();
   if(!v.isValid){
-    state.view="form";state.nav="form";renderForm();
+    state.view="form";state.nav="form";clearFormFilters();
     const f=v.errors[0]?.field;
     document.querySelector("[data-block='"+CSS.escape(f||"")+"']")?.scrollIntoView({behavior:"smooth",block:"center"});
     return;
@@ -152,6 +152,9 @@ function bind(){
   });
   $("sections").addEventListener("input",handleInput);
   $("sections").addEventListener("change",handleChange);
+  $("fieldSearch").addEventListener("input",event=>setFormFilters(event.target.value,$("pendingOnly").checked));
+  $("pendingOnly").addEventListener("change",()=>setFormFilters($("fieldSearch").value,$("pendingOnly").checked));
+  $("clearFieldFilters").addEventListener("click",clearFormFilters);
 
   document.addEventListener("click",e=>{
     const read=e.target.closest("[data-read]");if(read)speak(read.dataset.read);

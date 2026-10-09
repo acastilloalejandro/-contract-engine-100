@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f7f8">
 <meta name="description" content="Contract Engine 100: expedientes contractuales guiados, formularios adaptativos, reglas versionadas y protección de datos.">
-<meta name="application-version" content="5.2.0">
+<meta name="application-version" content="5.2.1">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="color-scheme" content="light dark">
@@ -14,14 +14,14 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icons/contract-engine.svg">
 <link rel="stylesheet" href="./styles/world-ui.css">
-<title>Contract Engine 100 · 5.2.0</title>
+<title>Contract Engine 100 · 5.2.1</title>
 </head>
 <body>
 <main id="accessGate" class="access-gate" aria-labelledby="accessTitle">
   <div class="access-wrap">
     <a class="brand access-brand" href="./" aria-label="Contract Engine 100">
       <span class="brand-mark" aria-hidden="true">CE</span>
-      <span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Contract OS 5.2.0</span></span>
+      <span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Contract OS 5.2.1</span></span>
     </a>
     <section class="access-card">
       <div class="hero-kicker">WORKSPACE CONTRACTUAL</div>
@@ -87,10 +87,18 @@
 </main>
 
 <div id="app" class="app-shell" hidden>
-<header class="topbar"><a class="brand" href="./" aria-label="Contract Engine 100"><span class="brand-mark" aria-hidden="true">CE</span><span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Field System 5.2.0</span></span></a><div class="topbar-actions"><span id="sessionBadge" class="pill">DEMO · LOCAL</span><span id="stateBadge" class="pill">DRAFT</span><button id="logoutBtn" class="secondary-btn logout-btn" type="button" hidden>Cerrar sesión</button><button id="themeBtn" class="icon-btn" type="button" aria-label="Cambiar tema">◐</button></div></header>
+<header class="topbar"><a class="brand" href="./" aria-label="Contract Engine 100"><span class="brand-mark" aria-hidden="true">CE</span><span><span class="brand-name">Contract Engine</span><span class="brand-sub">100 · Field System 5.2.1</span></span></a><div class="topbar-actions"><span id="sessionBadge" class="pill">DEMO · LOCAL</span><span id="stateBadge" class="pill">DRAFT</span><button id="logoutBtn" class="secondary-btn logout-btn" type="button" hidden>Cerrar sesión</button><button id="themeBtn" class="icon-btn" type="button" aria-label="Cambiar tema">◐</button></div></header>
 <main class="world-content">
 <section id="formView" class="view" aria-labelledby="formTitle">
 <div class="world-hero"><div class="hero-kicker">EXPEDIENTE CONTRACTUAL</div><div id="progressValue" class="hero-value">0%</div><div id="formTitle" class="hero-sub">Registro progresivo · <span id="progressText">0 de 0 requisitos</span></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="quick-actions"><button id="reviewBtn" class="quick-action primary" type="button">Revisar</button><button id="docsBtn" class="quick-action" type="button">Documentos</button><button id="saveBtn" class="quick-action" type="button">Guardar</button></div></div>
+<section class="panel form-tools" aria-labelledby="fieldSearchTitle">
+  <div class="section-head"><div><span class="eyebrow">BÚSQUEDA LOCAL</span><h2 id="fieldSearchTitle">Encuentra un campo</h2></div><span id="filterCount" class="counter" role="status" aria-live="polite">Todos los campos</span></div>
+  <label class="field-label" for="fieldSearch">Buscar por nombre o sección</label>
+  <input id="fieldSearch" type="search" autocomplete="off" placeholder="Ej. jornada, salario, documentos" aria-describedby="fieldSearchHelp">
+  <label class="check-row form-pending-toggle" for="pendingOnly"><input id="pendingOnly" type="checkbox"><span>Mostrar solo campos obligatorios pendientes</span></label>
+  <div class="button-row"><button id="clearFieldFilters" class="secondary-btn" type="button" hidden>Limpiar filtros</button></div>
+  <p id="fieldSearchHelp" class="microcopy">El filtro solo cambia lo que ves. No envía datos ni elimina respuestas del expediente.</p>
+</section>
 <section class="privacy-card"><div class="section-head"><div><span class="eyebrow">TRABAJADOR/A</span><h2>Protección privada</h2></div><span id="riskPill" class="pill normal">NORMAL</span></div><p class="muted">Los valores marcados como privados o restringidos se excluyen del borrador local y de la huella. Los archivos adjuntos sí pueden quedar en IndexedDB sin cifrado, incluso si contienen datos sensibles. Usa únicamente datos ficticios en esta demo.</p><div class="metric-grid"><div class="mini-card"><span>Señales</span><strong id="riskFlags">0</strong></div><div class="mini-card"><span>Puntuación</span><strong id="riskScore">0</strong></div><div class="mini-card"><span>Estado</span><strong id="riskState">NORMAL</strong></div></div><div class="privacy-state" role="status"><span class="status-dot" aria-hidden="true"></span>Modo privado activo</div></section>
 <div id="sections"></div>
 <section class="panel"><div class="section-head"><div><span class="eyebrow">CONTROL</span><h2>Listo para revisión</h2></div><span id="validationPill" class="pill good">0 errores</span></div><div id="validationSummary" class="summary-list"></div><button id="reviewBtnBottom" class="primary-btn" type="button">Revisar expediente</button><p id="saveState" class="microcopy">Borrador local listo.</p></section>

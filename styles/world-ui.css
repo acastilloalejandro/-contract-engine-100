@@ -203,3 +203,14 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
   .contract-draft__field dt,.contract-draft__footer,.contract-draft__jurisdiction{color:#333!important;}
   .contract-draft__section h3,.contract-draft__pending h3{border-bottom:1px solid #888!important;}
 }
+
+/* Local search and required-field filtering for long forms. */
+.form-tools .field-label{margin-top:14px}
+.form-pending-toggle{align-items:flex-start;margin:8px 0}
+.form-pending-toggle input{margin-top:2px}
+.form-tools .button-row{margin-top:8px}
+.form-tools .button-row>*{flex:0 1 220px}
+.empty-results{padding:24px 18px;text-align:left}
+.empty-results h2{margin:0;font-size:17px;letter-spacing:-.03em}
+.empty-results p{margin:8px 0 14px}
+@media(max-width:390px){.form-tools .button-row>*{flex:1 1 100%}}
