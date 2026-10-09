@@ -250,7 +250,12 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
         return;
       }
       const target = new URL(url);
-      if (target.protocol !== "https:" && target.hostname !== "localhost") throw new Error("El proveedor de identidad debe utilizar HTTPS.");
+      const allowedHosts = Array.isArray(window.CONTRACT_ENGINE_CONFIG?.identityProviderHosts)
+        ? window.CONTRACT_ENGINE_CONFIG.identityProviderHosts.map(host => String(host).toLowerCase())
+        : [];
+      if (target.protocol !== "https:" || target.username || target.password || !allowedHosts.includes(target.hostname.toLowerCase())) {
+        throw new Error("El dominio del proveedor de identidad no está incluido en la lista permitida de config.js.");
+      }
       location.assign(target.href);
     } catch (error) {
       message(error.message || "No se pudo iniciar la verificación de identidad.", "error");
