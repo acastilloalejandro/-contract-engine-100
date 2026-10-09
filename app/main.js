@@ -155,6 +155,7 @@ function bind(){
 
   document.addEventListener("click",e=>{
     const read=e.target.closest("[data-read]");if(read)speak(read.dataset.read);
+    if(e.target.closest("#printContractBtn")){window.print();return;}
     const open=e.target.closest("[data-open]");
     if(open){const d=state.docs.find(x=>x.id===open.dataset.open);if(d?.url)window.open(d.url,"_blank","noopener,noreferrer");}
   });
