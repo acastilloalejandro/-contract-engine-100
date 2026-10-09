@@ -81,7 +81,8 @@ const hardenedWorkflows = [
   ".github/workflows/contract-os.yml",
   ".github/workflows/codeql.yml",
   ".github/workflows/dependency-review.yml",
-  ".github/workflows/static.yml"
+  ".github/workflows/static.yml",
+  ".github/workflows/workflow-security.yml"
 ];
 for (const workflowPath of hardenedWorkflows) {
   const workflow = read(workflowPath);
