@@ -221,3 +221,9 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 .empty-results h2{margin:0;font-size:17px;letter-spacing:-.03em}
 .empty-results p{margin:8px 0 14px}
 @media(max-width:390px){.form-tools .button-row>*{flex:1 1 100%}}
+
+/* Canonical Bithome entry point: retains the legacy contract workspace as a separate historical module. */
+.bithome-portal{width:min(1100px,calc(100% - 28px));margin:20px auto 16px;padding:clamp(18px,3vw,30px);background:linear-gradient(140deg,#fff,#f7faff);border:1px solid #dfe7f6;border-radius:25px;display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 12px 38px #23447c10;color:#172334}
+.portal-brand{display:flex;align-items:flex-start;gap:17px}.portal-mark{flex:none;width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:#195cec;color:#fff;font-weight:900;font-size:23px}.portal-kicker{display:block;font-size:10px;letter-spacing:.13em;font-weight:850;color:#195cec}.bithome-portal h2{font-size:clamp(19px,3vw,27px);line-height:1.15;letter-spacing:-.045em;margin:8px 0}.bithome-portal p{font-size:13px;line-height:1.55;color:#61708a;max-width:660px;margin:0}.portal-cta{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;border-radius:14px;background:#195cec;color:white!important;font-size:13px;font-weight:750;text-decoration:none;padding:13px 17px;white-space:nowrap}.portal-cta:hover{background:#0f4fd2;text-decoration:none}
+@media(max-width:650px){.bithome-portal{align-items:stretch;flex-direction:column}.portal-brand{gap:12px}.portal-mark{width:41px;height:41px;font-size:20px}}
+@media(prefers-reduced-motion:reduce){.portal-cta{transition:none}}
