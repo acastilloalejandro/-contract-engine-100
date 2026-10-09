@@ -43,6 +43,12 @@ Requirements: Node.js 24 or newer, a Cloudflare account with Workers and D1 enab
 
         npx wrangler@4.148.0 d1 execute contract-engine-auth --remote --file=workers/api/schema.sql
 
+   The current schema includes `identity_sessions.last_event_created_at` and the `stripe_webhook_events` deduplication table. If the database was created from an older version of `schema.sql`, apply the one-time migration before deploying the updated Worker:
+
+        npx wrangler@4.148.0 d1 execute contract-engine-auth --remote --file=workers/api/migrations/20261009_webhook_idempotency.sql
+
+   Do not run that migration after applying the current schema to a fresh database; it would attempt to add a column that already exists.
+
 3. Set APP_ORIGIN and API_ORIGIN in wrangler.toml to the real HTTPS origins.
 
 4. From workers/api, deploy after installing/authenticating Wrangler:
