@@ -1,5 +1,13 @@
 # Contract OS — Arquitectura modular y compatibilidad
 
+## Autoría, licencia y atribución técnica
+
+- Titular de autoría declarada del proyecto: **Alejandro Hernández Castillo**. Contacto: **acastilloalejandro@icloud.com**.
+- La licencia aplicable al código debe leerse en `LICENSE`; el aviso de titularidad y sus límites está en `NOTICE.md`.
+- La procedencia, titularidad y licencia de cada componente deben quedar claras. La licencia del repositorio no sustituye licencias de terceros, recursos de interfaz, fuentes, bibliotecas ni contenido de terceros.
+- Mantener `AUTHORS.md`, `CITATION.cff` y la sección de arquitectura del README como punto de entrada de atribución y citación.
+- Los avisos de copyright en los archivos originales ayudan a conservar atribución, pero no sustituyen la licencia ni demuestran titularidad exclusiva.
+
 ## Registro de módulos
 
 | Module ID | Dominio | Estado | Regla |

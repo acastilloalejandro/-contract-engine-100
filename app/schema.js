@@ -1,3 +1,10 @@
+/*
+ * Contract Engine 100 · Field System
+ * Copyright (c) 2026 Alejandro Hernández Castillo
+ * Contact: acastilloalejandro@icloud.com
+ * License: see LICENSE and NOTICE.md at the repository root.
+ * Third-party components, dependencies, and assets remain under their own licenses.
+ */
 export const VERSION="5.2.1";
 export const MAX_FILE_BYTES=10*1024*1024;
 export const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];

@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.2.2 — atribución y gobernanza de propiedad intelectual (2026-10-09)
+
+- Añadir aviso de autoría, titularidad declarada, contacto y límites del aviso en `NOTICE.md`.
+- Ordenar la entrada del repositorio con mapa de arquitectura, licencias, límites de derechos y estado real de producción.
+- Incorporar `AUTHORS.md`, `CONTRIBUTING.md` y `CITATION.cff` para atribución, contribuciones y citación.
+- Añadir plantillas de incidencias para error y solicitud de funciones; incluyen recordatorios para no publicar secretos o datos contractuales.
+- Incluir metadatos de autor/copyright y avisos de cabecera en los componentes de autoría propia seleccionados.
+- Mantener la licencia existente identificada por GitHub; esta actualización no cambia unilateralmente los derechos ya concedidos bajo MIT.
+
 ## 5.2.1 — búsqueda y navegación de formulario (2026-10-09)
 
 - Añadir búsqueda local por nombre de campo y sección, con normalización de acentos.

@@ -11,3 +11,10 @@ La autenticación real, la autorización por recurso, la verificación de identi
 La función de protección dirige señales de posible explotación a revisión humana. No se implementan funciones de confinamiento, retención coercitiva de documentos ni control coercitivo del movimiento.
 
 Reporta vulnerabilidades sin publicar secretos ni datos personales en issues públicos.
+
+## Reporte privado de vulnerabilidades
+
+- Autor y contacto del proyecto: Alejandro Hernández Castillo, [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com).
+- No publiques tokens, datos personales, documentos ni detalles explotables en issues públicos.
+- Para incidentes sensibles, informa de forma privada por correo e incluye pasos de reproducción mínimos y una versión/commit afectado. No adjuntes datos de usuarios reales.
+- El correo es un canal de contacto de mantenedor; no equivale a una plataforma de divulgación coordinada con SLA ni a una garantía de respuesta.
