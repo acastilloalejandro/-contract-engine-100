@@ -12,3 +12,8 @@
 #progressBar{width:20%}
 @media(prefers-contrast:more){:root{--muted:#485875;--border:#bac6d7;--blue:#124bc9}.safety{border-color:#9a7a3c}.field-error{color:#930d17}}
 @media(max-width:480px){.app-shell{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}}
+
+/* Safe-area and forced contrast adaptations for iOS Safari and accessibility. */
+.app-shell{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+@media(max-width:480px){.app-shell{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}}
+@media(prefers-contrast:more){:root{--border:#64748b;--muted:#3b4b66;--blue:#073eb7}.field input:not([type=checkbox]),.field select,.field textarea{border-width:2px}.step-nav button.active{outline:2px solid #073eb7}}
