@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Contract Engine">
 <link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icons/contract-engine.svg">
 <link rel="stylesheet" href="./styles/world-ui.css">
 <title>Contract Engine 100 · 5.2.0</title>
 </head>
@@ -90,7 +91,7 @@
 <main class="world-content">
 <section id="formView" class="view" aria-labelledby="formTitle">
 <div class="world-hero"><div class="hero-kicker">EXPEDIENTE CONTRACTUAL</div><div id="progressValue" class="hero-value">0%</div><div id="formTitle" class="hero-sub">Registro progresivo · <span id="progressText">0 de 0 requisitos</span></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="quick-actions"><button id="reviewBtn" class="quick-action primary" type="button">Revisar</button><button id="docsBtn" class="quick-action" type="button">Documentos</button><button id="saveBtn" class="quick-action" type="button">Guardar</button></div></div>
-<section class="privacy-card"><div class="section-head"><div><span class="eyebrow">TRABAJADOR/A</span><h2>Protección privada</h2></div><span id="riskPill" class="pill normal">NORMAL</span></div><p class="muted">Las respuestas privadas de protección no se guardan en localStorage y no forman parte del QR público.</p><div class="metric-grid"><div class="mini-card"><span>Señales</span><strong id="riskFlags">0</strong></div><div class="mini-card"><span>Puntuación</span><strong id="riskScore">0</strong></div><div class="mini-card"><span>Estado</span><strong id="riskState">NORMAL</strong></div></div><div class="privacy-state" role="status"><span class="status-dot" aria-hidden="true"></span>Modo privado activo</div></section>
+<section class="privacy-card"><div class="section-head"><div><span class="eyebrow">TRABAJADOR/A</span><h2>Protección privada</h2></div><span id="riskPill" class="pill normal">NORMAL</span></div><p class="muted">Las respuestas marcadas como privadas o restringidas no se guardan en el borrador local ni se incluyen en la huella. Los demás datos se guardan sin cifrado en el navegador y los archivos adjuntos pueden quedar en IndexedDB. Usa únicamente datos ficticios en esta demo.</p><div class="metric-grid"><div class="mini-card"><span>Señales</span><strong id="riskFlags">0</strong></div><div class="mini-card"><span>Puntuación</span><strong id="riskScore">0</strong></div><div class="mini-card"><span>Estado</span><strong id="riskState">NORMAL</strong></div></div><div class="privacy-state" role="status"><span class="status-dot" aria-hidden="true"></span>Modo privado activo</div></section>
 <div id="sections"></div>
 <section class="panel"><div class="section-head"><div><span class="eyebrow">CONTROL</span><h2>Listo para revisión</h2></div><span id="validationPill" class="pill good">0 errores</span></div><div id="validationSummary" class="summary-list"></div><button id="reviewBtnBottom" class="primary-btn" type="button">Revisar expediente</button><p id="saveState" class="microcopy">Borrador local listo.</p></section>
 </section>
