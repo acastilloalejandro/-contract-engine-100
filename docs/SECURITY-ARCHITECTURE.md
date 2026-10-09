@@ -73,10 +73,14 @@ La revisión humana no elimina automáticamente el sesgo: hacen falta criterios 
 5. Usar WebAuthn/passkeys y firma electrónica sólo con desafíos, validación y evidencias verificadas en servidor.
 6. Configurar reglas de rama, protección de secretos, CodeQL, alertas de dependencias y notificaciones de seguridad en GitHub.
 
-## 7. Interpretación de los workflows
+## 7. Configuración administrativa de GitHub
 
-CodeQL y Dependency Review son controles de detección dentro de CI, no una certificación. Dependency Review revisa los cambios de dependencias en PR; no equivale por sí solo a una auditoría exhaustiva de todo el historial o de componentes vendorizados. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
+La lista de ajustes que requieren intervención del administrador, incluyendo el ruleset de `main`, MFA, permisos de Actions, Dependency Graph y Secret Scanning, está en [GITHUB-SECURITY-SETTINGS.md](GITHUB-SECURITY-SETTINGS.md). Los workflows no pueden activar esas opciones de la cuenta o del repositorio por sí solos.
 
-## 8. Criterio de aceptación
+## 8. Interpretación de los workflows
+
+CodeQL y `npm audit --audit-level=high --ignore-scripts` son controles de detección dentro de CI, no una certificación. `npm audit` revisa el árbol de dependencias que npm conoce en el lockfile; no equivale a una auditoría de todo el historial, del código vendorizado ni de la lógica de la aplicación. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
+
+## 9. Criterio de aceptación
 
 No declarar el sistema “seguro”, “blindado”, “cuánticamente seguro” ni apto para contratos reales por el simple hecho de que los workflows pasen. El criterio de salida requiere, como mínimo, revisión de resultados, protección de ramas y secretos configurada, backend operativo, pruebas de autorización e identidad, auditoría independiente y aprobación del responsable.
