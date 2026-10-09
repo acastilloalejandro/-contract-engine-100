@@ -1,13 +1,38 @@
-# Contract Engine 100 · Field System 5.2.0
+# Contract Engine 100 · Field System 5.2.1
+
+> **Autoría del proyecto:** Alejandro Hernández Castillo · **Contacto:** [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com) · **Titularidad y licencias:** consulte [NOTICE.md](NOTICE.md) y [LICENSE](LICENSE).
 
 Motor contractual modular, móvil primero, para crear expedientes guiados, validar datos y separar los datos privados del contenido compartible.
 
-> **Estado de entrega (9 de octubre de 2026):** los cambios de endurecimiento 5.2.0 están en la rama `feat/production-hardening-v5.2.0` y pendientes de CI/revisión; no se consideran fusionados ni publicados hasta que el PR se integre en `main`. La versión 5.1.0 fue la última publicación estática conocida. La API de autenticación no está desplegada y `config.js` mantiene `authBaseUrl` vacío.
+> **Estado de entrega (9 de octubre de 2026):** la versión 5.2.1 está integrada en `main` y publicada en GitHub Pages. La API de autenticación no está desplegada y `config.js` mantiene `authBaseUrl` vacío. Las licencias y avisos de autoría deben revisarse junto con los derechos de contribución y dependencias, según `NOTICE.md`.
+
+## Autoría, licencia y uso de la propiedad intelectual
+
+- **Autor del proyecto:** Alejandro Hernández Castillo.
+- **Contacto para consultas de licencia o permisos:** [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com).
+- **Aviso de autoría:** [NOTICE.md](NOTICE.md).
+- **Licencia del código fuente:** consulte el archivo [LICENSE](LICENSE). El aviso de autoría no reemplaza ni amplía esa licencia.
+- **Componentes de terceros:** sus licencias y atribuciones prevalecen respecto de esos componentes; revise avisos y dependencias antes de redistribuir.
+- **Marcas e identidad visual:** la licencia de código no concede por sí sola derechos sobre marcas, logotipos ni una falsa apariencia de afiliación.
+- **Límite importante:** un repositorio público permite acceder al contenido visible. La documentación de derechos ayuda a establecer condiciones y atribución, pero no bloquea técnicamente la copia. La protección de arquitectura, el secreto empresarial y la aplicación de derechos dependen de hechos y legislación; esta documentación no es asesoramiento jurídico.
+
+## Mapa del repositorio
+
+| Ruta | Propósito |
+|---|---|
+| `app/` | Interfaz, esquema, motor, previsualización y verificación estática |
+| `styles/`, `icons/`, `vendor/` | Estilos y recursos de interfaz; revisar licencias de recursos de terceros |
+| `src/`, `schema/`, `legal/` | Tipos, reglas, esquemas y material contractual |
+| `workers/api/` | API de referencia, todavía pendiente de despliegue de producción |
+| `tests/` | Regresiones, invariantes y pruebas de contrato |
+| `docs/` | Arquitectura, estrategia, seguridad y puertas de producción |
+| `.github/` | Automatización de calidad y despliegue |
+| `LICENSE`, `NOTICE.md`, `SECURITY.md` | Derechos, atribución y reporte de seguridad |
 
 ## Estado actual
 
 - **Frontend estático:** workflow de publicación completado correctamente. [Abrir la aplicación](https://acastilloalejandro.github.io/-contract-engine-100/).
-- **Calidad de código:** la rama 5.2.0 añade regresiones para privacidad, validación de archivos, CSP, QR local y PWA; el resultado actual debe confirmarse en las ejecuciones de CI asociadas al PR.
+- **Calidad de código:** la rama 5.2.1 añade regresiones para privacidad, validación de archivos, CSP, QR local y PWA; el resultado actual debe confirmarse en las ejecuciones de CI asociadas al PR.
 - **Autenticación e identidad reales:** no disponibles para usuarios reales hasta crear y desplegar la API, configurar D1, dominio, secretos y proveedores, y superar pruebas de integración.
 - **Uso recomendado:** demo técnica y entorno de evaluación. No utilizar todavía para formalizar contratos reales, almacenar documentación sensible ni acreditar identidad o firma.
 
@@ -17,7 +42,7 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - Vista previa local del borrador contractual agrupada por secciones, campos obligatorios pendientes e impresión/guardado como PDF mediante el navegador. No produce un contrato legal certificado ni un PDF firmado.
 - Pantallas de acceso e incorporación y un adaptador para conectar correo/contraseña, Google/Apple, OTP y verificación documental con proveedores externos. Estas pantallas no equivalen a un servicio de autenticación desplegado.
 - API de referencia en Cloudflare Workers + D1 para sesiones, OAuth, correo, teléfono y estado de identidad, pendiente de despliegue y configuración.
-- Pruebas automatizadas de humo, invariantes, autenticación, onboarding, contrato de API y regresiones v5.2.0 de minimización de datos y validación de archivos.
+- Pruebas automatizadas de humo, invariantes, autenticación, onboarding, contrato de API y regresiones v5.2.1 de minimización de datos y validación de archivos.
 - El workflow de publicación ejecuta un smoke test posterior al despliegue de la página raíz, verificador, configuración, manifest, CSS, módulos y generador QR.
 - Arquitectura modular para que empleo doméstico, alquiler residencial y otros contratos mantengan esquemas y reglas separados.
 
@@ -32,9 +57,9 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - [Arquitectura modular y límites de confianza](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [estado y gates de producción](docs/PRODUCTION-GATES.md), [matriz de 50 optimizaciones](docs/OPTIMIZATION-ROADMAP-50.md).
 - [Historial de cambios](CHANGELOG.md).
 
-## Cambios preparados para 5.2.0
+## Cambios preparados para 5.2.1
 
-- Versión del esquema, paquete, lockfile e interfaz sincronizadas en 5.2.0.
+- Versión del esquema, paquete, lockfile e interfaz sincronizadas en 5.2.1.
 - Eliminados los valores por defecto de país y jurisdicción; añadido aviso de revisión jurídica.
 - Campos marcados privados/restringidos excluidos del borrador serializado y del payload de integridad.
 - Validación cliente de tipo, extensión, MIME, firma inicial y tamaño de archivos; los controles de servidor siguen pendientes.
@@ -66,6 +91,6 @@ La capa de protección dirige las señales de riesgo a revisión humana. No impl
 Antes de producción siguen pendientes, como mínimo: despliegue y conexión del backend, verificación QR en servidor, recuperación y borrado de cuenta, autorización por recurso y rol, almacén de documentos cifrado, proveedor de firma, cabeceras de seguridad HTTP, análisis antimalware server-side, observabilidad, copias de seguridad y restauración, pruebas end-to-end, prueba en navegador real y revisión legal, seguridad, privacidad y accesibilidad por jurisdicción. La lista operativa está en [gates de producción](docs/PRODUCTION-GATES.md).
 
 
-### Estado de calidad v5.2.0
+### Estado de calidad v5.2.1
 
 La rama candidata debe superar de nuevo `npm test` después de los últimos cambios de privacidad y persistencia. Un resultado fallido en una ejecución anterior no demuestra que el último commit siga fallando; consulta las ejecuciones asociadas al SHA actual antes de publicar.
