@@ -1,4 +1,4 @@
-const SESSION_COOKIE = "ce_session";
+const SESSION_COOKIE = "__Host-ce_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 7;
 const PASSWORD_ITERATIONS = 210000;
 const OAUTH_STATE_SECONDS = 600;
@@ -62,12 +62,23 @@ function originAllowed(request, env) {
   return Boolean(env.APP_ORIGIN) && request.headers.get("Origin") === env.APP_ORIGIN;
 }
 
-function corsHeaders(request, env) {
-  const headers = new Headers({
-    "Content-Type": "application/json; charset=utf-8",
+function securityHeaders() {
+  return {
     "Cache-Control": "no-store",
     "Referrer-Policy": "no-referrer",
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "X-Permitted-Cross-Domain-Policies": "none",
+    "Strict-Transport-Security": "max-age=31536000"
+  };
+}
+
+function corsHeaders(request, env) {
+  const headers = new Headers({
+    ...securityHeaders(),
+    "Content-Type": "application/json; charset=utf-8",
     "Vary": "Origin"
   });
   const origin = request.headers.get("Origin");
@@ -88,7 +99,7 @@ function json(request, env, payload, status = 200, extra = {}) {
 }
 
 function redirect(location, extra = {}) {
-  const headers = new Headers({ Location: location, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" });
+  const headers = new Headers({ ...securityHeaders(), Location: location });
   for (const [key, value] of Object.entries(extra)) headers.append(key, value);
   return new Response(null, { status: 302, headers });
 }
@@ -120,8 +131,8 @@ function cookieValue(request, name) {
 }
 
 function sessionCookie(token, maxAge = SESSION_SECONDS) {
-  // SameSite=None is necessary when app/API use different sites; a shared custom domain is preferred.
-  return SESSION_COOKIE + "=" + token + "; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=" + maxAge;
+  // __Host- requires Secure, Path=/ and no Domain attribute. Production must use a same-site frontend/API domain.
+  return SESSION_COOKIE + "=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" + maxAge;
 }
 
 function userView(row) {
@@ -650,10 +661,10 @@ export default {
     const path = url.pathname;
     try {
       if (path === "/health" && request.method === "GET") {
-        return new Response("ok", { status: 200, headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
+        return new Response("ok", { status: 200, headers: securityHeaders() });
       }
       if (request.method === "OPTIONS") {
-        if (!originAllowed(request, env)) return new Response(null, { status: 403 });
+        if (!originAllowed(request, env)) return new Response(null, { status: 403, headers: securityHeaders() });
         return new Response(null, { status: 204, headers: corsHeaders(request, env) });
       }
       validateConfig(env);
