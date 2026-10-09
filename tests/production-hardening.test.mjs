@@ -21,7 +21,7 @@ const serviceWorker = read("sw.js");
 const postdeploy = read("scripts/postdeploy-smoke.mjs");
 const manifest = JSON.parse(read("manifest.webmanifest"));
 
-assert.equal(pkg.version, "5.2.0");
+assert.equal(pkg.version, "5.2.1");
 assert.equal(lock.version, pkg.version);
 assert.equal(lock.packages[""].version, pkg.version);
 assert.match(schema, /VERSION="5\.2\.0"/);
