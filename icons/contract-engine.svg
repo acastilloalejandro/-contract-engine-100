@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Contract Engine 100</title>
+  <rect width="512" height="512" rx="112" fill="#111827"/>
+  <path d="M118 166c0-24 19-43 43-43h190v58H175v150h176v58H161c-24 0-43-19-43-43z" fill="#f9fafb"/>
+  <path d="M217 205h179v50H217zM217 283h135v50H217z" fill="#93c5fd"/>
+  <circle cx="388" cy="139" r="24" fill="#60a5fa"/>
+</svg>
