@@ -248,7 +248,7 @@ export async function validateDocumentFile(file){
   if(file.size>MAX_FILE_BYTES) return "El archivo supera el límite de 10 MB.";
   const name=String(file.name||"").normalize("NFC");
   if(!name||name.length>180||name.includes("/")||name.includes(String.fromCharCode(92))||[...name].some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127)) return "El nombre del archivo no es válido.";
-  const ext=(name.match(/\\.[^.]+$/)?.[0]||"").toLowerCase();
+  const ext=(name.match(/\.[^.]+$/)?.[0]||"").toLowerCase();
   const rules={
     ".pdf":{mime:"application/pdf",test:b=>b.length>=5&&b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46&&b[4]===0x2d},
     ".jpg":{mime:"image/jpeg",test:b=>b.length>=3&&b[0]===0xff&&b[1]===0xd8&&b[2]===0xff},
