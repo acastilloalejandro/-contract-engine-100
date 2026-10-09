@@ -4,5 +4,6 @@
  * Example: window.CONTRACT_ENGINE_CONFIG = { authBaseUrl: "https://api.example.com" };
  */
 window.CONTRACT_ENGINE_CONFIG = Object.freeze({
-  authBaseUrl: ""
+  authBaseUrl: "",
+  identityProviderHosts: []
 });
