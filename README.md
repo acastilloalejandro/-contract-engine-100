@@ -6,6 +6,16 @@
 
 > **Estado de entrega (9 de octubre de 2026):** la versión base 5.2.1 se mantiene, junto al nuevo módulo inmobiliario independiente 1.0.0. La API de autenticación no está desplegada y `config.js` mantiene `authBaseUrl` vacío. Las licencias y avisos de autoría deben revisarse junto con los derechos de contribución y dependencias.
 
+## bithome · Fusion Light 1.1.0
+
+- [Aplicación inmobiliaria](real-estate/index.html): interfaz en modo claro, formulario condicional de cinco pasos, referencia EUR/BTC, validaciones y exportación local.
+- [Diseño editable en Figma](https://www.figma.com/design/aETVQUp6nLu6EkCA62SM3z): variables, botón y campo reutilizables, vistas de diseño.
+- [Backend de referencia](workers/api/src/index.js): rutas autenticadas de casos por usuario que solo reciben tipo de inmueble y fase; no está desplegado.
+- [Diseño y limitaciones](docs/DESIGN_SYSTEM.md) y [alcance inmobiliario](docs/REAL-ESTATE-BITCOIN.md).
+- La raíz conserva el motor contractual anterior por compatibilidad, mientras que /real-estate/ es la experiencia inmobiliaria nueva.
+
+**Estado de ejecución:** no hay pagos, custodia, verificación de identidad, firma ni notaría integrados. La demostración no debe usarse con datos personales reales.
+
 ## Estado actual
 
 - **Frontend estático:** workflow de publicación completado correctamente. [Abrir la aplicación](https://acastilloalejandro.github.io/-contract-engine-100/).
