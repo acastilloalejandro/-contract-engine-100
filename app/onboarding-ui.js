@@ -271,12 +271,9 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
     setBusy(btn, true, "Cerrando…");
     try {
       await auth.logout();
-      app.hidden = true;
-      gate.hidden = false;
-      sessionUser = null;
-      showPanel("authPanel");
-      setMode("login");
-      message("Sesión cerrada.", "success");
+      // Reload to clear in-memory form fields and event handlers before another account signs in.
+      location.reload();
+      return;
     } catch (error) {
       message(error.message || "No se pudo cerrar la sesión en el servidor.", "error");
     } finally {
