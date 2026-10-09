@@ -252,7 +252,8 @@ export async function restore(){
   }
   state.data={...state.data,...safeData};
   state.audit=Array.isArray(saved.audit)?saved.audit.filter(entry=>
-    entry&&typeof entry==="object"&&typeof entry.action==="string"
+    entry&&typeof entry==="object"&&typeof entry.action==="string"&&
+    !(migrated&&["documentAdded","reviewStarted","signaturePrepared"].includes(entry.action))
   ).slice(-50):[];
   state.snapshots=migrated?[]:(Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS).map(snapshot=>({
     ...snapshot,data:sanitizeSavedData(snapshot?.data)
