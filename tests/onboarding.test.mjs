@@ -22,6 +22,8 @@ assert.match(html, /id="phoneStartForm"/);
 assert.match(html, /id="identityStartBtn"/);
 assert.match(html, /config\.js/);
 assert.match(gate, /onboardingStatus/);
+assert.match(gate, /$("authSubmit").disabled = !configured/);
+assert.match(gate, /$("googleBtn").disabled = !configured/);
 assert.match(gate, /phoneIsVerified/);
 assert.match(gate, /identityIsVerified/);
 assert.match(gate, /identityProviderHosts/);
