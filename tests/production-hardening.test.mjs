@@ -55,6 +55,31 @@ assert.match(postdeploy, /Post-deploy Pages smoke test passed/);
 assert.match(index, /vendor\/qrcode\.min\.js/);
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /connect-src 'self'/);
+assert.match(index, /style-src 'self';/);
+assert.doesNotMatch(index, /style-src 'self' 'unsafe-inline'/);
+assert.equal((index.match(/<meta name="author"/g) || []).length, 1);
+assert.equal((index.match(/<meta name="contact"/g) || []).length, 1);
+assert.equal((index.match(/<meta name="license"/g) || []).length, 1);
+assert.doesNotMatch(verifyHtml, /\sstyle\s*=/i);
+assert.match(verifyHtml, /style-src 'self';/);
+assert.doesNotMatch(verifyHtml, /style-src 'self' 'unsafe-inline'/);
+assert.match(read("styles/world-ui.css"), /\.verify-page \.world-content/);
+
+const hardenedWorkflows = [
+  ".github/workflows/ci.yml",
+  ".github/workflows/contract-os.yml",
+  ".github/workflows/codeql.yml",
+  ".github/workflows/dependency-review.yml",
+  ".github/workflows/static.yml"
+];
+for (const workflowPath of hardenedWorkflows) {
+  const workflow = read(workflowPath);
+  assert.doesNotMatch(
+    workflow,
+    /^\s*uses:\s*[^@\s]+@(?![a-f0-9]{40}(?:\s|$))\S+/im,
+    "Every external GitHub Action must be pinned to a full commit SHA"
+  );
+}
 assert.match(main, /serviceWorker/);
 assert.match(serviceWorker, /ce100-shell-v5\.2\.1/);
 assert.match(serviceWorker, /request\.mode === "navigate"/);
