@@ -1,24 +1,40 @@
 name: contract-os
-
 on:
   pull_request:
     paths:
+      - "app/**"
       - "src/**"
+      - "schema/**"
       - "legal/**"
       - "tests/**"
+      - "workers/**"
+      - "styles/**"
+      - "index.html"
+      - "config.js"
+      - "manifest.webmanifest"
+      - "package.json"
+      - "package-lock.json"
+      - "README.md"
+      - "SECURITY.md"
       - ".github/workflows/contract-os.yml"
   push:
     branches:
       - main
       - "feat/**"
-
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
-      - run: npm install --ignore-scripts
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
       - run: npm test

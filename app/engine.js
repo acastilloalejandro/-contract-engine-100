@@ -3,7 +3,7 @@ import {VERSION,MAX_FILE_BYTES,SCHEMA,RISK_MAP} from "./schema.js";
 export const STORAGE_KEY="ce100:v5";
 export const MAX_SNAPSHOTS=5;
 export const state={
-  view:"form",nav:"form",role:"worker",dark:false,
+  view:"form",nav:"form",role:"worker",dark:false,storageKey:STORAGE_KEY,mode:"demo",userId:null,
   recordId:crypto.randomUUID?.()||String(Date.now()),
   data:{workerRole:"worker",country:"SA",city:"Jeddah",jurisdiction:"Jeddah, Saudi Arabia",compensation:"paid",currency:"SAR",contractLanguage:"es",liveIn:false,travelRequired:false,nda:false},
   docs:[],audit:[],snapshots:[],hash:"",prepared:null,qrUrl:"",saveTimer:null
@@ -83,6 +83,13 @@ export async function sha256Text(value){
   const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
+export async function setStorageScope(subject){
+  if(typeof subject!=="string"||!subject.trim()) throw new TypeError("A stable account identifier is required.");
+  const scope=await sha256Text(subject.trim());
+  state.storageKey=STORAGE_KEY+":user:"+scope.slice(0,32);
+  return state.storageKey;
+}
+
 export async function sha256File(file){
   const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
   return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -99,9 +106,9 @@ export function saveLocal(onDone){
   clearTimeout(state.saveTimer);
   state.saveTimer=setTimeout(()=>{
     try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      localStorage.setItem(state.storageKey||STORAGE_KEY,JSON.stringify({
         version:VERSION,recordId:state.recordId,role:state.role,
-        data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),
+        data:publicData(),documentCount:state.docs.length,audit:state.audit.slice(-50),
         snapshots:state.snapshots,savedAt:new Date().toISOString()
       }));
       onDone?.("Guardado local · "+new Date().toLocaleTimeString());
@@ -111,7 +118,7 @@ export function saveLocal(onDone){
 
 export function restore(){
   try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    const saved=JSON.parse(localStorage.getItem(state.storageKey||STORAGE_KEY)||"null");
     if(!saved) return;
     state.recordId=saved.recordId||state.recordId;
     state.role=saved.role||state.role;

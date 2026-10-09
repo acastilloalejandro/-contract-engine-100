@@ -1,21 +1,29 @@
 name: Contract Engine CI
 on:
   push:
-    branches: [main]
+    branches: [main, "feat/**"]
   pull_request:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
       - run: node --check app/schema.js
       - run: node --check app/engine.js
       - run: node --check app/ui.js
       - run: node --check app/main.js
+      - run: node --check app/auth.js
+      - run: node --check app/onboarding-ui.js
       - run: npm test

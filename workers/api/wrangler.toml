@@ -1,0 +1,14 @@
+name = "contract-engine-auth-api"
+main = "src/index.js"
+compatibility_date = "2026-10-09"
+workers_dev = true
+
+[vars]
+# Replace both values before deploying. Use exact HTTPS origins with no trailing slash or path.
+APP_ORIGIN = "https://app.example.com"
+API_ORIGIN = "https://api.example.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "contract-engine-auth"
+database_id = "REPLACE_WITH_D1_DATABASE_UUID"
