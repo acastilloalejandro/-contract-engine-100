@@ -34,6 +34,10 @@ El navegador, el almacenamiento local, las entradas del usuario, los parámetros
 | Robo o exposición de documentos del usuario | Avisos sobre los límites del almacenamiento en navegador | Para uso real, backend con autorización por recurso, cifrado en tránsito y reposo, gestión/rotación de claves, retención/borrado y registro de auditoría |
 | Suplantación de identidad o firma | La documentación distingue huellas de integridad de identidad y firma | Autenticación, identidad y firma deben validarse en servidor y con proveedores/protocolos auditados |
 
+### Sesiones y cabeceras de API
+
+El backend de referencia fija ahora la cookie de sesión a `__Host-ce_session`, con `Secure`, `HttpOnly`, `Path=/`, sin atributo `Domain` y `SameSite=Lax`; las respuestas del Worker incluyen cabeceras restrictivas de no caché, CSP para respuestas API, anti-framing, política de permisos y HSTS. Esto es código de referencia y pruebas de contrato, no evidencia de que el Worker esté desplegado. Antes de usarlo, hay que probar el flujo completo en el dominio de producción y todos los navegadores compatibles.
+
 ## 4. Preparación poscuántica
 
 “Resistencia cuántica” no es una opción que se añada mediante una etiqueta ni una garantía de seguridad para toda la aplicación. Se aplica a algoritmos y protocolos concretos.
