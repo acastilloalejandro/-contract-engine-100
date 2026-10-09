@@ -4,19 +4,10 @@ const base = new URL(configured);
 if (base.protocol !== "https:") throw new Error("Pages URL must use HTTPS.");
 
 const required = [
-  ["", "text/html"],
-  ["verify.html", "text/html"],
-  ["config.js", "javascript"],
-  ["manifest.webmanifest", "application/manifest+json"],
-  ["styles/world-ui.css", "text/css"],
-  ["app/main.js", "javascript"],
-  ["app/schema.js", "javascript"],
-  ["app/engine.js", "javascript"],
-  ["app/ui.js", "javascript"],
-  ["app/contract-preview.js", "javascript"],
-  ["app/verify.js", "javascript"],
-  ["vendor/qrcode.min.js", "javascript"],
-  ["sw.js", "javascript"]
+  "", "verify.html", "config.js", "manifest.webmanifest",
+  "styles/world-ui.css", "app/main.js", "app/schema.js", "app/engine.js",
+  "app/ui.js", "app/contract-preview.js", "app/verify.js",
+  "vendor/qrcode.min.js", "sw.js"
 ];
 
 async function fetchWithRetry(path) {
@@ -47,7 +38,7 @@ async function fetchWithRetry(path) {
 }
 
 const results = [];
-for (const [path] of required) results.push(await fetchWithRetry(path));
+for (const path of required) results.push(await fetchWithRetry(path));
 for (const result of results) {
   process.stdout.write("OK " + result.status + " " + result.path + " (" + result.bytes + " bytes)\n");
 }
