@@ -48,7 +48,7 @@ assert.match(contractPreview, /EXCLUDED_SECTIONS/);
 assert.match(contractPreview, /EXCLUDED_FIELDS/);
 assert.match(contractPreview, /NO FIRMADO/);
 assert.match(contractPreview, /VALIDADO JURÍDICAMENTE/);
-assert.match(postdeploy, /app\\/contract-preview\\.js/);
+assert.ok(postdeploy.includes("app/contract-preview.js"));
 assert.match(postdeploy, /application-version/);
 assert.match(postdeploy, /Post-deploy Pages smoke test passed/);
 assert.match(index, /vendor\/qrcode\.min\.js/);
