@@ -1,6 +1,7 @@
 import {VERSION,MAX_FILE_BYTES,SCHEMA,RISK_MAP} from "./schema.js";
 
-export const STORAGE_KEY="ce100:v5";
+export const STORAGE_KEY="ce100:v5.2";
+const LEGACY_STORAGE_KEY="ce100:v5";
 export const MAX_SNAPSHOTS=5;
 const DOCUMENT_DB_NAME="ce100-documents-v1";
 const DOCUMENT_STORE_NAME="documents";
@@ -213,24 +214,66 @@ export function saveLocal(onDone){
   },350);
 }
 
+function sanitizeSavedData(input){
+  const out={};
+  if(!input||typeof input!=="object") return out;
+  for(const field of SCHEMA){
+    // A file's display metadata must come from its local Blob record, not localStorage.
+    if(field.private||field.restricted||field.type==="file"||field.type==="files") continue;
+    if(Object.hasOwn(input,field.id)) out[field.id]=input[field.id];
+  }
+  return out;
+}
+
 export async function restore(){
-  let saved;
-  try{saved=JSON.parse(localStorage.getItem(state.storageKey||STORAGE_KEY)||"null");}
-  catch{return;}
+  const scope=state.storageKey||STORAGE_KEY;
+  let saved,sourceKey=scope;
+  try{
+    let raw=localStorage.getItem(scope);
+    if(!raw&&scope===STORAGE_KEY){
+      raw=localStorage.getItem(LEGACY_STORAGE_KEY);
+      if(raw) sourceKey=LEGACY_STORAGE_KEY;
+    }
+    saved=JSON.parse(raw||"null");
+  }catch{return;}
   if(!saved) return;
+  const migrated=sourceKey!==scope||saved.version!==VERSION;
   state.recordId=saved.recordId||state.recordId;
   state.role=saved.role||state.role;
-  state.data={...state.data,...(saved.data||{})};
-  state.audit=Array.isArray(saved.audit)?saved.audit:[];
-  state.snapshots=Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS):[];
+  const safeData=sanitizeSavedData(saved.data);
+  // v5.0/v5.1 stored a hard-coded Saudi/Jeddah context as if user-selected.
+  // Remove only the exact known defaults during migration, not user-entered jurisdictions.
+  if(migrated&&safeData.country==="SA"&&safeData.city==="Jeddah"&&safeData.jurisdiction==="Jeddah, Saudi Arabia"){
+    delete safeData.country;
+    delete safeData.city;
+    delete safeData.jurisdiction;
+    if(safeData.currency==="SAR") delete safeData.currency;
+    if(safeData.compensation==="paid") delete safeData.compensation;
+  }
+  state.data={...state.data,...safeData};
+  state.audit=Array.isArray(saved.audit)?saved.audit.filter(entry=>
+    entry&&typeof entry==="object"&&typeof entry.action==="string"
+  ).slice(-50):[];
+  state.snapshots=migrated?[]:(Array.isArray(saved.snapshots)?saved.snapshots.slice(-MAX_SNAPSHOTS).map(snapshot=>({
+    ...snapshot,data:sanitizeSavedData(snapshot?.data)
+  })):[]);
+  if(migrated&&sourceKey!==scope){
+    try{
+      localStorage.setItem(scope,JSON.stringify({
+        version:VERSION,recordId:state.recordId,role:state.role,
+        data:safeData,documentCount:0,audit:state.audit,snapshots:[],
+        savedAt:new Date().toISOString()
+      }));
+      audit("legacyDraftMigrated",{fromVersion:String(saved.version||"unknown")});
+    }catch{}
+  }
   try{
-    state.docs=await loadDocumentBlobs(state.storageKey||STORAGE_KEY,state.recordId);
+    state.docs=await loadDocumentBlobs(scope,state.recordId);
     const additional=[];
     for(const doc of state.docs){
       if(PRIVATE_DOCUMENT_FIELDS.has(doc.fieldId)) state.data[doc.fieldId]=doc;
       else if(doc.fieldId==="additionalDocuments") additional.push(doc);
     }
-    // Do not keep metadata for attachments whose binary is no longer present.
     state.data.additionalDocuments=additional;
     for(const id of PRIVATE_DOCUMENT_FIELDS){
       if(state.data[id]?.id&&!state.docs.some(doc=>doc.id===state.data[id].id)) state.data[id]=null;
@@ -286,7 +329,7 @@ export async function addDocuments(fileList,fieldId){
     state.docs.push(doc);
     if(PRIVATE_DOCUMENT_FIELDS.has(fieldId)) state.data[fieldId]=doc;
     else state.data.additionalDocuments=[...(state.data.additionalDocuments||[]),doc];
-    audit("documentAdded",{documentId:doc.id,hash:doc.hash,persisted:doc.persisted});
+    audit("documentAdded",{documentId:doc.id,persisted:doc.persisted});
     accepted++;
   }
   if(failures.length&&typeof alert==="function") alert(failures.join("\n"));
