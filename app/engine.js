@@ -36,6 +36,23 @@ export function validate(){
     if(f.type==="checkbox" ? v!==true : f.type==="file" ? !(v&&v.id) : !filled(v))
       errors.push({field:f.id,message:"Falta: "+f.label+"."});
   }
+  if(d.workerEmail&&!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(String(d.workerEmail).trim()))
+    errors.push({field:"workerEmail",message:"Introduce un correo electrónico con formato válido."});
+  if(d.workerPhone){
+    const phone=String(d.workerPhone).replace(/[()\\s.-]/g,"");
+    if(!/^\\+?\\d{7,15}$/.test(phone)) errors.push({field:"workerPhone",message:"Comprueba el teléfono y su prefijo internacional."});
+  }
+  for(const id of ["trialPeriod","salaryAmount","recruitmentFee","wageDeductions"]){
+    if(filled(d[id])&&(!Number.isFinite(Number(d[id]))||Number(d[id])<0))
+      errors.push({field:id,message:"Introduce un número válido igual o superior a cero."});
+  }
+  if(d.compensation==="paid"&&filled(d.salaryAmount)&&Number(d.salaryAmount)<=0)
+    errors.push({field:"salaryAmount",message:"La remuneración acordada debe ser mayor que cero."});
+  const expectedCurrency={SA:"SAR",ES:"EUR",FR:"EUR",PH:"PHP",IN:"INR",ID:"IDR"}[d.country];
+  if(d.compensation==="paid"&&expectedCurrency&&d.currency&&d.currency!==expectedCurrency)
+    warnings.push({field:"currency",message:"La moneda no coincide con la moneda de referencia configurada para el país seleccionado. Confirma el acuerdo y la normativa aplicable."});
+  if(d.jurisdiction)
+    warnings.push({field:"jurisdiction",message:"La jurisdicción introducida no se contrasta automáticamente con legislación vigente. Solicita revisión jurídica independiente."});
   if(d.endDate&&d.startDate&&d.endDate<d.startDate) errors.push({field:"endDate",message:"La fecha de finalización es anterior al inicio."});
   if(d.startTime&&d.endTime&&d.endTime<=d.startTime) warnings.push({field:"endTime",message:"Comprueba una jornada que pueda cruzar medianoche."});
   if(Array.isArray(d.workingDays)&&d.weeklyRestDay&&d.workingDays.includes(d.weeklyRestDay))
