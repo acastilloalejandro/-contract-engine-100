@@ -55,7 +55,21 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   // Keep the public runtime configuration fresh; never cache API responses.
-  const isConfig = url.pathname.endsWith("/config.js");
+  // Only public static pages/assets are cached. API routes and unknown paths always bypass this worker.
+  const base = self.registration.scope;
+  const publicPaths = new Set(SHELL.map(path => new URL(path, base).pathname));
+  const realEstateHome = new URL("./real-estate/", base).pathname;
+  const allowedNavigations = new Set([
+    new URL("./", base).pathname,
+    new URL("./index.html", base).pathname,
+    new URL("./real-estate/index.html", base).pathname,
+    realEstateHome,
+    new URL("./verify.html", base).pathname
+  ]);
+  if (url.pathname.includes("/v1/") || url.pathname.includes("/api/") || request.headers.has("Authorization")) return;
+  const isConfig = url.pathname === new URL("./config.js", base).pathname;
+  if (request.mode === "navigate" && !allowedNavigations.has(url.pathname)) return;
+  if (request.mode !== "navigate" && !publicPaths.has(url.pathname)) return;
   if (request.mode === "navigate" || isConfig) {
     event.respondWith((async () => {
       try {
@@ -67,7 +81,9 @@ self.addEventListener("fetch", event => {
         return response;
       } catch {
         return await caches.match(request, { ignoreSearch: true }) ||
-          await caches.match(new URL("./index.html", self.registration.scope).href);
+          (url.pathname === realEstateHome
+            ? await caches.match(new URL("./real-estate/index.html", base).href)
+            : await caches.match(new URL("./index.html", base).href));
       }
     })());
     return;
