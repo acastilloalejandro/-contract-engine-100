@@ -161,7 +161,17 @@ function bind(){
   window.addEventListener("beforeunload",releaseObjectUrls);
 }
 
+async function registerOfflineShell(){
+  if(!("serviceWorker" in navigator)||location.protocol!=="https:") return;
+  try{await navigator.serviceWorker.register(new URL("../sw.js",import.meta.url));}
+  catch{
+    const status=$("saveState");
+    if(status) status.textContent="Modo sin conexión no disponible en este navegador.";
+  }
+}
+
 async function startContractApp({mode="demo",user=null}={}){
+  void registerOfflineShell();
   state.mode=mode;
   state.userId=user?.id||user?.sub||user?.userId||user?.email||null;
   if(mode==="authenticated"){
