@@ -4,9 +4,9 @@ No presentar la aplicación como lista para producción hasta que se hayan compl
 
 ## Estado de la rama candidata 5.2.0 (9 de octubre de 2026)
 
-- [ ] PR [#13](https://github.com/acastilloalejandro/-contract-engine-100/pull/13) abierto; los checks deben quedar verdes antes de fusionar.
-- [x] Implementados en la rama: versión sincronizada, ausencia de jurisdicción predeterminada, minimización de campos privados/restringidos en borrador JSON y huella, validación inicial de archivos en cliente, persistencia local de adjuntos, QR local, etiqueta «NO VERIFICADO», CSP meta y shell PWA versionado.
-- [ ] Ejecutar CI completa (incluidos tests nuevos de regresión); no marcar esta puerta como superada hasta ver los resultados reales.
+- [ ] PR [#13](https://github.com/acastilloalejandro/-contract-engine-100/pull/13) contiene el endurecimiento local y la vista previa imprimible; ejecutar los checks del SHA más reciente antes de fusionar.
+- [x] Implementados en la rama: versión sincronizada, ausencia de jurisdicción predeterminada, minimización de campos privados/restringidos en borrador JSON y huella, validación inicial de archivos en cliente, persistencia local de adjuntos, QR local, etiqueta «NO VERIFICADO», CSP meta, shell PWA versionado y borrador contractual imprimible.
+- [ ] Repetir CI completa tras añadir la vista previa contractual y su CSS de impresión; no reutilizar el resultado verde de un SHA anterior.
 - [ ] Probar la URL publicada en Safari/iOS y en un navegador de escritorio; el contenido de la rama aún no está publicado en Pages.
 - [ ] Desplegar API y D1, configurar proveedores y ejecutar integración end-to-end. `config.js` conserva `authBaseUrl: ""`; la autenticación real no está activa.
 - [ ] Revisar la [matriz de las 50 optimizaciones](OPTIMIZATION-ROADMAP-50.md); la matriz diferencia trabajo aplicado, parcial y bloqueado.
