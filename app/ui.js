@@ -6,6 +6,35 @@ export const $=id=>document.getElementById(id);
 export const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 export const filled=v=>v!==undefined&&v!==null&&v!==""&&!(Array.isArray(v)&&v.length===0);
 
+let activeFormQuery="";
+let onlyPendingFields=false;
+
+function normalizeSearch(value){
+  return String(value??"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es").trim();
+}
+
+function fieldComplete(field){
+  const value=state.data[field.id];
+  if(field.type==="checkbox")return value===true;
+  if(field.type==="file")return Boolean(value?.id);
+  if(field.type==="files"||field.type==="multiselect")return Array.isArray(value)&&value.length>0;
+  return filled(value);
+}
+
+export function setFormFilters(query,pendingOnly){
+  activeFormQuery=normalizeSearch(query);
+  onlyPendingFields=pendingOnly===true;
+  renderForm();
+}
+
+export function clearFormFilters(){
+  activeFormQuery="";
+  onlyPendingFields=false;
+  const query=$("fieldSearch");if(query)query.value="";
+  const pending=$("pendingOnly");if(pending)pending.checked=false;
+  renderForm();
+}
+
 function docMeta(d){
   return "<div class='doc-meta'><b>"+esc(d.name)+"</b><span>"+esc(d.status)+" · "+esc((d.hash||"").slice(0,16))+"…</span>"+
     (d.url?"<button type='button' class='link-btn' data-open='"+esc(d.id)+"'>Abrir</button>":"")+"</div>";
@@ -55,8 +84,17 @@ export function refreshFormMeta(){ formMetrics(); }
 
 export function renderForm(){
   const {val,r,fs}=formMetrics();
-  const groups={};for(const f of fs)(groups[f.section]??=[]).push(f);
-  $("sections").innerHTML=Object.entries(groups).map(([name,list])=>"<section class='panel'><div class='section-head'><div><span class='eyebrow'>"+esc(name.toUpperCase())+"</span><h2>"+esc(name)+"</h2></div><span class='counter'>"+list.filter(f=>filled(state.data[f.id])).length+"/"+list.length+"</span></div>"+list.map(f=>"<div class='field-block' data-block='"+esc(f.id)+"'>"+control(f)+"</div>").join("")+"</section>").join("");
+  const filteredFields=fs.filter(f=>{
+    const matchesQuery=!activeFormQuery||normalizeSearch(f.label+" "+f.section).includes(activeFormQuery);
+    const matchesPending=!onlyPendingFields||(f.required&&!fieldComplete(f));
+    return matchesQuery&&matchesPending;
+  });
+  const groups={};for(const f of filteredFields)(groups[f.section]??=[]).push(f);
+  $("filterCount").textContent=filteredFields.length+" "+(filteredFields.length===1?"campo":"campos")+" visibles";
+  $("clearFieldFilters").hidden=!activeFormQuery&&!onlyPendingFields;
+  $("sections").innerHTML=Object.entries(groups).map(([name,list])=>"<section class='panel'><div class='section-head'><div><span class='eyebrow'>"+esc(name.toUpperCase())+"</span><h2>"+esc(name)+"</h2></div><span class='counter'>"+list.filter(fieldComplete).length+"/"+list.length+" visibles completos</span></div>"+list.map(f=>"<div class='field-block' data-block='"+esc(f.id)+"'>"+control(f)+"</div>").join("")+"</section>").join("")||
+    "<section class='panel empty-results' role='status'><h2>No hay campos que coincidan</h2><p class='muted'>Prueba otra búsqueda o limpia los filtros. Las respuestas guardadas siguen intactas.</p><button class='secondary-btn' id='emptyClearFilters' type='button'>Mostrar todos los campos</button></section>";
+  const emptyClear=$("emptyClearFilters");if(emptyClear)emptyClear.onclick=clearFormFilters;
   $("protectedContent").innerHTML="<div class='summary-card'><div class='metric-grid'><div class='mini-card'><span>Nivel</span><strong>"+r.level+"</strong></div><div class='mini-card'><span>Señales</span><strong>"+r.flags.length+"</strong></div><div class='mini-card'><span>Puntuación</span><strong>"+r.score+"</strong></div></div>"+r.flags.map(f=>"<div class='risk-row'><span>"+esc(f.label)+"</span><b>"+esc(f.severity)+"</b></div>").join("")+"<div class='notice'>Este control protege al trabajador y requiere revisión humana. No es un diagnóstico jurídico.</div></div>";
   $("expertData").textContent=JSON.stringify({version:VERSION,role:state.role,risk:r,validation:val,optimizationCount:OPTIMIZATIONS.length,optimizations:OPTIMIZATIONS,fields:fs.map(f=>f.id),documents:documentManifest(),audit:state.audit.slice(-10)},null,2);
   updateViews();
