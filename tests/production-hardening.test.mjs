@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { state, publicData, integrityData, validateDocumentFile } from "../app/engine.js";
+import { state, publicData, integrityData, validateDocumentFile, visibleFields, validate } from "../app/engine.js";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname);
 const read = file => fs.readFileSync(path.join(root, file), "utf8");
@@ -15,6 +15,8 @@ const verifyHtml = read("verify.html");
 const verifyScript = read("app/verify.js");
 const config = read("config.js");
 const gates = read("docs/PRODUCTION-GATES.md");
+const serviceWorker = read("sw.js");
+const manifest = JSON.parse(read("manifest.webmanifest"));
 
 assert.equal(pkg.version, "5.2.0");
 assert.equal(lock.version, pkg.version);
@@ -35,6 +37,10 @@ assert.match(main, /function focusDocuments\(\)/);
 assert.match(index, /vendor\/qrcode\.min\.js/);
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /connect-src 'self'/);
+assert.match(main, /serviceWorker/);
+assert.match(serviceWorker, /ce100-shell-v5\.2\.0/);
+assert.match(serviceWorker, /request\.mode === "navigate"/);
+assert.ok(manifest.icons.some(icon => icon.src.includes("contract-engine.svg")));
 assert.match(verifyHtml, /app\/verify\.js/);
 assert.match(verifyHtml, /no-referrer/);
 assert.match(verifyScript, /NO VERIFICADO/);
@@ -52,6 +58,16 @@ assert.equal(Object.hasOwn(integrityData(), "workerEmail"), false);
 assert.equal(Object.hasOwn(publicData(), "employerIdNumber"), false);
 assert.equal(Object.hasOwn(publicData(), "workerEmail"), false);
 assert.equal(integrityData().position, "Cuidador/a");
+state.role = "reviewer";
+assert.equal(visibleFields().some(field => field.id === "workerEmail"), false);
+assert.equal(visibleFields().some(field => field.id === "employerIdNumber"), false);
+state.role = "worker";
+state.data.country = "ES";
+state.data.compensation = "paid";
+state.data.currency = "SAR";
+state.data.jurisdiction = "Jurisdicción de prueba";
+assert.ok(validate().warnings.some(warning => warning.field === "currency"));
+assert.ok(validate().warnings.some(warning => warning.field === "jurisdiction"));
 
 // The upload guard checks both the allow-listed extension and the actual
 // file signature. MIME declarations alone are insufficient.
