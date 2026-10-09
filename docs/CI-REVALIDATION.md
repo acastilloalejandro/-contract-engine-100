@@ -1,11 +1,11 @@
 # Revalidación CI v5.2.0
 
-La ejecución `37877790482` falló en `npm test` por una aserción de regresión que esperaba que `additionalDocuments` se marcara como privado. El esquema de la rama ya debe declarar ese campo como `private: true`. Esta nota no sustituye una ejecución verde: el cambio solo se considerará validado cuando el workflow correspondiente al último SHA termine correctamente.
+La primera ejecución falló porque el test usaba una expresión regular que no incluía la sección y la etiqueta del campo `additionalDocuments`. La aserción fue corregida para comprobar su definición completa. Una ejecución intermedia falló por una expresión regular mal escapada al añadir el test postdespliegue; se sustituyó por una comprobación de cadena simple.
 
-## Comprobaciones que quedan
+## Últimos resultados conocidos
 
-- `npm test` completo en Node 24.
-- Comprobación visual real de la página publicada.
-- Validación del CSP con la configuración de producción.
-- Pruebas E2E y de accesibilidad en navegadores.
-- Configuración y despliegue de la API antes de activar autenticación, firma o verificación real.
+- Commit verificado: `d4051ffb4bfab33952bbd0b57d35e93f2f8094e8`.
+- [Contract Engine CI](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37878570802): correcto.
+- [contract-os / quality](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37878570856): correcto.
+
+Las ejecuciones corresponden a ese SHA. Repite CI si cambia el código. Tras fusionar, el workflow de Pages ejecutará la comprobación automatizada de rutas y recursos; aún requiere confirmación visual humana en Safari/iOS y escritorio.
