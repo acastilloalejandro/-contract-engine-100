@@ -2,7 +2,23 @@
 
 No presentar la aplicación como lista para producción hasta que se hayan completado todas las puertas aplicables y se hayan guardado las evidencias de verificación.
 
-## Estado de la rama candidata 5.2.0 (9 de octubre de 2026)
+
+## Estado actualizado de seguridad y autorización (9 de octubre de 2026)
+
+El commit actual de `main` mantiene el producto como demo estática: `config.js` tiene `authBaseUrl: ""` y `workers/api/wrangler.toml` aún contiene un UUID D1 de marcador y dominios de ejemplo. No hay evidencia en el repositorio de que la API real esté desplegada, de que se hayan configurado los secretos del proveedor, ni de que se haya ejecutado una prueba de autorización contra una instancia real de D1.
+
+- [x] CodeQL, auditoría npm, CI y despliegue de GitHub Pages ejecutados correctamente en el commit integrado que añadió cabeceras más estrictas al Worker.
+- [x] Guía de configuración administrativa: [GITHUB-SECURITY-SETTINGS.md](GITHUB-SECURITY-SETTINGS.md).
+- [x] Matriz de pruebas de autorización negativas y dependencias operativas: [AUTHORIZATION-TESTS.md](AUTHORIZATION-TESTS.md).
+- [ ] Activar y verificar en la cuenta de GitHub MFA resistente a phishing, políticas de Actions, secretos, Dependency Graph y protección de `main` con PR y checks requeridos.
+- [ ] Desplegar Worker y D1 en el dominio propio, aplicar esquema/migraciones y configurar secretos en Cloudflare.
+- [ ] Ejecutar pruebas E2E de autorización con dos cuentas distintas: acceso cruzado a expediente, sesión, desafíos, estado de identidad y cualquier futuro recurso documental debe ser denegado.
+- [ ] Probar cookies y sesión en navegadores reales, webhook real en modo de prueba, revocación, rate limiting, restore de copias y borrado/retención.
+- [ ] Conseguir revisión de seguridad independiente y corregir los hallazgos antes de aceptar datos reales.
+
+Los tests con D1 simulado prueban invariantes del Worker; no prueban configuración administrativa, infraestructura, cookies de terceros ni aislamiento real de datos en producción. Un resultado verde de CI no sustituye esas comprobaciones.
+
+## Historial de una rama candidata anterior (referencia histórica)
 
 - [ ] PR [#13](https://github.com/acastilloalejandro/-contract-engine-100/pull/13) contiene el endurecimiento local y la vista previa imprimible; ejecutar los checks del SHA más reciente antes de fusionar.
 - [x] Implementados en la rama: versión sincronizada, ausencia de jurisdicción predeterminada, minimización de campos privados/restringidos en borrador JSON y huella, validación inicial de archivos en cliente, persistencia local de adjuntos, QR local, etiqueta «NO VERIFICADO», CSP meta, shell PWA versionado y borrador contractual imprimible.
