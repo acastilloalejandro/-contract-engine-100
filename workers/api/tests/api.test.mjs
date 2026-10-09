@@ -81,7 +81,7 @@ async function hashTokenForTest(value) {
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-function authorizationDb({ sessions = [], users = [], phoneChallenges = [] } = {}) {
+function authorizationDb({ sessions = [], users = [], phoneChallenges = [], identitySessions = [] } = {}) {
   const calls = [];
   const db = {
     calls,
@@ -102,6 +102,11 @@ function authorizationDb({ sessions = [], users = [], phoneChallenges = [] } = {
           if (sql.includes("FROM phone_challenges WHERE id = ? AND user_id = ?")) {
             return phoneChallenges.find(item =>
               item.id === params[0] && item.user_id === params[1]
+            ) || null;
+          }
+          if (sql.includes("FROM identity_sessions WHERE provider_session_id = ? AND user_id = ?")) {
+            return identitySessions.find(item =>
+              item.provider_session_id === params[0] && item.user_id === params[1]
             ) || null;
           }
           return null;
@@ -201,5 +206,54 @@ assert.ok(crossUserDb.calls.some(call =>
 assert.equal(crossUserDb.calls.filter(call =>
   call.type === "run" && /UPDATE phone_challenges/i.test(call.sql)
 ).length, 0, "a non-owner must not mutate another user's challenge");
+
+
+
+const identityEventSecret = "test-stripe-webhook-secret";
+const foreignIdentityPayload = JSON.stringify({
+  id: "evt-cross-user-test",
+  type: "identity.verification_session.verified",
+  data: {
+    object: {
+      id: "vs-session-owned-by-b",
+      type: "document",
+      status: "verified",
+      metadata: { user_id: "user-a" }
+    }
+  }
+});
+const foreignIdentityTimestamp = String(Math.floor(Date.now() / 1000));
+const foreignIdentitySignature = await hmacSignature(
+  foreignIdentityPayload,
+  identityEventSecret,
+  foreignIdentityTimestamp
+);
+const identityDb = authorizationDb({
+  identitySessions: [{
+    id: "local-identity-b",
+    provider_session_id: "vs-session-owned-by-b",
+    user_id: "user-b"
+  }]
+});
+const foreignIdentityWebhook = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Stripe-Signature": foreignIdentitySignature
+  },
+  body: foreignIdentityPayload
+}), { ...env, DB: identityDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(foreignIdentityWebhook.status, 200);
+assert.equal(await foreignIdentityWebhook.text(), "ignored");
+assertSecurityHeaders(foreignIdentityWebhook);
+assert.ok(identityDb.calls.some(call =>
+  call.type === "first" &&
+  call.sql.includes("FROM identity_sessions WHERE provider_session_id = ? AND user_id = ?") &&
+  call.params[0] === "vs-session-owned-by-b" &&
+  call.params[1] === "user-a"
+), "webhook updates must require both provider session ID and associated user ID");
+assert.equal(identityDb.calls.filter(call =>
+  call.type === "run" && /UPDATE (identity_sessions|users SET identity_status)/i.test(call.sql)
+).length, 0, "a provider session owned by another user must not change identity status");
 
 console.log("Worker API and authorization regression tests: OK");
