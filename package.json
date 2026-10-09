@@ -1,12 +1,12 @@
 {
   "name": "contract-engine-100",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
-    "test": "node tests/smoke.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs && node tests/onboarding.test.mjs && node --check workers/api/src/index.js && node workers/api/tests/api.test.mjs"
+    "test": "node --check app/schema.js && node --check app/engine.js && node --check app/ui.js && node --check app/main.js && node --check app/verify.js && node tests/smoke.test.mjs && node tests/production-hardening.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs && node tests/onboarding.test.mjs && node --check workers/api/src/index.js && node workers/api/tests/api.test.mjs"
   }
 }
