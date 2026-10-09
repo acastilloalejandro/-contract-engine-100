@@ -4,7 +4,7 @@ No presentar la aplicación como lista para producción hasta que se hayan compl
 
 ## Estado de la rama candidata 5.2.0 (9 de octubre de 2026)
 
-- [ ] PR pendiente de creación/revisión; los checks de la rama deben ejecutarse y quedar verdes antes de fusionar.
+- [ ] PR [#13](https://github.com/acastilloalejandro/-contract-engine-100/pull/13) abierto; los checks deben quedar verdes antes de fusionar.
 - [x] Implementados en la rama: versión sincronizada, ausencia de jurisdicción predeterminada, minimización de campos privados/restringidos en borrador JSON y huella, validación inicial de archivos en cliente, persistencia local de adjuntos, QR local, etiqueta «NO VERIFICADO», CSP meta y shell PWA versionado.
 - [ ] Ejecutar CI completa (incluidos tests nuevos de regresión); no marcar esta puerta como superada hasta ver los resultados reales.
 - [ ] Probar la URL publicada en Safari/iOS y en un navegador de escritorio; el contenido de la rama aún no está publicado en Pages.
