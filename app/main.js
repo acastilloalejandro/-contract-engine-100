@@ -1,7 +1,8 @@
 import {VERSION,SCHEMA} from "./schema.js";
+import {initializeAccessGate} from "./onboarding-ui.js";
 import {
   state,restore,saveLocal,audit,validate,riskAssessment,integrityData,publicData,
-  documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest
+  documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest,setStorageScope,STORAGE_KEY
 } from "./engine.js";
 import {renderForm,renderReview,refreshFormMeta,updateViews,$,esc} from "./ui.js";
 
@@ -110,7 +111,7 @@ function handleInput(e){
 }
 
 function reset(){
-  releaseObjectUrls();localStorage.removeItem("ce100:v5");location.reload();
+  releaseObjectUrls();localStorage.removeItem(state.storageKey||STORAGE_KEY);location.reload();
 }
 
 function bind(){
@@ -147,7 +148,15 @@ function bind(){
   window.addEventListener("beforeunload",releaseObjectUrls);
 }
 
-function init(){
+async function startContractApp({mode="demo",user=null}={}){
+  state.mode=mode;
+  state.userId=user?.id||user?.sub||user?.userId||user?.email||null;
+  if(mode==="authenticated"){
+    if(!state.userId) throw new Error("El servidor no devolvió un identificador de cuenta estable.");
+    await setStorageScope(String(state.userId));
+  }else{
+    state.storageKey=STORAGE_KEY;
+  }
   restore();
   state.dark=localStorage.getItem("ce-theme")==="dark";
   document.documentElement.classList.toggle("dark",state.dark);
@@ -159,4 +168,8 @@ function init(){
   renderForm();
   updateViews();
 }
-init();
+
+initializeAccessGate({
+  onEnterDemo:()=>startContractApp({mode:"demo"}),
+  onEnterAuthenticated:user=>startContractApp({mode:"authenticated",user})
+});
