@@ -108,7 +108,7 @@ export function saveLocal(onDone){
     try{
       localStorage.setItem(state.storageKey||STORAGE_KEY,JSON.stringify({
         version:VERSION,recordId:state.recordId,role:state.role,
-        data:publicData(),docs:documentManifest(),audit:state.audit.slice(-50),
+        data:publicData(),documentCount:state.docs.length,audit:state.audit.slice(-50),
         snapshots:state.snapshots,savedAt:new Date().toISOString()
       }));
       onDone?.("Guardado local · "+new Date().toLocaleTimeString());
