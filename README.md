@@ -1,40 +1,50 @@
-# Contract Engine 100 · Field System 5.0
+# Contract Engine 100 · Field System 5.1.0
 
-Frontend estático, iPhone-first y orientado a registro contractual, verificación documental y protección del trabajador.
+Motor contractual modular, móvil primero, para crear expedientes guiados, validar datos y separar los datos privados del contenido compartible.
 
-## Estructura
+> **Estado de esta versión:** candidata de actualización en una rama de trabajo. La URL pública de GitHub Pages no cambia hasta que se integre y despliegue la versión. La autenticación del backend sigue sin desplegar ni configurar con credenciales reales.
 
-- index.html: shell de la aplicación.
-- styles/world-ui.css: sistema visual local.
-- app/schema.js: esquema declarativo y catálogo de optimizaciones.
-- app/engine.js: validación, riesgo, hashing, documentos y persistencia local.
-- app/ui.js: renderizado accesible.
-- app/main.js: orquestación de eventos y flujo.
-- app/auth.js: adaptador de autenticación e incorporación conectado a un backend externo; no simula autenticación.
-- app/onboarding-ui.js: puerta de acceso, registro, inicio de sesión y pasos de verificación.
-- config.js: configuración pública para la API y lista permitida de dominios de identidad.
-- tests/onboarding.test.mjs: pruebas del acceso, minimización de datos y redirecciones OAuth.
-- docs/AUTH-ONBOARDING.md: contrato API, flujo de alta y requisitos de seguridad.
-- workers/api/src/index.js: backend Cloudflare Worker para sesiones, OAuth, email, OTP y verificación de identidad.
-- workers/api/schema.sql: esquema D1.
-- workers/api/wrangler.toml y workers/api/README.md: configuración de despliegue y secretos.
-- verify.html: verificación estática.
-- manifest.webmanifest: instalación tipo app.
+## Qué incluye
 
-## Autenticación e incorporación
+- Formulario declarativo, validación, reglas de revisión, documentos, hashing de integridad, borrador local y QR con datos públicos mínimos.
+- Acceso y onboarding para correo/contraseña, Google/Apple, OTP y verificación documental a través de proveedores externos.
+- API de referencia en Cloudflare Workers + D1 para sesiones, OAuth, correo, teléfono y estado de identidad.
+- Pruebas automatizadas de UI, invariantes, autenticación, onboarding y API.
+- Arquitectura modular para que empleo doméstico, alquiler residencial y otros contratos mantengan esquemas y reglas separados.
 
-La rama de integración incluye una pantalla de acceso, modo demo separado, formulario de registro/inicio de sesión, botones OAuth y pasos de OTP e identidad. Para habilitar el acceso real se debe configurar `config.js` con el endpoint HTTPS del backend y los hosts del proveedor de identidad. La UI no simula verificación. Los borradores del frontend siguen siendo locales y no están cifrados; consulta [docs/AUTH-ONBOARDING.md](docs/AUTH-ONBOARDING.md).
+## Estructura principal
 
-## Seguridad y protección
+- `index.html`, `styles/world-ui.css`: interfaz accesible y adaptable.
+- `app/schema.js`, `app/engine.js`, `app/ui.js`, `app/main.js`: esquema, lógica contractual, renderizado y orquestación.
+- `app/auth.js`, `app/onboarding-ui.js`, `config.js`: adaptador de acceso y configuración pública sin secretos.
+- `src/`, `schema/`, `legal/`: contratos de tipos, validación y registro de reglas.
+- `workers/api/src/index.js`, `workers/api/schema.sql`, `workers/api/wrangler.toml`: backend Cloudflare de referencia.
+- `tests/`: regresiones y pruebas de invariantes.
+- [Arquitectura modular](docs/MODULE-ARCHITECTURE.md), [estrategia de producto](docs/PRODUCT-STRATEGY.md), [onboarding y seguridad](docs/AUTH-ONBOARDING.md), [límites de producción](docs/PRODUCTION-GATES.md).
+- [Historial de cambios](CHANGELOG.md).
 
-Las respuestas privadas no se persisten en localStorage ni se incluyen en el QR público. Los campos restringidos pueden cubrirse en la huella de integridad sin exponerse.
+## Versión 5.1.0
 
-La capa de protección utiliza señales para revisión humana. No implementa propiedad sobre personas, confinamiento, retención coercitiva ni control coercitivo del movimiento.
+- Versión del paquete y de la interfaz sincronizadas.
+- CI migrada a Node.js 24 LTS y acciones mantenidas de GitHub Actions.
+- Instalación reproducible con `npm ci` y lockfile, aunque el núcleo no depende de paquetes npm.
+- CLI de Wrangler documentada con versión exacta para que las instrucciones no cambien bajo los pies del despliegue.
 
-## Firma
+## Ejecutar y verificar localmente
 
-WebAuthn solo se detecta como capacidad. La firma solo se prepara. No se simulan credenciales, biometría ni firmas cualificadas.
+Requisitos: Node.js 24 o superior.
 
-## Producción
+```sh
+npm ci --ignore-scripts
+npm test
+```
 
-Se ha añadido una implementación de referencia del backend en workers/api, pero todavía no está desplegada ni configurada con credenciales. Antes de producción faltan autorización por rol, almacenamiento cifrado de documentos contractuales, WebAuthn real, proveedor de firma, OCR/document intelligence, CSP, gestión de claves, observabilidad, recuperación de cuenta, política de retención y revisión jurídica por jurisdicción. Consulta workers/api/README.md. La web de GitHub Pages debe tratarse como demo hasta que se despliegue el backend y se use un dominio compatible con cookies seguras.
+Para la API, revisa [workers/api/README.md](workers/api/README.md). No despliegues hasta sustituir el UUID ficticio de D1, configurar los orígenes HTTPS y guardar todas las credenciales exclusivamente en los secretos de Cloudflare.
+
+## Seguridad y límites reales
+
+La demo no acredita una identidad ni crea una firma electrónica. El navegador no es una autoridad de permisos. Los datos privados de protección se excluyen del QR público y de la persistencia local prevista; los borradores locales no están cifrados como almacenamiento de servidor.
+
+La capa de protección dirige las señales de riesgo a revisión humana. No implementa confinamiento, retención coercitiva de documentos ni control coercitivo del movimiento.
+
+GitHub Pages solo sirve para la demo estática. Antes de producción faltan, como mínimo, despliegue real, recuperación/borrado de cuenta, autorización por recurso y rol, persistencia cifrada de documentos, proveedor de firma, CSP, observabilidad, backups y revisión de seguridad, privacidad, accesibilidad y legal por jurisdicción. Ver [gates de producción](docs/PRODUCTION-GATES.md).

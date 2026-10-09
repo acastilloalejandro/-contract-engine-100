@@ -1,10 +1,12 @@
 {
-  "name":"Contract Engine 100",
-  "short_name":"Contract Engine",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#f7f7f8",
-  "theme_color":"#f7f7f8",
-  "lang":"es"
+  "id": "./",
+  "name": "Contract Engine 100",
+  "short_name": "Contract Engine",
+  "description": "Expedientes contractuales guiados con reglas versionadas y protección de datos.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f8",
+  "theme_color": "#f7f7f8",
+  "lang": "es"
 }

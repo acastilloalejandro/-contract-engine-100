@@ -31,25 +31,25 @@ The current frontend is hosted at https://acastilloalejandro.github.io. A separa
 
 ## Create and configure the backend
 
-Requirements: a Cloudflare account with Workers and D1 enabled, Node.js/npm and Wrangler, a domain whose DNS can be managed, provider accounts, and a verified sender address for email.
+Requirements: Node.js 24 or newer, a Cloudflare account with Workers and D1 enabled, a domain whose DNS can be managed, provider accounts, and a verified sender address for email. The documented CLI version is pinned to Wrangler 4.148.0 (checked 2026-10-09) for repeatable setup; review the official release notes before intentionally changing it.
 
 1. Create D1:
 
-        npx wrangler d1 create contract-engine-auth
+        npx wrangler@4.148.0 d1 create contract-engine-auth
 
    Copy the returned UUID into wrangler.toml, replacing REPLACE_WITH_D1_DATABASE_UUID.
 
 2. Create the database schema:
 
-        npx wrangler d1 execute contract-engine-auth --remote --file=workers/api/schema.sql
+        npx wrangler@4.148.0 d1 execute contract-engine-auth --remote --file=workers/api/schema.sql
 
 3. Set APP_ORIGIN and API_ORIGIN in wrangler.toml to the real HTTPS origins.
 
 4. From workers/api, deploy after installing/authenticating Wrangler:
 
-        npx wrangler deploy
+        npx wrangler@4.148.0 deploy
 
-5. Add the D1 binding exactly as declared (DB) and configure the following secrets. Use npx wrangler secret put NAME for each, never commit secret values.
+5. Add the D1 binding exactly as declared (DB) and configure the following secrets. Use npx wrangler@4.148.0 secret put NAME for each, never commit secret values.
 
 Required for password registration:
 - RESEND_API_KEY
