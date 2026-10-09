@@ -1,5 +1,5 @@
 import {VERSION,SCHEMA,OPTIMIZATIONS} from "./schema.js";
-import {state,riskAssessment,validate,publicData,documentManifest} from "./engine.js";
+import {state,riskAssessment,validate,publicData,documentManifest,visibleFields} from "./engine.js";
 
 export const $=id=>document.getElementById(id);
 export const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -30,7 +30,7 @@ function control(f){
 }
 
 function formMetrics(){
-  const val=validate(),r=riskAssessment(),fs=SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
+  const val=validate(),r=riskAssessment(),fs=visibleFields();
   const req=fs.filter(f=>f.required);
   const done=req.filter(f=>f.type==="checkbox"?state.data[f.id]===true:f.type==="file"?!!state.data[f.id]?.id:filled(state.data[f.id])).length;
   const pct=req.length?Math.round(done/req.length*100):0;
