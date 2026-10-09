@@ -671,9 +671,12 @@ async function stripeWebhook(request, env) {
 
   const changed = await env.DB.prepare(
     "UPDATE identity_sessions SET status = ?, updated_at = ?, last_event_created_at = ? " +
-    "WHERE id = ? AND user_id = ? AND last_event_created_at <= ? " +
+    "WHERE id = ? AND user_id = ? " +
+    "AND (last_event_created_at < ? OR (last_event_created_at = ? AND " +
+    "CASE status WHEN 'requires_input' THEN 1 WHEN 'processing' THEN 2 WHEN 'verified' THEN 3 WHEN 'failed' THEN 3 ELSE 0 END " +
+    "<= CASE ? WHEN 'requires_input' THEN 1 WHEN 'processing' THEN 2 WHEN 'verified' THEN 3 WHEN 'failed' THEN 3 ELSE 0 END)) " +
     "AND (status NOT IN ('verified', 'failed') OR status = ?)"
-  ).bind(nextStatus, now, event.created, record.id, record.user_id, event.created, nextStatus).run();
+  ).bind(nextStatus, now, event.created, record.id, record.user_id, event.created, event.created, nextStatus, nextStatus).run();
   if (Number(changed?.meta?.changes || 0) !== 1) {
     // A concurrent or newer event won the race. Record this event so retries
     // cannot repeatedly attempt to apply an already superseded transition.
