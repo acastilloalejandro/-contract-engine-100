@@ -4,7 +4,7 @@
 
 La aplicación publicada es un frontend estático servido desde GitHub Pages. GitHub Pages no proporciona sesiones privadas, base de datos, secretos OAuth, envío de SMS ni verificación de DNI. Un botón o campo no demuestra autenticación ni identidad verificada.
 
-Esta rama añade un adaptador frontend provider-neutral (app/auth.js) y define el contrato que deberá implementar el backend. No marca usuarios como autenticados o verificados por sí solo.
+Esta rama añade el adaptador frontend (app/auth.js), las pantallas de acceso (app/onboarding-ui.js) y una implementación backend de referencia en workers/api/src/index.js. La API debe desplegarse y configurarse antes de aceptar usuarios reales. Un estado de autenticación o identidad solo es válido cuando lo confirma el servidor.
 
 ## Flujo previsto
 
@@ -61,3 +61,29 @@ La pantalla de acceso vive en `index.html` y la lógica está en `app/onboarding
 Los borradores locales se separan mediante un identificador de cuenta hasheado, pero esto no cifra el contenido del navegador. El distintivo de interfaz debe conservar la aclaración de que el borrador es local hasta que se implemente almacenamiento server-side.
 
 La copia completa del DNI no se solicita en la pantalla de onboarding: el flujo arranca mediante un proveedor especializado. Esto sigue el principio de minimización. La AEPD indica que, como regla general, una copia del DNI no es necesaria para ejercer derechos y que deben protegerse datos no necesarios cuando se facilite una copia: https://www.aepd.es/preguntas-frecuentes/1-tus-derechos/3-identificacion-con-dni/FAQ-0108-para-el-ejercicio-de-estos-derechos-es-necesario-facilitar-la-copia-del-dni
+
+
+## Backend de referencia implementado
+
+La rama incluye Cloudflare Workers + D1 bajo workers/api:
+- Registro de contraseña y verificación de correo por enlace de un solo uso mediante Resend.
+- Sesiones server-side con cookies HttpOnly, Secure y SameSite=None, almacenando solo el hash del token de sesión.
+- Google OIDC con state, nonce y PKCE; Apple Sign in with Apple con client-secret ES256 generado en servidor y validación de ID token.
+- Verificación telefónica mediante Twilio Verify, con códigos de corta duración, intentos limitados y estado de servidor.
+- Inicio de verificación documental con Stripe Identity. El estado pasa a verified únicamente cuando se recibe y valida el webhook de Stripe.
+- Rate limits básicos en D1, CORS restringido al origen configurado, consultas SQL preparadas y endpoint de salud sin exposición de configuración.
+
+El esquema está en workers/api/schema.sql. La configuración de Wrangler y los pasos de despliegue están en workers/api/wrangler.toml y workers/api/README.md. La API no está desplegada; se requieren una cuenta Cloudflare, base D1, remitente de correo, credenciales Google/Apple, Twilio, Stripe y un dominio propio.
+
+## Restricción del dominio
+
+La URL actual de GitHub Pages y un API en workers.dev son sitios diferentes. Aunque el backend usa cookies Secure y SameSite=None y CORS con credenciales, los controles de cookies de terceros de los navegadores pueden interrumpir la continuidad de sesión. El despliegue de producción debe poner la app y la API bajo el mismo dominio registrable (por ejemplo app.example.com y api.example.com). No activar login real en GitHub Pages con un API de otro sitio sin probar navegadores y configurar el dominio adecuado.
+
+## Limitaciones aún abiertas
+
+- Recuperación de contraseña y revocación total de sesiones en todos los dispositivos.
+- Gestión de roles/organizaciones y autorización por expediente.
+- Backups, restauración, retención y borrado automático, telemetría y alertas.
+- Persistencia cifrada de documentos contractuales y generación/almacenamiento de contratos.
+- Proveedor de firma electrónica y validación de firmas.
+- Revisión de seguridad, privacidad, accesibilidad, cobertura legal y pruebas E2E antes de producción.
