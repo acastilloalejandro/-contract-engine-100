@@ -395,7 +395,7 @@ async function verifyIdToken(idToken, provider, oauth, expectedNonce, env) {
   const now = Math.floor(Date.now() / 1000);
   const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
   const emailVerified = claims.email_verified === true || claims.email_verified === "true";
-  if (!validSignature || !oauth.issuer.includes(claims.iss) || !aud.includes(oauth.clientId) ||
+  if (!validSignature || !oauth.issuer.includes(claims.iss) || !aud.includes(oauth.clientId) || (aud.length > 1 && claims.azp !== oauth.clientId) ||
       Number(claims.exp) <= now || Number(claims.iat) > now + 60 ||
       claims.nonce !== expectedNonce || typeof claims.sub !== "string" || !claims.sub ||
       !emailVerified || typeof claims.email !== "string") {
@@ -689,3 +689,5 @@ export default {
     }
   }
 };
+
+export { verifyStripeSignature };
