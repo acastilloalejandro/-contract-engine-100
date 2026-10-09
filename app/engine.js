@@ -296,7 +296,7 @@ export async function addDocuments(fileList,fieldId){
     audit("documentAdded",{documentId:doc.id,hash:doc.hash,persisted:doc.persisted});
     accepted++;
   }
-  if(failures.length&&typeof alert==="function") alert(failures.join("\\n"));
+  if(failures.length&&typeof alert==="function") alert(failures.join("\n"));
   return {accepted,failures};
 }
 
@@ -314,9 +314,13 @@ export function buildVerificationURL(){
 }
 
 export async function createSignatureRequest(){
+  if(state.role==="reviewer"){
+    alert("La perspectiva de revisión no puede preparar una solicitud de firma. Usa una parte firmante autorizada en el servicio real.");
+    return false;
+  }
   const validation=validate();
   if(!validation.isValid) return false;
-  if(state.role==="worker"&&(riskAssessment().level!=="NORMAL"||state.data.independentReviewRequested===true)){
+  if(riskAssessment().level!=="NORMAL"||state.data.independentReviewRequested===true){
     state.view="protected";state.nav="review";audit("protectiveGate",{level:riskAssessment().level});return false;
   }
   if(!state.data.consentIdentity||!state.data.consentDocuments||!state.data.consentContract){
