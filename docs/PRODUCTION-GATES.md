@@ -23,8 +23,8 @@ No presentar la aplicación como lista para producción hasta que se hayan compl
 
 - [x] CI de la versión integrada completa correctamente.
 - [x] Workflow de publicación estática completo correctamente.
-- [ ] Abrir la URL pública en Safari y al menos un navegador de escritorio; comprobar consola, carga de módulos, manifest, navegación, almacenamiento local, QR y enlaces.
-- [ ] Añadir comprobación automatizada de disponibilidad de la URL pública y carga de recursos esenciales después de cada despliegue.
+- [ ] Abrir la URL pública en Safari y al menos un navegador de escritorio; comprobar apariencia, consola, manifest, navegación, borrador, impresión y QR después del despliegue 5.2.0.
+- [x] Añadida comprobación automatizada de URL y recursos esenciales tras cada despliegue en el workflow de Pages; queda pendiente observar un despliegue real y confirmar manualmente la apariencia en Safari/iOS y escritorio.
 - [ ] Verificar configuración de dominio y política de caché para futuras actualizaciones.
 
 ## 2. Backend y configuración
