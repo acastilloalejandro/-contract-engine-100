@@ -5,7 +5,7 @@
  * License: see LICENSE and NOTICE.md at the repository root.
  * Third-party components, dependencies, and assets remain under their own licenses.
  */
-const CACHE_NAME = "ce100-shell-v5.2.1";
+const CACHE_NAME = "ce100-shell-v5.2.1-bithome-fusion";
 const SHELL = [
   "./",
   "./index.html",
@@ -22,7 +22,12 @@ const SHELL = [
   "./app/onboarding-ui.js",
   "./app/verify.js",
   "./vendor/qrcode.min.js",
-  "./icons/contract-engine.svg"
+  "./icons/contract-engine.svg",
+  "./icons/bithome.svg",
+  "./real-estate/index.html",
+  "./real-estate/main.js",
+  "./real-estate/schema.js",
+  "./real-estate/style.css"
 ];
 
 self.addEventListener("install", event => {
