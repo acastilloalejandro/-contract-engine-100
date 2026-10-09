@@ -6,3 +6,9 @@
 @media(max-width:480px){.app-header{min-height:75px}.app-shell{padding:0 14px}.brand{font-size:21px}.brand-icon{width:39px;height:39px}.environment{font-size:.66rem;padding:7px 9px}.hero h1{font-size:2.7rem}.fields,.narrative{grid-template-columns:1fr}.workflow{padding:16px;border-radius:19px}.section-bar{margin-bottom:20px}.section-bar h2{font-size:1.23rem}.version{font-size:.66rem}.action-right{gap:1px}.button{padding:11px 13px;font-size:.77rem}.step-nav button{padding:7px 9px}.footer{margin-top:35px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 @media(print){:root{background:#fff}.app-header,.hero,.safety,.workflow,.summary,.footer,.result .actions,.result details{display:none!important}.app-grid{display:none}.result{border:0;box-shadow:none;padding:0;margin:0}.narrative>div{break-inside:avoid}.result[hidden]{display:none!important}}
+
+/* Safe-area and high-contrast defaults for iPhone/iPad. */
+.app-shell{padding-left:max(clamp(16px,4.1vw,58px),env(safe-area-inset-left));padding-right:max(clamp(16px,4.1vw,58px),env(safe-area-inset-right));padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+#progressBar{width:20%}
+@media(prefers-contrast:more){:root{--muted:#485875;--border:#bac6d7;--blue:#124bc9}.safety{border-color:#9a7a3c}.field-error{color:#930d17}}
+@media(max-width:480px){.app-shell{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}}
