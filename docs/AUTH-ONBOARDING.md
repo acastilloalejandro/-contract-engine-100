@@ -2,9 +2,9 @@
 
 ## Estado actual
 
-La aplicación publicada es un frontend estático servido desde GitHub Pages. GitHub Pages no proporciona sesiones privadas, base de datos, secretos OAuth, envío de SMS ni verificación de DNI. Un botón o campo no demuestra autenticación ni identidad verificada.
+La versión 5.1.0 está integrada en `main` y el workflow de GitHub Pages terminó correctamente para el frontend estático. La API de autenticación **no está desplegada** y `config.js` mantiene `authBaseUrl` vacío. Por tanto, registro, inicio de sesión, OAuth, OTP y verificación documental no están disponibles como servicios reales en la publicación actual.
 
-Esta rama añade el adaptador frontend (app/auth.js), las pantallas de acceso (app/onboarding-ui.js) y una implementación backend de referencia en workers/api/src/index.js. La API debe desplegarse y configurarse antes de aceptar usuarios reales. Un estado de autenticación o identidad solo es válido cuando lo confirma el servidor.
+El repositorio incluye las pantallas de acceso (`index.html`, `app/onboarding-ui.js`), el adaptador (`app/auth.js`) y una implementación backend de referencia en `workers/api/src/index.js`. La API debe desplegarse y configurarse, y superar pruebas de integración antes de aceptar usuarios reales. Un botón o campo no demuestra autenticación ni identidad verificada.
 
 ## Flujo previsto
 
@@ -31,7 +31,7 @@ Esta rama añade el adaptador frontend (app/auth.js), las pantallas de acceso (a
 ## Seguridad obligatoria antes de producción
 
 - Configurar Google OAuth Client ID y Sign in with Apple en proveedor y backend. Las claves privadas de Apple nunca se publican en el repositorio.
-- Validar en backend firmas, issuer, audience, nonce, state, PKCE, expiración y URI de retorno. No confiar en un email recibido del navegador.
+- Validar en backend firmas, issuer, audience, nonce, state, PKCE, expiración y URI de retorno.
 - Usar cookies seguras, protección CSRF para mutaciones, rotación/revocación, límites de intentos y rate limiting.
 - Para OTP: límite por cuenta/IP/dispositivo, caducidad breve, uso único y respuestas que no revelen si una cuenta existe.
 - Para identidad: proveedor y base jurídica aprobados, evaluación de privacidad, plazos de borrado, control de acceso y separación entre datos identificativos y expediente contractual.
@@ -41,7 +41,16 @@ Esta rama añade el adaptador frontend (app/auth.js), las pantallas de acceso (a
 
 ## Configuración frontend
 
-El hosting puede inyectar window.CONTRACT_ENGINE_CONFIG = { authBaseUrl: "https://api.example.com" } antes de cargar app/main.js. El valor debe ser un endpoint público, nunca una clave secreta. Si no está configurado, el adaptador falla explícitamente y no simula una sesión.
+El archivo público `config.js` contiene actualmente:
+
+```js
+window.CONTRACT_ENGINE_CONFIG = Object.freeze({
+  authBaseUrl: "",
+  identityProviderHosts: []
+});
+```
+
+El valor `authBaseUrl` debe configurarse con una URL HTTPS de API, nunca con una clave secreta. `identityProviderHosts` debe incluir solo los nombres de host exactos del proveedor elegido. La configuración actual vacía hace que el adaptador falle explícitamente y no simule una sesión.
 
 ## Criterios de aceptación
 
@@ -52,28 +61,17 @@ El hosting puede inyectar window.CONTRACT_ENGINE_CONFIG = { authBaseUrl: "https:
 - DNI, OTP y tokens no aparecen en URL, logs, analítica, QR público ni almacenamiento local.
 - Tests de OAuth state/nonce/PKCE, CSRF, expiración, reuso de OTP, rate limits, control de acceso y borrado pasan antes del lanzamiento.
 
-## Pantallas frontend añadidas
-
-La pantalla de acceso vive en `index.html` y la lógica está en `app/onboarding-ui.js`. El shell contractual permanece oculto hasta que el usuario elige explícitamente la demo o el servidor confirma una sesión y el estado de incorporación. El formulario de onboarding solicita teléfono y redirige a una página de identidad solo si el host está autorizado en `config.js`.
-
-`config.js` es público y solo contiene configuración no secreta. Para habilitar el backend se configura `authBaseUrl` con un endpoint HTTPS y `identityProviderHosts` con los dominios exactos del proveedor elegido. Nunca colocar tokens privados ni claves de Apple en ese archivo.
-
-Los borradores locales se separan mediante un identificador de cuenta hasheado, pero esto no cifra el contenido del navegador. El distintivo de interfaz debe conservar la aclaración de que el borrador es local hasta que se implemente almacenamiento server-side.
-
-La copia completa del DNI no se solicita en la pantalla de onboarding: el flujo arranca mediante un proveedor especializado. Esto sigue el principio de minimización. La AEPD indica que, como regla general, una copia del DNI no es necesaria para ejercer derechos y que deben protegerse datos no necesarios cuando se facilite una copia: https://www.aepd.es/preguntas-frecuentes/1-tus-derechos/3-identificacion-con-dni/FAQ-0108-para-el-ejercicio-de-estos-derechos-es-necesario-facilitar-la-copia-del-dni
-
-
 ## Backend de referencia implementado
 
-La rama incluye Cloudflare Workers + D1 bajo workers/api:
+La API Cloudflare Workers + D1 del repositorio contempla:
 - Registro de contraseña y verificación de correo por enlace de un solo uso mediante Resend.
 - Sesiones server-side con cookies HttpOnly, Secure y SameSite=None, almacenando solo el hash del token de sesión.
 - Google OIDC con state, nonce y PKCE; Apple Sign in with Apple con client-secret ES256 generado en servidor y validación de ID token.
 - Verificación telefónica mediante Twilio Verify, con códigos de corta duración, intentos limitados y estado de servidor.
-- Inicio de verificación documental con Stripe Identity. El estado pasa a verified únicamente cuando se recibe y valida el webhook de Stripe.
+- Inicio de verificación documental con Stripe Identity. El estado cambia a verified únicamente cuando se recibe y valida el webhook de Stripe.
 - Rate limits básicos en D1, CORS restringido al origen configurado, consultas SQL preparadas y endpoint de salud sin exposición de configuración.
 
-El esquema está en workers/api/schema.sql. La configuración de Wrangler y los pasos de despliegue están en workers/api/wrangler.toml y workers/api/README.md. La API no está desplegada; se requieren una cuenta Cloudflare, base D1, remitente de correo, credenciales Google/Apple, Twilio, Stripe y un dominio propio.
+El esquema está en `workers/api/schema.sql`. La configuración de Wrangler y los pasos de despliegue están en `workers/api/wrangler.toml` y `workers/api/README.md`. La API requiere una cuenta Cloudflare, base D1, remitente de correo, credenciales Google/Apple, Twilio, Stripe y un dominio propio. Ninguno de esos servicios queda activado por publicar la página estática.
 
 ## Restricción del dominio
 
