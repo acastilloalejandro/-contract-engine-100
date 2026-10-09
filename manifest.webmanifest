@@ -8,5 +8,13 @@
   "display": "standalone",
   "background_color": "#f7f7f8",
   "theme_color": "#f7f7f8",
-  "lang": "es"
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./icons/contract-engine.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }

@@ -1,5 +1,6 @@
+import { renderContractDraft } from "./contract-preview.js";
 import {VERSION,SCHEMA,OPTIMIZATIONS} from "./schema.js";
-import {state,riskAssessment,validate,publicData,documentManifest} from "./engine.js";
+import {state,riskAssessment,validate,publicData,documentManifest,visibleFields} from "./engine.js";
 
 export const $=id=>document.getElementById(id);
 export const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -23,14 +24,14 @@ function control(f){
   if(f.type==="multiselect"){const a=Array.isArray(v)?v:[];c="<div class='choice-grid'>"+f.options.map(o=>"<label class='choice'><input type='checkbox' data-multi='"+f.id+"' value='"+esc(o.value)+"' "+(a.includes(o.value)?"checked":"")+"><span>"+esc(o.label)+"</span></label>").join("")+"</div>";}
   if(f.type==="checkbox") c="<label class='check-row'><input id='"+id+"' data-field='"+f.id+"' type='checkbox' "+(v===true?"checked":"")+"><span>"+esc(f.label)+"</span></label>";
   if(f.type==="switch") c="<label class='switch-row'><input id='"+id+"' data-field='"+f.id+"' type='checkbox' "+(v===true?"checked":"")+"><span class='switch-track'><span></span></span><span>"+(v?"Sí":"No")+"</span></label>";
-  if(f.type==="file"||f.type==="files") c="<div class='upload-box'><input id='"+id+"' data-upload='"+f.id+"' type='file' accept='.pdf,.jpg,.jpeg,.png,.webp,.txt' "+(f.type==="files"?"multiple":"")+" capture='environment'><label for='"+id+"'>Añadir "+(f.type==="files"?"documentos":"documento")+"</label><div class='upload-meta'>"+(f.type==="file"&&v?docMeta(v):f.type==="files"&&Array.isArray(v)?v.map(docMeta).join(""):"")+"</div></div>";
+  if(f.type==="file"||f.type==="files") c="<div class='upload-box'><input id='"+id+"' data-upload='"+f.id+"' type='file' accept='.pdf,.jpg,.jpeg,.png,.webp' "+(f.type==="files"?"multiple":"")+" capture='environment'><label for='"+id+"'>Añadir "+(f.type==="files"?"documentos":"documento")+"</label><p class='microcopy'>PDF, JPEG, PNG o WebP · máximo 10 MB.</p><div class='upload-meta'>"+(f.type==="file"&&v?docMeta(v):f.type==="files"&&Array.isArray(v)?v.map(docMeta).join(""):"")+"</div></div>";
   return (f.type==="checkbox"?"":"<label class='field-label' for='"+id+"'>"+esc(f.label)+" "+(f.required?"<span class='req'>*</span>":"")+" "+mark+"</label>")+
     c+(["text","textarea","select","date","time"].includes(f.type)?"<button type='button' class='text-btn' data-read='"+esc(f.label+(filled(v)?": "+v:""))+"'>Escuchar</button>":"")+
     "<div id='"+id+"-error' class='field-error'></div>";
 }
 
 function formMetrics(){
-  const val=validate(),r=riskAssessment(),fs=SCHEMA.filter(f=>(!f.actor||f.actor.includes(state.role))&&f.when(state.data));
+  const val=validate(),r=riskAssessment(),fs=visibleFields();
   const req=fs.filter(f=>f.required);
   const done=req.filter(f=>f.type==="checkbox"?state.data[f.id]===true:f.type==="file"?!!state.data[f.id]?.id:filled(state.data[f.id])).length;
   const pct=req.length?Math.round(done/req.length*100):0;
@@ -68,6 +69,7 @@ export function renderReview(){
   $("reviewDocs").innerHTML="<div class='summary-card'><div class='section-head'><div><span class='eyebrow'>DOCUMENTOS</span><h2>Expediente documental</h2></div><span class='counter'>"+state.docs.length+"</span></div>"+(state.docs.length?state.docs.map(d=>"<div class='doc-row'><div><b>"+esc(d.name)+"</b><span>"+esc(d.status)+" · "+esc(d.hash.slice(0,16))+"…</span></div><button type='button' class='link-btn' data-open='"+esc(d.id)+"'>Abrir</button></div>").join(""):"<p class='muted'>No hay documentos.</p>")+"</div>";
   const a=state.snapshots.at(-2)?.data||{},b=state.snapshots.at(-1)?.data||{},keys=[...new Set([...Object.keys(a),...Object.keys(b)])].filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k]));
   $("reviewDiff").innerHTML="<div class='summary-card'><div class='section-head'><div><span class='eyebrow'>VERSIONES</span><h2>Contract Diff</h2></div><span class='counter'>"+state.snapshots.length+"</span></div>"+(keys.length?keys.map(k=>"<div class='diff-row'><b>"+esc(k)+"</b><span>"+esc(JSON.stringify(a[k]??null))+"</span><span>"+esc(JSON.stringify(b[k]??null))+"</span></div>").join(""):"<p class='muted'>Sin diferencias o aún no hay dos versiones.</p>")+"</div>";
+  renderContractDraft();
   $("signContent").innerHTML="<div class='summary-card'><div class='hash-row'><span>Expediente</span><b>"+esc(state.recordId)+"</b></div><div class='hash-row'><span>Versión</span><b>"+VERSION+"</b></div><div class='hash-row'><span>Huella</span><b class='break'>"+esc(state.hash)+"</b></div><div class='notice'>Esta versión solo prepara una solicitud de firma. No almacena biometría ni fabrica una firma electrónica cualificada.</div></div>";
   $("stateTitle").textContent=state.prepared?"SIGNATURE_PREPARED":"DRAFT";$("stateSub").textContent=state.prepared?"Solicitud de firma preparada.":"Expediente local y no firmado.";
   $("stateCard").innerHTML="<div class='summary-card'><div class='section-head'><div><span class='eyebrow'>AUDITORÍA</span><h2>Últimos eventos</h2></div><span class='counter'>"+state.audit.length+"</span></div>"+state.audit.slice(-10).reverse().map(e=>"<div class='audit-row'><b>"+esc(e.action)+"</b><span>"+new Date(e.timestamp).toLocaleString()+"</span></div>").join("")+(state.prepared?"<div class='button-row' style='margin-top:12px'><button id='qrBtn' class='secondary-btn' type='button'>Generar QR</button><button id='copyBtn' class='primary-btn' type='button'>Copiar verificación</button></div>":"")+"</div>";

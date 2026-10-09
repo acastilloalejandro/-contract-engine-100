@@ -2,21 +2,29 @@
 
 No presentar la aplicación como lista para producción hasta que se hayan completado todas las puertas aplicables y se hayan guardado las evidencias de verificación.
 
-## Estado verificado de la versión 5.1.0 (9 de octubre de 2026)
+## Estado de la rama candidata 5.2.0 (9 de octubre de 2026)
+
+- [ ] PR [#13](https://github.com/acastilloalejandro/-contract-engine-100/pull/13) contiene el endurecimiento local y la vista previa imprimible; ejecutar los checks del SHA más reciente antes de fusionar.
+- [x] Implementados en la rama: versión sincronizada, ausencia de jurisdicción predeterminada, minimización de campos privados/restringidos en borrador JSON y huella, validación inicial de archivos en cliente, persistencia local de adjuntos, QR local, etiqueta «NO VERIFICADO», CSP meta, shell PWA versionado y borrador contractual imprimible.
+- [ ] Repetir CI completa tras añadir la vista previa contractual y su CSS de impresión; no reutilizar el resultado verde de un SHA anterior.
+- [ ] Probar la URL publicada en Safari/iOS y en un navegador de escritorio; el contenido de la rama aún no está publicado en Pages.
+- [ ] Desplegar API y D1, configurar proveedores y ejecutar integración end-to-end. `config.js` conserva `authBaseUrl: ""`; la autenticación real no está activa.
+- [ ] Revisar la [matriz de las 50 optimizaciones](OPTIMIZATION-ROADMAP-50.md); la matriz diferencia trabajo aplicado, parcial y bloqueado.
+
+## Historial verificado de la versión 5.1.0 (9 de octubre de 2026)
 
 - [x] Versión 5.1.0 integrada en `main`, commit `444c3f7fd675ac8febb25a2514d3587fa209ebf0`.
-- [x] CI `Contract Engine CI`: ejecución [#142](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410270) completada correctamente.
-- [x] `contract-os`: ejecución [#132](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410267) completada correctamente.
-- [x] GitHub Pages: ejecución [#2](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410276) completada correctamente.
-- [ ] Confirmar desde un navegador real que la URL pública sirve los recursos correctos y que las rutas de la aplicación funcionan. El verificador web utilizado en esta revisión no pudo recuperar la página, por lo que esta comprobación no se marca como superada.
-- [ ] Desplegar la API, conectar D1, configurar proveedores y realizar pruebas end-to-end. `config.js` conserva `authBaseUrl: ""`; la autenticación real no está activa.
+- [x] CI `Contract Engine CI`: ejecución [#142](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410270) completada correctamente para la entrega anterior.
+- [x] `contract-os`: ejecución [#132](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410267) completada correctamente para la entrega anterior.
+- [x] GitHub Pages: ejecución [#2](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410276) completada correctamente para la entrega anterior.
+
 
 ## 1. Entrega y despliegue
 
 - [x] CI de la versión integrada completa correctamente.
 - [x] Workflow de publicación estática completo correctamente.
-- [ ] Abrir la URL pública en Safari y al menos un navegador de escritorio; comprobar consola, carga de módulos, manifest, navegación, almacenamiento local, QR y enlaces.
-- [ ] Añadir comprobación automatizada de disponibilidad de la URL pública y carga de recursos esenciales después de cada despliegue.
+- [ ] Abrir la URL pública en Safari y al menos un navegador de escritorio; comprobar apariencia, consola, manifest, navegación, borrador, impresión y QR después del despliegue 5.2.0.
+- [x] Añadida comprobación automatizada de URL y recursos esenciales tras cada despliegue en el workflow de Pages; queda pendiente observar un despliegue real y confirmar manualmente la apariencia en Safari/iOS y escritorio.
 - [ ] Verificar configuración de dominio y política de caché para futuras actualizaciones.
 
 ## 2. Backend y configuración
@@ -52,4 +60,4 @@ No presentar la aplicación como lista para producción hasta que se hayan compl
 
 ## 5. Criterio de lanzamiento
 
-La versión 5.1.0 está publicada como **demo estática**, no como servicio contractual completo. No se debe habilitar producción general hasta que todas las casillas bloqueantes estén verificadas, documentadas y aprobadas. Si un gate no aplica, documentar la justificación en vez de marcarlo como superado.
+La última publicación conocida, 5.1.0, está publicada como **demo estática**; la rama 5.2.0 candidata sigue sin ser producción, no como servicio contractual completo. No se debe habilitar producción general hasta que todas las casillas bloqueantes estén verificadas, documentadas y aprobadas. Si un gate no aplica, documentar la justificación en vez de marcarlo como superado.
