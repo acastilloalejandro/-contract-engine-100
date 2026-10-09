@@ -11,13 +11,16 @@ Frontend estático, iPhone-first y orientado a registro contractual, verificaci�
 - app/ui.js: renderizado accesible.
 - app/main.js: orquestación de eventos y flujo.
 - app/auth.js: adaptador de autenticación e incorporación conectado a un backend externo; no simula autenticación.
+- app/onboarding-ui.js: puerta de acceso, registro, inicio de sesión y pasos de verificación.
+- config.js: configuración pública para la API y lista permitida de dominios de identidad.
+- tests/onboarding.test.mjs: pruebas del acceso, minimización de datos y redirecciones OAuth.
 - docs/AUTH-ONBOARDING.md: contrato API, flujo de alta y requisitos de seguridad.
 - verify.html: verificación estática.
 - manifest.webmanifest: instalación tipo app.
 
 ## Autenticación e incorporación
 
-La rama de integración de autenticación introduce un adaptador para registro convencional, Google/Apple, verificación OTP de teléfono y verificación de identidad mediante proveedor. Requiere un backend real configurado en `window.CONTRACT_ENGINE_CONFIG.authBaseUrl`. El adaptador no puede verificar usuarios desde GitHub Pages por sí solo. Consulta [docs/AUTH-ONBOARDING.md](docs/AUTH-ONBOARDING.md).
+La rama de integración incluye una pantalla de acceso, modo demo separado, formulario de registro/inicio de sesión, botones OAuth y pasos de OTP e identidad. Para habilitar el acceso real se debe configurar `config.js` con el endpoint HTTPS del backend y los hosts del proveedor de identidad. La UI no simula verificación. Los borradores del frontend siguen siendo locales y no están cifrados; consulta [docs/AUTH-ONBOARDING.md](docs/AUTH-ONBOARDING.md).
 
 ## Seguridad y protección
 
