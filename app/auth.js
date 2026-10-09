@@ -6,6 +6,15 @@ const config = () => window.CONTRACT_ENGINE_CONFIG || {};
 const baseUrl = () => String(config().authBaseUrl || "").replace(/\/$/, "");
 const configured = () => Boolean(baseUrl());
 
+function apiBase() {
+  if (!configured()) throw new AuthConfigurationError();
+  const url = new URL(baseUrl());
+  if (url.protocol !== "https:" && url.hostname !== "localhost") {
+    throw new Error("La API de autenticación debe utilizar HTTPS.");
+  }
+  return url;
+}
+
 export class AuthConfigurationError extends Error {
   constructor(message = "La autenticación aún no está configurada en el servidor.") {
     super(message);
@@ -14,8 +23,8 @@ export class AuthConfigurationError extends Error {
 }
 
 async function request(path, { method = "GET", body, signal } = {}) {
-  if (!configured()) throw new AuthConfigurationError();
-  const response = await fetch(baseUrl() + path, {
+  const api = apiBase();
+  const response = await fetch(api.origin + api.pathname.replace(/\\/$/, "") + path, {
     method, credentials: "include",
     headers: { "Accept": "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
     body: body ? JSON.stringify(body) : undefined, signal
@@ -41,7 +50,10 @@ export const auth = Object.freeze({
     const result = await request("/v1/auth/oauth/" + provider);
     if (typeof result.authorizationUrl !== "string") throw new Error("El servidor no devolvió una URL de autorización válida.");
     const target = new URL(result.authorizationUrl);
-    if (target.protocol !== "https:" && target.hostname !== "localhost") throw new Error("La URL de autorización debe usar HTTPS.");
+    const expectedHost = provider === "google" ? "accounts.google.com" : "appleid.apple.com";
+    if (target.protocol !== "https:" || target.hostname !== expectedHost || target.username || target.password) {
+      throw new Error("El servidor devolvió un destino de autenticación no permitido.");
+    }
     location.assign(target.href);
   },
   startPhoneVerification: phone => request("/v1/onboarding/phone/start", { method: "POST", body: { phone } }),
