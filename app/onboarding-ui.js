@@ -133,7 +133,7 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
   $("demoPanel").hidden = false;
   $("accessState").textContent = configured
     ? "Autenticación conectada: la sesión y la identidad se comprobarán en el servidor."
-    : "Autenticación real sin configurar. La demo no crea una cuenta ni verifica identidad.";
+    : "Acceso real deshabilitado: falta configurar el backend. El formulario de acceso se muestra como vista previa y la demo no crea cuentas ni verifica identidades.";
   const query = new URLSearchParams(location.search);
   if (query.get("email_verified") === "1") {
     message("Correo verificado. Ya puedes iniciar sesión.", "success");
