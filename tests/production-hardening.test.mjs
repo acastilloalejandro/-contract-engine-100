@@ -31,7 +31,7 @@ assert.match(engine, /export async function restore\(\)/);
 assert.match(engine, /export async function validateDocumentFile\(file\)/);
 assert.match(engine, /f\.private\|\|f\.restricted/);
 assert.match(engine, /clearPersistedDocuments/);
-assert.doesNotMatch(saveBlock, /documents:\\s*state\\.docs\\.filter/);
+assert.doesNotMatch(saveBlock, /documents:\s*state\.docs\.filter/);
 assert.match(main, /await restore\(\)/);
 assert.doesNotMatch(main, /cdn\.jsdelivr\.net/);
 assert.match(main, /warningsAcknowledged/);
