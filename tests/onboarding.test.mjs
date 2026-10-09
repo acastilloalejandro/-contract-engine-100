@@ -47,6 +47,18 @@ await assert.rejects(auth.session(), AuthConfigurationError);
 window.CONTRACT_ENGINE_CONFIG.authBaseUrl = "http://api.example.test";
 await assert.rejects(auth.session(), /HTTPS/);
 
+// API subpaths are joined without corrupting the endpoint URL.
+window.CONTRACT_ENGINE_CONFIG.authBaseUrl = "https://api.example.test/service/";
+let requestedUrl = "";
+globalThis.fetch = async url => {
+  requestedUrl = String(url);
+  return {
+    ok: true, status: 200, json: async () => ({ authenticated: false })
+  };
+};
+await auth.session();
+assert.equal(requestedUrl, "https://api.example.test/service/v1/auth/session");
+
 // OAuth redirect targets are constrained to their expected provider hosts.
 window.CONTRACT_ENGINE_CONFIG.authBaseUrl = "https://api.example.test";
 globalThis.fetch = async () => ({
