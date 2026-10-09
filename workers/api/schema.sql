@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS users (
   password_iterations INTEGER,
   auth_provider TEXT NOT NULL,
   auth_subject TEXT,
-  phone TEXT,
   phone_verified INTEGER NOT NULL DEFAULT 0 CHECK (phone_verified IN (0, 1)),
   identity_status TEXT NOT NULL DEFAULT 'unverified'
     CHECK (identity_status IN ('unverified', 'requires_input', 'processing', 'verified', 'failed')),
