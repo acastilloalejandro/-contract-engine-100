@@ -1,27 +1,37 @@
-name: Dependency Review
+name: Dependency Security Audit
 
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main, "security/**"]
+  schedule:
+    - cron: "47 3 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: dependency-review-${{ github.event.pull_request.number }}
+  group: dependency-audit-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  dependency-review:
-    name: Detect newly introduced vulnerable dependencies
+  npm-audit:
+    name: Audit npm dependency tree
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: read
     steps:
-      - name: Review dependency diff
-        uses: actions/dependency-review-action@v4
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
-          fail-on-severity: high
-          fail-on-scopes: runtime,development
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Audit locked dependencies
+        run: npm audit --audit-level=high --ignore-scripts
