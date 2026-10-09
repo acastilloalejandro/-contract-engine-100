@@ -66,4 +66,14 @@ globalThis.fetch = async () => ({
   json: async () => ({ authorizationUrl: "https://evil.example/phishing" })
 });
 await assert.rejects(auth.startOAuth("google"), /destino de autenticación no permitido/);
+globalThis.fetch = async () => ({
+  ok: true, status: 200,
+  json: async () => ({ authorizationUrl: "https://accounts.google.com:8443/o/oauth2/v2/auth" })
+});
+await assert.rejects(auth.startOAuth("google"), /destino de autenticación no permitido/);
+globalThis.fetch = async () => ({
+  ok: true, status: 200,
+  json: async () => ({ authorizationUrl: "https://accounts.google.com/evil" })
+});
+await assert.rejects(auth.startOAuth("google"), /destino de autenticación no permitido/);
 console.log("Access and onboarding tests: OK");
