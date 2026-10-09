@@ -21,6 +21,7 @@ const serviceWorker = read("sw.js");
 const postdeploy = read("scripts/postdeploy-smoke.mjs");
 const manifest = JSON.parse(read("manifest.webmanifest"));
 const workerApi = read("workers/api/src/index.js");
+const workerSchema = read("workers/api/schema.sql");
 const workerApiTests = read("workers/api/tests/api.test.mjs");
 
 assert.equal(pkg.version, "5.2.1");
@@ -75,13 +76,26 @@ assert.match(workerApi, /frame-ancestors 'none'/);
 assert.match(workerApi, /Permissions-Policy/);
 assert.match(workerApiTests, /assertSecurityHeaders\(health\)/);
 assert.match(workerApiTests, /assertSecurityHeaders\(databaseMissing\)/);
+assert.match(workerApi, /attempts < 5/);
+assert.match(workerApi, /stripe_webhook_events/);
+assert.match(workerApi, /last_event_created_at/);
+assert.doesNotMatch(workerApi, /identity\.verification_session\.redacted": "failed"/);
+assert.match(workerApiTests, /Atomic phone-attempt claims/);
+assert.match(workerApiTests, /Replaying the exact Stripe event/);
+assert.match(workerApiTests, /older processing event cannot roll an already verified session/);
+assert.match(workerSchema, /last_event_created_at INTEGER NOT NULL DEFAULT 0/);
+assert.match(workerSchema, /CREATE TABLE IF NOT EXISTS stripe_webhook_events/);
+assert.match(read("workers/api/migrations/20261009_webhook_idempotency.sql"), /ADD COLUMN last_event_created_at/);
+assert.match(read("THIRD-PARTY-NOTICES.md"), /vendor\/qrcode\.min\.js/);
+assert.match(read("docs/RECOGNITION-READINESS.md"), /no una certificación/);
 
 const hardenedWorkflows = [
   ".github/workflows/ci.yml",
   ".github/workflows/contract-os.yml",
   ".github/workflows/codeql.yml",
   ".github/workflows/dependency-review.yml",
-  ".github/workflows/static.yml"
+  ".github/workflows/static.yml",
+  ".github/workflows/scorecard.yml"
 ];
 for (const workflowPath of hardenedWorkflows) {
   const workflow = read(workflowPath);
