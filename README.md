@@ -13,6 +13,16 @@ Motor contractual modular, móvil primero, para crear expedientes guiados, valid
 - **Autenticación e identidad reales:** no disponibles para usuarios reales hasta crear y desplegar la API, configurar D1, dominio, secretos y proveedores, y superar pruebas de integración.
 - **Uso recomendado:** demo técnica y entorno de evaluación. No utilizar todavía para formalizar contratos reales, almacenar documentación sensible ni acreditar identidad o firma.
 
+## Seguridad y evaluación externa
+
+- [Modelo de amenazas y hoja de ruta de seguridad](docs/SECURITY-ARCHITECTURE.md).
+- [Configuración manual de seguridad de GitHub](docs/GITHUB-SECURITY-SETTINGS.md).
+- [Puertas de producción y estado de evidencias](docs/PRODUCTION-GATES.md).
+- [Preparación para evaluación externa](docs/RECOGNITION-READINESS.md).
+- [Inventario de software de terceros](THIRD-PARTY-NOTICES.md).
+
+La CI integra CodeQL, auditoría npm y OpenSSF Scorecard. Esos resultados son evidencias parciales, no un sello de seguridad ni una concesión de premios. Para procesar contratos reales siguen siendo obligatorios el backend desplegado, las autorizaciones validadas con D1, la configuración de cuenta/ramas, la revisión de privacidad y una auditoría externa.
+
 ## Qué incluye
 
 - Formulario declarativo, validación mejorada, advertencias que requieren reconocimiento, persistencia local de adjuntos con IndexedDB, huellas de integridad, QR generado desde una biblioteca local y aviso explícito de no verificación.
