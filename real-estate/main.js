@@ -156,3 +156,8 @@ $("download").addEventListener("click",()=>{
 });
 $("print").addEventListener("click",()=>{if(exportText)window.print();});
 render();
+
+// The PWA shell is public/static. Its caches must never contain personal drafts or API replies.
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+ navigator.serviceWorker.register("../sw.js", {scope:"../"}).catch(()=>{});
+}
