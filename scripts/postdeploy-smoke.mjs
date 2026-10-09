@@ -20,9 +20,9 @@ async function fetchWithRetry(path) {
       if (!response.ok) throw new Error(path + ": HTTP " + response.status);
       const body = await response.text();
       if (!body.length) throw new Error(path + ": empty response");
-      const versionMarker = 'name="application-version" content="5.2.0"';
+      const versionMarker = 'name="application-version" content="5.2.1"';
       if (path === "" && !body.includes(versionMarker)) {
-        throw new Error("The deployed homepage does not advertise version 5.2.0.");
+        throw new Error("The deployed homepage does not advertise version 5.2.1.");
       }
       if (path === "verify.html" && !body.includes("app/verify.js")) {
         throw new Error("Verification route does not load the verification module.");
