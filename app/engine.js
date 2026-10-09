@@ -375,7 +375,7 @@ export async function createSignatureRequest(){
     requestId:crypto.randomUUID?.()||String(Date.now())
   };
   state.qrUrl=buildVerificationURL();
-  audit("signaturePrepared",{requestId:state.prepared.requestId,hash:state.hash});
+  audit("signaturePrepared",{requestId:state.prepared.requestId});
   state.view="sign";state.nav="review";
   return true;
 }
