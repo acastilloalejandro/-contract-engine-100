@@ -7,7 +7,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "test": "node --check app/schema.js && node --check app/engine.js && node --check app/ui.js && node --check app/main.js && node --check app/verify.js && node --check app/contract-preview.js && node --check sw.js && node --check scripts/postdeploy-smoke.mjs && node tests/smoke.test.mjs && node tests/production-hardening.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs && node tests/onboarding.test.mjs && node --check workers/api/src/index.js && node workers/api/tests/api.test.mjs && node tests/real-estate.test.mjs && node --check real-estate/main.js && node --check real-estate/schema.js && node workers/api/tests/bithome.test.mjs"
+    "test": "node --check app/schema.js && node --check app/engine.js && node --check app/ui.js && node --check app/main.js && node --check app/verify.js && node --check app/contract-preview.js && node --check sw.js && node --check scripts/postdeploy-smoke.mjs && node tests/smoke.test.mjs && node tests/production-hardening.test.mjs && node tests/architecture/invariants.test.mjs && node tests/core.test.mjs && node tests/auth.test.mjs && node tests/onboarding.test.mjs && node --check workers/api/src/index.js && node workers/api/tests/api.test.mjs && node tests/real-estate.test.mjs && node --check real-estate/main.js && node --check real-estate/schema.js && node workers/api/tests/bithome.test.mjs && node tests/bithome-ui.test.mjs"
   },
   "author": "Alejandro Hernández Castillo <acastilloalejandro@icloud.com>",
   "license": "MIT",
