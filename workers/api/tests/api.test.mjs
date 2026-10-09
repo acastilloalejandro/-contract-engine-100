@@ -70,4 +70,190 @@ const expired = await hmacSignature(payload, secret, String(now - 600));
 assert.equal(await verifyStripeSignature(payload, expired, secret), false);
 assert.equal(await verifyStripeSignature(payload, signed, "wrong-secret"), false);
 
-console.log("Worker API contract tests: OK");
+
+
+// Authorization regression tests: a signed-in user must not be able to act
+// on another user's phone-verification challenge or bypass protected routes.
+async function hashTokenForTest(value) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(value))));
+  let binary = "";
+  for (const byte of digest) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+
+function authorizationDb({ sessions = [], users = [], phoneChallenges = [], identitySessions = [] } = {}) {
+  const calls = [];
+  const db = {
+    calls,
+    prepare(sql) {
+      let params = [];
+      return {
+        bind(...values) { params = values; return this; },
+        async first() {
+          calls.push({ type: "first", sql, params });
+          if (sql.includes("FROM sessions s JOIN users u")) {
+            const session = sessions.find(item =>
+              item.token_hash === params[0] && Number(item.expires_at) > Number(params[1])
+            );
+            if (!session) return null;
+            const user = users.find(item => item.id === session.user_id);
+            return user ? { ...user } : null;
+          }
+          if (sql.includes("FROM phone_challenges WHERE id = ? AND user_id = ?")) {
+            return phoneChallenges.find(item =>
+              item.id === params[0] && item.user_id === params[1]
+            ) || null;
+          }
+          if (sql.includes("FROM identity_sessions WHERE provider_session_id = ? AND user_id = ?")) {
+            return identitySessions.find(item =>
+              item.provider_session_id === params[0] && item.user_id === params[1]
+            ) || null;
+          }
+          return null;
+        },
+        async run() {
+          calls.push({ type: "run", sql, params });
+          return { meta: { changes: 1 } };
+        }
+      };
+    }
+  };
+  return db;
+}
+
+const protectedRoutes = [
+  ["POST", "/v1/onboarding/phone/start", { phone: "+34600111222" }],
+  ["POST", "/v1/onboarding/phone/confirm", { challengeId: "challenge-12345678901234567890", code: "123456" }],
+  ["POST", "/v1/onboarding/identity/start", { documentType: "DNI", country: "ES" }],
+  ["GET", "/v1/onboarding/status", undefined]
+];
+
+for (const [method, path, body] of protectedRoutes) {
+  const request = new Request(API_ORIGIN + path, {
+    method,
+    headers: { Origin: APP_ORIGIN, ...(body ? { "Content-Type": "application/json" } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  });
+  const response = await worker.fetch(request, { ...env, DB: {} });
+  assert.equal(response.status, 401, method + " " + path + " must require a session");
+  assert.equal((await response.json()).code, "AUTH_REQUIRED");
+  assertSecurityHeaders(response);
+}
+
+const originGuard = await worker.fetch(new Request(API_ORIGIN + "/v1/onboarding/status", {
+  headers: { Origin: "https://attacker.example", Cookie: "__Host-ce_session=must-not-be-read" }
+}), { ...env, DB: { prepare() { throw new Error("DB should not be read for a rejected Origin"); } } });
+assert.equal(originGuard.status, 403);
+assert.equal((await originGuard.json()).code, "ORIGIN_NOT_ALLOWED");
+assertSecurityHeaders(originGuard);
+
+const sessionToken = "session-token-for-user-a";
+const sessionHash = await hashTokenForTest(sessionToken);
+const nowForAuthorization = Math.floor(Date.now() / 1000);
+const userA = {
+  id: "user-a",
+  email: "alice@example.invalid",
+  email_verified: 1,
+  phone_verified: 0,
+  identity_status: "unverified"
+};
+const sessionDb = authorizationDb({
+  sessions: [{ token_hash: sessionHash, user_id: userA.id, expires_at: nowForAuthorization + 3600 }],
+  users: [userA]
+});
+const authorizedStatus = await worker.fetch(new Request(API_ORIGIN + "/v1/onboarding/status", {
+  headers: { Origin: APP_ORIGIN, Cookie: "__Host-ce_session=" + sessionToken }
+}), { ...env, DB: sessionDb });
+assert.equal(authorizedStatus.status, 200);
+assert.deepEqual(await authorizedStatus.json(), {
+  emailVerified: true,
+  phoneVerified: false,
+  identityStatus: "unverified",
+  identityVerified: false
+});
+assertSecurityHeaders(authorizedStatus);
+
+const challengeIdOwnedByB = "challenge-owner-b-1234567890";
+const crossUserDb = authorizationDb({
+  sessions: [{ token_hash: sessionHash, user_id: userA.id, expires_at: nowForAuthorization + 3600 }],
+  users: [userA],
+  phoneChallenges: [{
+    id: challengeIdOwnedByB,
+    user_id: "user-b",
+    phone: "+34600999888",
+    attempts: 0,
+    expires_at: nowForAuthorization + 600,
+    used_at: null
+  }]
+});
+const crossUserAttempt = await worker.fetch(new Request(API_ORIGIN + "/v1/onboarding/phone/confirm", {
+  method: "POST",
+  headers: {
+    Origin: APP_ORIGIN,
+    Cookie: "__Host-ce_session=" + sessionToken,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ challengeId: challengeIdOwnedByB, code: "123456" })
+}), { ...env, DB: crossUserDb });
+assert.equal(crossUserAttempt.status, 400);
+assert.equal((await crossUserAttempt.json()).code, "PHONE_CHALLENGE_EXPIRED");
+assert.ok(crossUserDb.calls.some(call =>
+  call.type === "first" &&
+  call.sql.includes("FROM phone_challenges WHERE id = ? AND user_id = ?") &&
+  call.params[0] === challengeIdOwnedByB &&
+  call.params[1] === userA.id
+), "challenge lookup must bind both challenge ID and the authenticated user ID");
+assert.equal(crossUserDb.calls.filter(call =>
+  call.type === "run" && /UPDATE phone_challenges/i.test(call.sql)
+).length, 0, "a non-owner must not mutate another user's challenge");
+
+
+
+const identityEventSecret = "test-stripe-webhook-secret";
+const foreignIdentityPayload = JSON.stringify({
+  id: "evt-cross-user-test",
+  type: "identity.verification_session.verified",
+  data: {
+    object: {
+      id: "vs-session-owned-by-b",
+      type: "document",
+      status: "verified",
+      metadata: { user_id: "user-a" }
+    }
+  }
+});
+const foreignIdentityTimestamp = String(Math.floor(Date.now() / 1000));
+const foreignIdentitySignature = await hmacSignature(
+  foreignIdentityPayload,
+  identityEventSecret,
+  foreignIdentityTimestamp
+);
+const identityDb = authorizationDb({
+  identitySessions: [{
+    id: "local-identity-b",
+    provider_session_id: "vs-session-owned-by-b",
+    user_id: "user-b"
+  }]
+});
+const foreignIdentityWebhook = await worker.fetch(new Request(API_ORIGIN + "/v1/webhooks/stripe", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Stripe-Signature": foreignIdentitySignature
+  },
+  body: foreignIdentityPayload
+}), { ...env, DB: identityDb, STRIPE_WEBHOOK_SECRET: identityEventSecret });
+assert.equal(foreignIdentityWebhook.status, 200);
+assert.equal(await foreignIdentityWebhook.text(), "ignored");
+assertSecurityHeaders(foreignIdentityWebhook);
+assert.ok(identityDb.calls.some(call =>
+  call.type === "first" &&
+  call.sql.includes("FROM identity_sessions WHERE provider_session_id = ? AND user_id = ?") &&
+  call.params[0] === "vs-session-owned-by-b" &&
+  call.params[1] === "user-a"
+), "webhook updates must require both provider session ID and associated user ID");
+assert.equal(identityDb.calls.filter(call =>
+  call.type === "run" && /UPDATE (identity_sessions|users SET identity_status)/i.test(call.sql)
+).length, 0, "a provider session owned by another user must not change identity status");
+
+console.log("Worker API and authorization regression tests: OK");

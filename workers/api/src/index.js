@@ -104,6 +104,12 @@ function redirect(location, extra = {}) {
   return new Response(null, { status: 302, headers });
 }
 
+function textResponse(body, status = 200, extra = {}) {
+  const headers = new Headers(securityHeaders());
+  for (const [key, value] of Object.entries(extra)) headers.set(key, value);
+  return new Response(body, { status, headers });
+}
+
 function requireOrigin(request, env) {
   if (!originAllowed(request, env)) throw new HttpError(403, "ORIGIN_NOT_ALLOWED", "Origen no permitido.");
 }
@@ -609,9 +615,9 @@ async function stripeWebhook(request, env) {
     "identity.verification_session.canceled",
     "identity.verification_session.redacted"
   ]);
-  if (!allowed.has(event.type)) return new Response("ignored", { status: 200 });
+  if (!allowed.has(event.type)) return textResponse("ignored");
   const session = event.data?.object;
-  if (!session?.id || session.type !== "document" || !session.metadata?.user_id) return new Response("ignored", { status: 200 });
+  if (!session?.id || session.type !== "document" || !session.metadata?.user_id) return textResponse("ignored");
   const statusMap = {
     "identity.verification_session.verified": session.status === "verified" ? "verified" : "pending",
     "identity.verification_session.requires_input": "requires_input",
@@ -624,12 +630,12 @@ async function stripeWebhook(request, env) {
   const record = await env.DB.prepare(
     "SELECT id, user_id FROM identity_sessions WHERE provider_session_id = ? AND user_id = ? LIMIT 1"
   ).bind(session.id, session.metadata.user_id).first();
-  if (!record) return new Response("ignored", { status: 200 });
+  if (!record) return textResponse("ignored");
   await env.DB.prepare("UPDATE identity_sessions SET status = ?, updated_at = ? WHERE id = ? AND user_id = ?")
     .bind(nextStatus, now, record.id, record.user_id).run();
   await env.DB.prepare("UPDATE users SET identity_status = ? WHERE id = ?")
     .bind(nextStatus, record.user_id).run();
-  return new Response("ok", { status: 200 });
+  return textResponse("ok");
 }
 
 async function onboardingStatus(request, env) {
