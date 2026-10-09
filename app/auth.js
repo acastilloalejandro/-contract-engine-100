@@ -55,7 +55,8 @@ export const auth = Object.freeze({
     if (typeof result.authorizationUrl !== "string") throw new Error("El servidor no devolvió una URL de autorización válida.");
     const target = new URL(result.authorizationUrl);
     const expectedHost = provider === "google" ? "accounts.google.com" : "appleid.apple.com";
-    if (target.protocol !== "https:" || target.hostname !== expectedHost || target.username || target.password) {
+    const expectedPath = provider === "google" ? "/o/oauth2/v2/auth" : "/auth/authorize";
+    if (target.protocol !== "https:" || target.hostname !== expectedHost || target.pathname !== expectedPath || target.port || target.username || target.password) {
       throw new Error("El servidor devolvió un destino de autenticación no permitido.");
     }
     location.assign(target.href);
