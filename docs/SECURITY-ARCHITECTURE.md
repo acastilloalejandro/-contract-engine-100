@@ -25,8 +25,8 @@ El navegador, el almacenamiento local, las entradas del usuario, los parámetros
 | Amenaza | Control implementado en esta línea base | Trabajo pendiente / límite |
 |---|---|---|
 | Vulnerabilidades en JavaScript/TypeScript | Análisis CodeQL en PR, push a `main` y semanal | Revisar cada hallazgo y añadir pruebas para rutas críticas |
-| Introducción de dependencias vulnerables | Dependency Review bloquea nuevas vulnerabilidades de severidad alta o crítica | Activar alertas de Dependabot y revisar todas las dependencias ya existentes |
-| Dependencias o Actions obsoletas | Dependabot propone actualizaciones semanales | Revisar los diffs, validar cambios y fijar Actions a SHA completo donde sea viable |
+| Introducción de dependencias vulnerables | `npm audit --audit-level=high --ignore-scripts` y propuestas semanales de Dependabot | `npm audit` no cubre código vendorizado ni sustituye inventario/SBOM; activar alertas de Dependabot en GitHub |
+| Dependencias o Actions obsoletas | Dependabot propone actualizaciones semanales; las Actions se fijan a SHA completo y se ha añadido OpenSSF Scorecard | Revisar cada propuesta y observar la primera evaluación Scorecard después de integrar el workflow |
 | Secretos publicados accidentalmente | Política documentada: nunca incluir tokens, claves o datos reales | Activar secret scanning y push protection en la configuración de GitHub si el plan lo permite; rotar cualquier secreto expuesto |
 | Compromiso de cuenta o de cadena de suministro | Workflows con permisos mínimos y sin publicar artefactos privilegiados desde forks | Activar MFA resistente a phishing/passkeys, revisar colaboradores, tokens y aplicaciones OAuth/GitHub Apps |
 | Alteración maliciosa de `main` o del despliegue | CI y revisión por PR como línea base | Configurar reglas de rama: PR obligatorio, checks requeridos, sin force-push/borrado, aprobaciones y CODEOWNERS. Requiere acción administrativa de GitHub |
@@ -91,7 +91,7 @@ La lista de ajustes que requieren intervención del administrador, incluyendo el
 
 ## 8. Interpretación de los workflows
 
-CodeQL y `npm audit --audit-level=high --ignore-scripts` son controles de detección dentro de CI, no una certificación. `npm audit` revisa el árbol de dependencias que npm conoce en el lockfile; no equivale a una auditoría de todo el historial, del código vendorizado ni de la lógica de la aplicación. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
+CodeQL, `npm audit --audit-level=high --ignore-scripts` y OpenSSF Scorecard son controles de detección/evaluación dentro de CI, no una certificación. `npm audit` revisa el árbol de dependencias que npm conoce en el lockfile; no equivale a una auditoría de todo el historial, del código vendorizado ni de la lógica de la aplicación. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
 
 ## 9. Criterio de aceptación
 
