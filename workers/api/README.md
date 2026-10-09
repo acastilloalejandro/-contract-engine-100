@@ -97,7 +97,7 @@ Subscribe Stripe to the Identity Verification Session events used by the Worker,
 - OAuth ID tokens are verified server-side: signature, issuer, audience, expiry, nonce and verified email. Google uses server flow with state/nonce/PKCE; Apple uses a server-generated ES256 client-secret JWT.
 - OAuth state is short-lived and one-use. Provider errors return a generic status to the frontend.
 - The API only accepts the configured frontend origin and does not use wildcard CORS.
-- Mutating browser routes require the configured Origin. Session cookies are HttpOnly, Secure and SameSite=None.
+- Mutating browser routes require the configured Origin. Session cookies use the `__Host-ce_session` prefix, are HttpOnly, Secure, `Path=/`, omit `Domain`, and use `SameSite=Lax`. This requires the production frontend/API to share the same site. Existing sessions are not migrated; before first production deployment, use this cookie policy from the start and test login, OAuth callbacks, and logout in supported browsers.
 - Email verification expires after 24 hours; phone challenges expire after 10 minutes with an attempt limit. Twilio handles code generation and delivery.
 - Stripe webhook signatures and timestamps are validated before server-side identity state is changed.
 - Identity verification accepts only the configured DNI/document flow. No DNI number or image is collected by the app form directly.
