@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<title id="title">bithome</title><desc id="desc">Icono independiente de bithome, casa geométrica blanca sobre azul</desc>
+<rect width="128" height="128" rx="30" fill="#195cec"/>
+<path d="M27 62 64 30l37 32" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38 59v37c0 3 3 6 6 6h40c3 0 6-3 6-6V59" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M56 102V77a8 8 0 0 1 16 0v25" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+<circle cx="97" cy="96" r="18" fill="#dbeafe" stroke="#195cec" stroke-width="4"/>
+<path d="M97 86v20m5-15h-8c-7 0-7 7 0 7h6c7 0 7 8-1 8h-8" stroke="#195cec" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</svg>
