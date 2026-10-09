@@ -264,7 +264,7 @@ export function initializeAccessGate({ onEnterDemo, onEnterAuthenticated }) {
       const allowedHosts = Array.isArray(window.CONTRACT_ENGINE_CONFIG?.identityProviderHosts)
         ? window.CONTRACT_ENGINE_CONFIG.identityProviderHosts.map(host => String(host).toLowerCase())
         : [];
-      if (target.protocol !== "https:" || target.username || target.password || !allowedHosts.includes(target.hostname.toLowerCase())) {
+      if (target.protocol !== "https:" || target.port || target.username || target.password || !allowedHosts.includes(target.hostname.toLowerCase())) {
         throw new Error("El dominio del proveedor de identidad no está incluido en la lista permitida de config.js.");
       }
       location.assign(target.href);
