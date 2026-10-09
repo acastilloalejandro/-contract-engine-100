@@ -51,3 +51,13 @@ El hosting puede inyectar window.CONTRACT_ENGINE_CONFIG = { authBaseUrl: "https:
 - Cambiar el estado en el navegador no desbloquea el formulario ni permite acceder a datos ajenos.
 - DNI, OTP y tokens no aparecen en URL, logs, analítica, QR público ni almacenamiento local.
 - Tests de OAuth state/nonce/PKCE, CSRF, expiración, reuso de OTP, rate limits, control de acceso y borrado pasan antes del lanzamiento.
+
+## Pantallas frontend añadidas
+
+La pantalla de acceso vive en `index.html` y la lógica está en `app/onboarding-ui.js`. El shell contractual permanece oculto hasta que el usuario elige explícitamente la demo o el servidor confirma una sesión y el estado de incorporación. El formulario de onboarding solicita teléfono y redirige a una página de identidad solo si el host está autorizado en `config.js`.
+
+`config.js` es público y solo contiene configuración no secreta. Para habilitar el backend se configura `authBaseUrl` con un endpoint HTTPS y `identityProviderHosts` con los dominios exactos del proveedor elegido. Nunca colocar tokens privados ni claves de Apple en ese archivo.
+
+Los borradores locales se separan mediante un identificador de cuenta hasheado, pero esto no cifra el contenido del navegador. El distintivo de interfaz debe conservar la aclaración de que el borrador es local hasta que se implemente almacenamiento server-side.
+
+La copia completa del DNI no se solicita en la pantalla de onboarding: el flujo arranca mediante un proveedor especializado. Esto sigue el principio de minimización. La AEPD indica que, como regla general, una copia del DNI no es necesaria para ejercer derechos y que deben protegerse datos no necesarios cuando se facilite una copia: https://www.aepd.es/preguntas-frecuentes/1-tus-derechos/3-identificacion-con-dni/FAQ-0108-para-el-ejercicio-de-estos-derechos-es-necesario-facilitar-la-copia-del-dni
