@@ -20,6 +20,8 @@ const saveBlock = engine.slice(engine.indexOf("export function saveLocal"), engi
 const serviceWorker = read("sw.js");
 const postdeploy = read("scripts/postdeploy-smoke.mjs");
 const manifest = JSON.parse(read("manifest.webmanifest"));
+const workerApi = read("workers/api/src/index.js");
+const workerApiTests = read("workers/api/tests/api.test.mjs");
 
 assert.equal(pkg.version, "5.2.1");
 assert.equal(lock.version, pkg.version);
@@ -64,6 +66,15 @@ assert.doesNotMatch(verifyHtml, /\sstyle\s*=/i);
 assert.match(verifyHtml, /style-src 'self';/);
 assert.doesNotMatch(verifyHtml, /style-src 'self' 'unsafe-inline'/);
 assert.match(read("styles/world-ui.css"), /\.verify-page \.world-content/);
+assert.match(workerApi, /const SESSION_COOKIE = "__Host-ce_session";/);
+assert.match(workerApi, /Path=\/; HttpOnly; Secure; SameSite=Lax; Max-Age=/);
+assert.doesNotMatch(workerApi, /SameSite=None/);
+assert.match(workerApi, /function securityHeaders\(\)/);
+assert.match(workerApi, /X-Frame-Options": "DENY"/);
+assert.match(workerApi, /frame-ancestors 'none'/);
+assert.match(workerApi, /Permissions-Policy/);
+assert.match(workerApiTests, /assertSecurityHeaders\(health\)/);
+assert.match(workerApiTests, /assertSecurityHeaders\(databaseMissing\)/);
 
 const hardenedWorkflows = [
   ".github/workflows/ci.yml",
