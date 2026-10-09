@@ -1,41 +1,55 @@
-# Production Gates
+# Gates de producción · Contract Engine 100
 
-The application must not be presented as production-ready until every gate passes.
+No presentar la aplicación como lista para producción hasta que se hayan completado todas las puertas aplicables y se hayan guardado las evidencias de verificación.
 
-## Legal
-- authoritative source attached to every production rule
-- territorial coverage verified
-- effective dates tested
-- regression scenarios reviewed
+## Estado verificado de la versión 5.1.0 (9 de octubre de 2026)
 
-## Security
-- authentication and authorization
-- tenant isolation
-- encrypted evidence storage
-- signed URLs
-- secret management
-- CSP and secure headers
-- audit trail
+- [x] Versión 5.1.0 integrada en `main`, commit `444c3f7fd675ac8febb25a2514d3587fa209ebf0`.
+- [x] CI `Contract Engine CI`: ejecución [#142](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410270) completada correctamente.
+- [x] `contract-os`: ejecución [#132](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410267) completada correctamente.
+- [x] GitHub Pages: ejecución [#2](https://github.com/acastilloalejandro/-contract-engine-100/actions/runs/37875410276) completada correctamente.
+- [ ] Confirmar desde un navegador real que la URL pública sirve los recursos correctos y que las rutas de la aplicación funcionan. El verificador web utilizado en esta revisión no pudo recuperar la página, por lo que esta comprobación no se marca como superada.
+- [ ] Desplegar la API, conectar D1, configurar proveedores y realizar pruebas end-to-end. `config.js` conserva `authBaseUrl: ""`; la autenticación real no está activa.
 
-## Data
-- server-side persistence
-- migrations
-- backup and restore test
-- immutable contract versions
-- rule snapshots
+## 1. Entrega y despliegue
 
-## Documents
-- deterministic Contract AST
-- PDF/DOCX render tests
-- signature provider integration
-- public verification endpoint that exposes no private evidence
+- [x] CI de la versión integrada completa correctamente.
+- [x] Workflow de publicación estática completo correctamente.
+- [ ] Abrir la URL pública en Safari y al menos un navegador de escritorio; comprobar consola, carga de módulos, manifest, navegación, almacenamiento local, QR y enlaces.
+- [ ] Añadir comprobación automatizada de disponibilidad de la URL pública y carga de recursos esenciales después de cada despliegue.
+- [ ] Verificar configuración de dominio y política de caché para futuras actualizaciones.
 
-## Operations
-- CI
-- monitoring
-- error reporting
-- rate limiting
-- disaster recovery
+## 2. Backend y configuración
 
-## Legal review
-A qualified professional must review the production rule set and generated contract templates before real-world use.
+- [ ] Crear Worker de Cloudflare y base D1 reales; sustituir `REPLACE_WITH_D1_DATABASE_UUID`.
+- [ ] Aplicar `workers/api/schema.sql` a la base remota y validar migraciones.
+- [ ] Elegir un dominio propio y publicar frontend/API bajo el mismo dominio registrable (por ejemplo `app.example.com` y `api.example.com`).
+- [ ] Configurar `APP_ORIGIN`, `API_ORIGIN`, `authBaseUrl` y los dominios de identidad permitidos con los valores de producción exactos.
+- [ ] Guardar credenciales mediante secretos de Cloudflare: Resend, Google, Apple, Twilio y Stripe. Ningún secreto debe almacenarse en GitHub ni en `config.js`.
+- [ ] Configurar los URI de retorno de OAuth y el webhook de Stripe en cada proveedor.
+- [ ] Comprobar `GET /health` y validar flujos de registro, confirmación de correo, login, logout, recuperación de contraseña, OAuth, OTP y verificación documental con cuentas de prueba.
+- [ ] Probar cookies y sesiones en Safari/iOS, Chrome y Firefox, incluyendo caducidad, revocación y uso entre pestañas.
+
+## 3. Seguridad y privacidad
+
+- [ ] Revisión independiente de autenticación, autorización por recurso/rol, aislamiento entre usuarios y validación de entradas.
+- [ ] Protección CSRF, CSP y cabeceras seguras verificadas en el dominio definitivo.
+- [ ] Limitar abuso con rate limiting revisado, mitigación de bots/WAF, alertas y respuestas genéricas que eviten enumeración de cuentas.
+- [ ] Definir retención, exportación y borrado de datos; probar borrado de cuenta y revocación de sesiones.
+- [ ] Implementar almacenamiento de documentos cifrado, control de acceso, URLs firmadas, registro de auditoría y política de recuperación.
+- [ ] Probar restauración de copias de seguridad y el procedimiento de respuesta a incidentes.
+- [ ] Realizar evaluación de privacidad y revisión RGPD/LOPDGDD para los datos y proveedores seleccionados.
+- [ ] Realizar pruebas de penetración y revisión de dependencias antes de aceptar datos reales.
+
+## 4. Documentos, firma y verificación
+
+- [ ] Persistencia server-side de expedientes, con versiones inmutables y snapshots de las reglas utilizadas.
+- [ ] Renderizado determinista y pruebas de salida PDF/DOCX si se habilitan esos formatos.
+- [ ] Integrar proveedor de firma y verificar las firmas en servidor; preparar una solicitud no equivale a firmar.
+- [ ] Asegurar que QR y endpoint público exponen solo datos aprobados y nunca documentos privados, identificadores sensibles ni secretos.
+- [ ] Validar las reglas jurídicas, fuentes autorizadas, jurisdicción, fechas efectivas y casos de regresión con profesionales competentes.
+- [ ] Completar pruebas end-to-end y pruebas de accesibilidad con las pantallas finales.
+
+## 5. Criterio de lanzamiento
+
+La versión 5.1.0 está publicada como **demo estática**, no como servicio contractual completo. No se debe habilitar producción general hasta que todas las casillas bloqueantes estén verificadas, documentadas y aprobadas. Si un gate no aplica, documentar la justificación en vez de marcarlo como superado.
