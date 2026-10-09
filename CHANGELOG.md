@@ -2,6 +2,8 @@
 
 ## 5.2.0 — endurecimiento estático y local (2026-10-09, rama candidata)
 
+- Añadir una previsualización contractual por secciones, lista de campos obligatorios pendientes e impresión/Guardar como PDF del navegador, con avisos visibles de borrador y no validación jurídica.
+
 - Sincronizar el número de versión en esquema, paquete, lockfile e interfaz.
 - Eliminar país y jurisdicción predeterminados; advertir de que un texto de jurisdicción no es una validación legal.
 - Excluir campos `private` y `restricted` del borrador JSON y de la huella de integridad.
