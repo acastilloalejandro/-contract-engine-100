@@ -1,3 +1,10 @@
+/*
+ * Contract Engine 100 · Field System
+ * Copyright (c) 2026 Alejandro Hernández Castillo
+ * Contact: acastilloalejandro@icloud.com
+ * License: see LICENSE and NOTICE.md at the repository root.
+ * Third-party components, dependencies, and assets remain under their own licenses.
+ */
 const CACHE_NAME = "ce100-shell-v5.2.1";
 const SHELL = [
   "./",
