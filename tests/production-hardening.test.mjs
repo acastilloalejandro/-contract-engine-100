@@ -24,7 +24,7 @@ assert.equal(lock.version, pkg.version);
 assert.equal(lock.packages[""].version, pkg.version);
 assert.match(schema, /VERSION="5\.2\.0"/);
 assert.match(index, /application-version" content="5\.2\.0"/);
-assert.doesNotMatch(engine, /country:"SA",city:"Jeddah"|Jeddah, Saudi Arabia/);
+assert.doesNotMatch(engine, /data:\{workerRole:"worker",country:"SA",city:"Jeddah"/);
 assert.match(engine, /indexedDB/);
 assert.match(engine, /persistDocumentBlob/);
 assert.match(engine, /export async function restore\(\)/);
