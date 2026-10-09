@@ -2,7 +2,7 @@ import {VERSION,SCHEMA} from "./schema.js";
 import {initializeAccessGate} from "./onboarding-ui.js";
 import {
   state,restore,saveLocal,audit,validate,riskAssessment,integrityData,publicData,
-  documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest,setStorageScope,STORAGE_KEY
+  documentManifest,sha256Text,addDocuments,releaseObjectUrls,createSignatureRequest,setStorageScope,clearPersistedDocuments,STORAGE_KEY
 } from "./engine.js";
 import {renderForm,renderReview,refreshFormMeta,updateViews,$,esc} from "./ui.js";
 
@@ -22,6 +22,12 @@ async function prepareReview(){
     const f=v.errors[0]?.field;
     document.querySelector("[data-block='"+CSS.escape(f||"")+"']")?.scrollIntoView({behavior:"smooth",block:"center"});
     return;
+  }
+  if(v.warnings.length){
+    const warningText=v.warnings.map(w=>"• "+w.message).join("\\n");
+    const accepted=window.confirm("Hay advertencias que requieren tu revisión:\\n\\n"+warningText+"\\n\\nContinuar no implica validez jurídica ni firma electrónica. ¿Has revisado estas advertencias?");
+    if(!accepted) return;
+    audit("warningsAcknowledged",{fields:v.warnings.map(w=>w.field)});
   }
   const r=riskAssessment();
   if(state.role==="worker"&&r.level!=="NORMAL"){
@@ -64,10 +70,8 @@ async function createQR(){
     "&request="+encodeURIComponent(state.prepared.requestId)+"&mode=static";
   state.qrUrl=url;
   if(!window.QRCode){
-    const script=document.createElement("script");
-    script.src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.6.2/dist/easy.qrcode.min.js";
-    script.async=true;document.head.append(script);
-    await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=reject;});
+    alert("El generador QR local no se ha cargado. Recarga la aplicación y vuelve a intentarlo.");
+    return;
   }
   const modal=document.createElement("div");
   modal.className="modal";
@@ -110,8 +114,17 @@ function handleInput(e){
   refreshFormMeta();
 }
 
-function reset(){
-  releaseObjectUrls();localStorage.removeItem(state.storageKey||STORAGE_KEY);location.reload();
+function focusDocuments(){
+  state.view="form";
+  state.nav="docs";
+  renderForm();
+  const target=document.querySelector("[data-block='workerPassport']")||
+    document.querySelector("[data-block='additionalDocuments']");
+  target?.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+async function reset(){
+  releaseObjectUrls();localStorage.removeItem(state.storageKey||STORAGE_KEY);try{await clearPersistedDocuments();}catch{}location.reload();
 }
 
 function bind(){
@@ -122,7 +135,7 @@ function bind(){
   };
   $("reviewBtn").onclick=prepareReview;
   $("reviewBtnBottom").onclick=prepareReview;
-  $("docsBtn").onclick=()=>document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});
+  $("docsBtn").onclick=focusDocuments;
   $("saveBtn").onclick=()=>{saveLocal(msg=>$("saveState").textContent=msg);};
   $("backFormBtn").onclick=()=>{state.view="form";state.nav="form";renderForm();};
   $("prepareBtn").onclick=prepareSignature;
@@ -135,7 +148,7 @@ function bind(){
     if(n==="form"){state.view="form";state.nav="form";renderForm();}
     else if(n==="review"){state.nav="review";prepareReview();}
     else if(n==="state"){state.view="state";state.nav="state";renderForm();updateViews();}
-    else {state.view="form";state.nav="docs";renderForm();document.querySelector("[data-block='workerPassport']")?.scrollIntoView({behavior:"smooth",block:"center"});}
+    else focusDocuments();
   });
   $("sections").addEventListener("input",handleInput);
   $("sections").addEventListener("change",handleChange);
@@ -157,7 +170,7 @@ async function startContractApp({mode="demo",user=null}={}){
   }else{
     state.storageKey=STORAGE_KEY;
   }
-  restore();
+  await restore();
   state.dark=localStorage.getItem("ce-theme")==="dark";
   document.documentElement.classList.toggle("dark",state.dark);
   if(!crypto.subtle){
