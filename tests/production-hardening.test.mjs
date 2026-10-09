@@ -15,6 +15,7 @@ const verifyHtml = read("verify.html");
 const verifyScript = read("app/verify.js");
 const config = read("config.js");
 const gates = read("docs/PRODUCTION-GATES.md");
+const saveBlock = engine.slice(engine.indexOf("export function saveLocal"), engine.indexOf("export async function restore"));
 const serviceWorker = read("sw.js");
 const manifest = JSON.parse(read("manifest.webmanifest"));
 
@@ -30,6 +31,7 @@ assert.match(engine, /export async function restore\(\)/);
 assert.match(engine, /export async function validateDocumentFile\(file\)/);
 assert.match(engine, /f\.private\|\|f\.restricted/);
 assert.match(engine, /clearPersistedDocuments/);
+assert.doesNotMatch(saveBlock, /documents:\\s*state\\.docs\\.filter/);
 assert.match(main, /await restore\(\)/);
 assert.doesNotMatch(main, /cdn\.jsdelivr\.net/);
 assert.match(main, /warningsAcknowledged/);
