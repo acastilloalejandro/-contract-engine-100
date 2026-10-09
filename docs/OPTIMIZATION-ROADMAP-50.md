@@ -27,8 +27,8 @@ Esta matriz convierte las 50 recomendaciones de la auditoría en un estado rastr
 | 14 | Bloquear jurisdicciones desconocidas | Parcial aplicada | Se eliminó el valor por defecto y se añade aviso jurídico; no existe validador legal de jurisdicción. |
 | 15 | Motor declarativo de cláusulas | Parcial | Existen piezas del motor en `src/`; integrar su salida al frontend contractual. |
 | 16 | Validación condicional robusta | Parcial aplicada | Añadidos controles de email, teléfono, límites numéricos y avisos de moneda/jurisdicción; faltan reglas por ley aplicable. |
-| 17 | Vista previa del contrato final | Pendiente | Renderizado final determinista, distinto del resumen de datos actual. |
-| 18 | Exportación PDF/DOCX | Pendiente | Añadir exportadores y pruebas de formato una vez aprobado el modelo legal. |
+| 17 | Vista previa del borrador contractual | Parcial aplicada | Hay previsualización agrupada por secciones y campos pendientes; aún no es una plantilla legal final revisada por jurisdicción. |
+| 18 | Exportación PDF/DOCX | Parcial aplicada | El navegador permite imprimir/guardar la previsualización como PDF; no hay generación PDF nativa ni exportador DOCX. |
 | 19 | Historial inmutable de versiones | Parcial | Hay snapshots locales limitados; se necesita versionado persistente en servidor. |
 | 20 | Separar integridad técnica de validez legal | Aplicado | La pantalla QR aclara que el formato no verifica expediente, identidad ni firma. |
 
