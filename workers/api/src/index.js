@@ -536,8 +536,15 @@ async function confirmPhone(request, env) {
   if (!challenge || challenge.used_at !== null || Number(challenge.expires_at) <= now || Number(challenge.attempts) >= 5) {
     throw new HttpError(400, "PHONE_CHALLENGE_EXPIRED", "La solicitud de verificación ha caducado. Inicia una nueva.");
   }
-  await env.DB.prepare("UPDATE phone_challenges SET attempts = attempts + 1 WHERE id = ? AND user_id = ? AND used_at IS NULL")
-    .bind(challengeId, user.id).run();
+  // Claim an attempt atomically so concurrent requests cannot race past
+  // the five-attempt limit checked above.
+  const claimed = await env.DB.prepare(
+    "UPDATE phone_challenges SET attempts = attempts + 1 " +
+    "WHERE id = ? AND user_id = ? AND used_at IS NULL AND expires_at > ? AND attempts < 5"
+  ).bind(challengeId, user.id, now).run();
+  if (Number(claimed?.meta?.changes || 0) !== 1) {
+    throw new HttpError(400, "PHONE_CHALLENGE_EXPIRED", "La solicitud de verificación ha caducado. Inicia una nueva.");
+  }
   const result = await twilioRequest(env, "VerificationCheck", { To: challenge.phone, Code: code });
   if (result.status !== "approved") throw new HttpError(400, "PHONE_CODE_INVALID", "El código no es válido o ha caducado.");
   await env.DB.prepare("UPDATE phone_challenges SET used_at = ?, phone = '' WHERE id = ? AND user_id = ? AND used_at IS NULL")
@@ -598,43 +605,103 @@ async function verifyStripeSignature(body, signature, secret) {
 
 async function stripeWebhook(request, env) {
   if (!env.STRIPE_WEBHOOK_SECRET) throw new HttpError(503, "WEBHOOK_NOT_CONFIGURED", "El webhook no está configurado.");
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);
+  if (declaredLength > 1024 * 1024) throw new HttpError(413, "BODY_TOO_LARGE", "El evento supera el tamaño permitido.");
   const raw = await request.text();
   if (encoder.encode(raw).length > 1024 * 1024) throw new HttpError(413, "BODY_TOO_LARGE", "El evento supera el tamaño permitido.");
   const valid = await verifyStripeSignature(raw, request.headers.get("Stripe-Signature"), env.STRIPE_WEBHOOK_SECRET);
   if (!valid) throw new HttpError(400, "INVALID_WEBHOOK_SIGNATURE", "La firma del webhook no es válida.");
+
   let event;
   try {
     event = JSON.parse(raw);
   } catch {
     throw new HttpError(400, "INVALID_WEBHOOK", "El evento no es JSON válido.");
   }
-  const allowed = new Set([
-    "identity.verification_session.verified",
-    "identity.verification_session.requires_input",
-    "identity.verification_session.processing",
-    "identity.verification_session.canceled",
-    "identity.verification_session.redacted"
-  ]);
-  if (!allowed.has(event.type)) return textResponse("ignored");
-  const session = event.data?.object;
-  if (!session?.id || session.type !== "document" || !session.metadata?.user_id) return textResponse("ignored");
+  if (!event || typeof event.id !== "string" || !/^evt_[A-Za-z0-9]+$/.test(event.id) ||
+      !Number.isSafeInteger(event.created) || event.created <= 0 || typeof event.type !== "string") {
+    throw new HttpError(400, "INVALID_WEBHOOK", "Faltan identificadores válidos del evento.");
+  }
+
+  // Redaction concerns the provider's data-retention lifecycle, not a failed
+  // identity decision. It must not revoke an already verified account.
   const statusMap = {
-    "identity.verification_session.verified": session.status === "verified" ? "verified" : "pending",
+    "identity.verification_session.verified": "verified",
     "identity.verification_session.requires_input": "requires_input",
     "identity.verification_session.processing": "processing",
-    "identity.verification_session.canceled": "failed",
-    "identity.verification_session.redacted": "failed"
+    "identity.verification_session.canceled": "failed"
   };
+  if (!Object.hasOwn(statusMap, event.type)) return textResponse("ignored");
+
+  const session = event.data?.object;
+  if (!session?.id || session.type !== "document" ||
+      typeof session.metadata?.user_id !== "string" || !session.metadata.user_id) {
+    return textResponse("ignored");
+  }
+  // Do not let a malformed/inconsistent "verified" event move the account to
+  // any state. Stripe's signed event is accepted only with a verified object.
+  if (event.type === "identity.verification_session.verified" && session.status !== "verified") {
+    return textResponse("ignored");
+  }
+
   const nextStatus = statusMap[event.type];
   const now = Math.floor(Date.now() / 1000);
   const record = await env.DB.prepare(
-    "SELECT id, user_id FROM identity_sessions WHERE provider_session_id = ? AND user_id = ? LIMIT 1"
+    "SELECT id, user_id, status, last_event_created_at FROM identity_sessions " +
+    "WHERE provider_session_id = ? AND user_id = ? LIMIT 1"
   ).bind(session.id, session.metadata.user_id).first();
   if (!record) return textResponse("ignored");
-  await env.DB.prepare("UPDATE identity_sessions SET status = ?, updated_at = ? WHERE id = ? AND user_id = ?")
-    .bind(nextStatus, now, record.id, record.user_id).run();
-  await env.DB.prepare("UPDATE users SET identity_status = ? WHERE id = ?")
-    .bind(nextStatus, record.user_id).run();
+
+  const seen = await env.DB.prepare(
+    "SELECT event_id FROM stripe_webhook_events WHERE event_id = ? LIMIT 1"
+  ).bind(event.id).first();
+  if (seen) return textResponse("duplicate");
+
+  const lastEventCreated = Number(record.last_event_created_at || 0);
+  const nextRank = { requires_input: 1, processing: 2, verified: 3, failed: 3 }[nextStatus];
+  const currentRank = { requires_input: 1, processing: 2, verified: 3, failed: 3 }[record.status] || 0;
+  if (event.created < lastEventCreated ||
+      (event.created === lastEventCreated && nextRank < currentRank) ||
+      (["verified", "failed"].includes(record.status) && record.status !== nextStatus)) {
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO stripe_webhook_events (event_id, event_type, event_created_at, received_at) VALUES (?, ?, ?, ?)"
+    ).bind(event.id, event.type, event.created, now).run();
+    return textResponse("ignored");
+  }
+
+  const changed = await env.DB.prepare(
+    "UPDATE identity_sessions SET status = ?, updated_at = ?, last_event_created_at = ? " +
+    "WHERE id = ? AND user_id = ? " +
+    "AND (last_event_created_at < ? OR (last_event_created_at = ? AND " +
+    "CASE status WHEN 'requires_input' THEN 1 WHEN 'processing' THEN 2 WHEN 'verified' THEN 3 WHEN 'failed' THEN 3 ELSE 0 END " +
+    "<= CASE ? WHEN 'requires_input' THEN 1 WHEN 'processing' THEN 2 WHEN 'verified' THEN 3 WHEN 'failed' THEN 3 ELSE 0 END)) " +
+    "AND (status NOT IN ('verified', 'failed') OR status = ?)"
+  ).bind(nextStatus, now, event.created, record.id, record.user_id, event.created, event.created, nextStatus, nextStatus).run();
+  if (Number(changed?.meta?.changes || 0) !== 1) {
+    // A concurrent or newer event won the race. Record this event so retries
+    // cannot repeatedly attempt to apply an already superseded transition.
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO stripe_webhook_events (event_id, event_type, event_created_at, received_at) VALUES (?, ?, ?, ?)"
+    ).bind(event.id, event.type, event.created, now).run();
+    return textResponse("ignored");
+  }
+
+  if (nextStatus === "verified") {
+    await env.DB.prepare("UPDATE users SET identity_status = 'verified' WHERE id = ?")
+      .bind(record.user_id).run();
+  } else {
+    // A delayed processing/cancel event from another session may not revoke
+    // a previously verified user. Re-verification/revocation requires an
+    // explicit reviewed flow, not event-delivery order.
+    await env.DB.prepare("UPDATE users SET identity_status = ? WHERE id = ? AND identity_status <> 'verified'")
+      .bind(nextStatus, record.user_id).run();
+  }
+
+  await env.DB.prepare(
+    "INSERT OR IGNORE INTO stripe_webhook_events (event_id, event_type, event_created_at, received_at) VALUES (?, ?, ?, ?)"
+  ).bind(event.id, event.type, event.created, now).run();
+  await env.DB.prepare("DELETE FROM stripe_webhook_events WHERE received_at < ?")
+    .bind(now - 30 * 24 * 60 * 60).run();
   return textResponse("ok");
 }
 

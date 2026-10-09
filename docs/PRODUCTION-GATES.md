@@ -14,6 +14,9 @@ El commit actual de `main` mantiene el producto como demo estática: `config.js`
 - [ ] Desplegar Worker y D1 en el dominio propio, aplicar esquema/migraciones y configurar secretos en Cloudflare.
 - [ ] Ejecutar pruebas E2E de autorización con dos cuentas distintas: acceso cruzado a expediente, sesión, desafíos, estado de identidad y cualquier futuro recurso documental debe ser denegado.
 - [ ] Probar cookies y sesión en navegadores reales, webhook real en modo de prueba, revocación, rate limiting, restore de copias y borrado/retención.
+- [x] Añadida en código la reserva atómica de intentos OTP, deduplicación de eventos de Stripe y protección de transiciones de identidad fuera de orden; existen pruebas simuladas para esos casos.
+- [ ] Si D1 se inicializó desde un esquema anterior, aplicar `workers/api/migrations/20261009_webhook_idempotency.sql` antes del Worker nuevo. En una base nueva, usar únicamente el `workers/api/schema.sql` actual.
+- [ ] Verificar la lógica de migración, deduplicación y eventos fuera de orden contra una instancia D1 real y webhooks de Stripe en modo de prueba.
 - [ ] Conseguir revisión de seguridad independiente y corregir los hallazgos antes de aceptar datos reales.
 
 Los tests con D1 simulado prueban invariantes del Worker; no prueban configuración administrativa, infraestructura, cookies de terceros ni aislamiento real de datos en producción. Un resultado verde de CI no sustituye esas comprobaciones.

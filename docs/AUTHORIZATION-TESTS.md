@@ -15,6 +15,11 @@ Las pruebas de `workers/api/tests/api.test.mjs` ejercitan el Worker con una base
 | Sesión válida consultando el onboarding | HTTP 200 y solo estado de la cuenta autenticada | Confundir capacidad del navegador con identidad autenticada |
 | Usuario A confirma el desafío telefónico del usuario B | Rechazo y cero actualizaciones del desafío | IDOR/BOLA sobre desafíos de verificación |
 | Webhook firmado se refiere a una sesión de identidad que pertenece a B pero declara a A en los metadatos | Evento ignorado y cero actualizaciones de identidad | Cambiar el estado de identidad de otra cuenta por desacoplar ID de proveedor y propietario |
+| Dos entregas del mismo evento de Stripe | La segunda entrega no ejecuta mutaciones | Duplicar o repetir una transición desde un webhook reintentado |
+| Evento de identidad antiguo llega después de uno posterior | Se ignora el evento obsoleto | Degradar el estado con entregas fuera de orden |
+| Estado verificado recibe un evento no terminal tardío | La cuenta conserva `verified` | Revocar la identidad de forma accidental por el orden de eventos |
+| Evento `redacted` de Stripe | No cambia el resultado de identidad | Confundir eliminación/retención de datos con fallo de verificación |
+| Carrera de confirmación de teléfono en el último intento | La reserva SQL condicional rechaza una petición perdedora | Superar el máximo de cinco intentos mediante solicitudes concurrentes |
 | Respuestas textuales del webhook | Cabeceras HTTP de seguridad presentes | Respuestas exitosas del webhook sin controles de cabecera |
 
 Estas son pruebas unitarias con mocks. No simulan una cuenta real de Cloudflare, el motor SQL real de D1, cookies reales de Safari, el proveedor de identidad ni despliegue/secretos. Tampoco son una prueba de penetración.

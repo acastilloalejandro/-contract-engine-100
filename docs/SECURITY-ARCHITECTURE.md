@@ -25,14 +25,22 @@ El navegador, el almacenamiento local, las entradas del usuario, los parámetros
 | Amenaza | Control implementado en esta línea base | Trabajo pendiente / límite |
 |---|---|---|
 | Vulnerabilidades en JavaScript/TypeScript | Análisis CodeQL en PR, push a `main` y semanal | Revisar cada hallazgo y añadir pruebas para rutas críticas |
-| Introducción de dependencias vulnerables | Dependency Review bloquea nuevas vulnerabilidades de severidad alta o crítica | Activar alertas de Dependabot y revisar todas las dependencias ya existentes |
-| Dependencias o Actions obsoletas | Dependabot propone actualizaciones semanales | Revisar los diffs, validar cambios y fijar Actions a SHA completo donde sea viable |
+| Introducción de dependencias vulnerables | `npm audit --audit-level=high --ignore-scripts` y propuestas semanales de Dependabot | `npm audit` no cubre código vendorizado ni sustituye inventario/SBOM; activar alertas de Dependabot en GitHub |
+| Dependencias o Actions obsoletas | Dependabot propone actualizaciones semanales; las Actions se fijan a SHA completo y se ha añadido OpenSSF Scorecard | Revisar cada propuesta y observar la primera evaluación Scorecard después de integrar el workflow |
 | Secretos publicados accidentalmente | Política documentada: nunca incluir tokens, claves o datos reales | Activar secret scanning y push protection en la configuración de GitHub si el plan lo permite; rotar cualquier secreto expuesto |
 | Compromiso de cuenta o de cadena de suministro | Workflows con permisos mínimos y sin publicar artefactos privilegiados desde forks | Activar MFA resistente a phishing/passkeys, revisar colaboradores, tokens y aplicaciones OAuth/GitHub Apps |
 | Alteración maliciosa de `main` o del despliegue | CI y revisión por PR como línea base | Configurar reglas de rama: PR obligatorio, checks requeridos, sin force-push/borrado, aprobaciones y CODEOWNERS. Requiere acción administrativa de GitHub |
 | XSS, inyección, datos maliciosos o acceso indebido | Análisis estático como detector complementario | Auditoría manual de DOM/HTML, validación de entradas, CSP y pruebas dinámicas; CodeQL no demuestra ausencia de fallos |
 | Robo o exposición de documentos del usuario | Avisos sobre los límites del almacenamiento en navegador | Para uso real, backend con autorización por recurso, cifrado en tránsito y reposo, gestión/rotación de claves, retención/borrado y registro de auditoría |
 | Suplantación de identidad o firma | La documentación distingue huellas de integridad de identidad y firma | Autenticación, identidad y firma deben validarse en servidor y con proveedores/protocolos auditados |
+
+### Integridad de eventos externos y límites de intentos
+
+El Worker de referencia reclama el intento de confirmación telefónica mediante una actualización SQL condicional (propietario correcto, no caducado, no usado y menos de cinco intentos). Esto reduce carreras entre solicitudes concurrentes; la conducta debe probarse también contra D1 real.
+
+Los eventos de Stripe requieren firma válida, identificador de evento y fecha de creación. Se registra el ID del evento para evitar reprocesar entregas, y las actualizaciones de estado incluyen una guarda de orden temporal y no permiten degradar estados terminales mediante eventos no terminales tardíos. Los eventos `redacted` se tratan como una operación de ciclo de vida de datos, no como prueba de identidad fallida. La tabla deduplica durante una ventana operativa de 30 días; no sustituye controles de secretos, auditoría de proveedor ni reconciliación periódica.
+
+Si se desplegó una base D1 con una versión anterior del esquema, aplicar la migración documentada antes del Worker actualizado. Las pruebas incluidas usan una base simulada y no prueban transacciones/semántica SQL de D1 real.
 
 ### Sesiones y cabeceras de API
 
@@ -83,7 +91,7 @@ La lista de ajustes que requieren intervención del administrador, incluyendo el
 
 ## 8. Interpretación de los workflows
 
-CodeQL y `npm audit --audit-level=high --ignore-scripts` son controles de detección dentro de CI, no una certificación. `npm audit` revisa el árbol de dependencias que npm conoce en el lockfile; no equivale a una auditoría de todo el historial, del código vendorizado ni de la lógica de la aplicación. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
+CodeQL, `npm audit --audit-level=high --ignore-scripts` y OpenSSF Scorecard son controles de detección/evaluación dentro de CI, no una certificación. `npm audit` revisa el árbol de dependencias que npm conoce en el lockfile; no equivale a una auditoría de todo el historial, del código vendorizado ni de la lógica de la aplicación. Los resultados deben revisarse y corregirse. La activación de características de seguridad de GitHub y las reglas de rama puede requerir cambios manuales en la configuración del repositorio y depende del plan disponible.
 
 ## 9. Criterio de aceptación
 
