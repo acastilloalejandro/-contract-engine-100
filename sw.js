@@ -10,6 +10,7 @@ const SHELL = [
   "./app/schema.js",
   "./app/engine.js",
   "./app/ui.js",
+  "./app/contract-preview.js",
   "./app/auth.js",
   "./app/onboarding-ui.js",
   "./app/verify.js",
