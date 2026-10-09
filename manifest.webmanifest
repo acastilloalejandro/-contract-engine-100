@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Contract Engine 100",
-  "short_name": "Contract Engine",
-  "description": "Expedientes contractuales guiados con reglas versionadas y protección de datos.",
+  "name": "bithome · Inmobiliaria Bitcoin",
+  "short_name": "bithome",
+  "description": "Preparación de expedientes inmobiliarios con Bitcoin en España.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

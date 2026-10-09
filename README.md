@@ -1,8 +1,8 @@
-# Contract Engine 100 · Inmobiliario Bitcoin España
+# bithome · Transacciones inmobiliarias con Bitcoin
 
 > **Autoría del proyecto:** Alejandro Hernández Castillo · **Contacto:** [acastilloalejandro@icloud.com](mailto:acastilloalejandro@icloud.com) · **Titularidad y licencias:** consulte [NOTICE.md](NOTICE.md) y [LICENSE](LICENSE).
 
-**Nuevo enfoque inmobiliario:** [Formulario de compraventa con Bitcoin](real-estate/index.html) · [Alcance jurídico y técnico](docs/REAL-ESTATE-BITCOIN.md). El módulo realiza borradores locales; no tramita pagos, notaría ni verificación de identidad.\n\nMotor contractual modular, móvil primero, para crear expedientes guiados, validar datos y separar los datos privados del contenido compartible.
+**Producto principal: bithome.** Aplicación web para preparar operaciones inmobiliarias documentadas con Bitcoin. La marca Contract Engine 100 queda como nombre histórico del motor.\n\n**Nuevo enfoque inmobiliario:** [Formulario de compraventa con Bitcoin](real-estate/index.html) · [Alcance jurídico y técnico](docs/REAL-ESTATE-BITCOIN.md). El módulo realiza borradores locales; no tramita pagos, notaría ni verificación de identidad.\n\nMotor contractual modular, móvil primero, para crear expedientes guiados, validar datos y separar los datos privados del contenido compartible.
 
 > **Estado de entrega (9 de octubre de 2026):** la versión base 5.2.1 se mantiene, junto al nuevo módulo inmobiliario independiente 1.0.0. La API de autenticación no está desplegada y `config.js` mantiene `authBaseUrl` vacío. Las licencias y avisos de autoría deben revisarse junto con los derechos de contribución y dependencias.
 
