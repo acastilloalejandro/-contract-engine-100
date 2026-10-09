@@ -1,4 +1,4 @@
-import { SCHEMA } from "./schema.js";
+import { SCHEMA, VERSION } from "./schema.js";
 import { state, filled, visibleFields, validate } from "./engine.js";
 
 const EXCLUDED_SECTIONS = new Set(["Protección", "Consentimientos", "Documentos"]);
@@ -103,7 +103,7 @@ export function renderContractDraft() {
     "<div class=\"contract-draft__toolbar\"><div><span class=\"eyebrow\">VISTA PREVIA</span><h2>Documento de trabajo</h2><p class=\"muted\">Previsualización local basada en los campos cumplimentados.</p></div>" +
     "<button id=\"printContractBtn\" type=\"button\" class=\"primary-btn\">Imprimir / Guardar PDF</button></div>" +
     "<article class=\"contract-draft__page\"><header class=\"contract-draft__header\"><p class=\"contract-draft__overline\">CONTRACT ENGINE 100 · VERSIÓN " +
-    escapeHtml(state.prepared?.version || "5.2.0") + "</p><h1>" + escapeHtml(contractTitle()) + "</h1>" +
+    escapeHtml(state.prepared?.version || VERSION) + "</p><h1>" + escapeHtml(contractTitle()) + "</h1>" +
     "<p class=\"contract-draft__status\">" + escapeHtml(status) + "</p>" +
     "<p class=\"contract-draft__jurisdiction\">" + escapeHtml(jurisdiction || "Jurisdicción pendiente de indicar") + "</p></header>" +
     "<div class=\"contract-draft__notice\"><strong>BORRADOR · NO FIRMADO · NO VALIDADO JURÍDICAMENTE</strong><p>Este documento organiza los datos introducidos. No constituye asesoramiento jurídico, no verifica la legislación aplicable y no crea una firma electrónica. Requiere revisión humana competente antes de utilizarse.</p></div>" +
